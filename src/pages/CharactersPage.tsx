@@ -1,55 +1,6 @@
-interface CharacterProfile {
-  readonly id: string
-  readonly name: string
-  readonly initials: string
-  readonly role: 'Main Playable Character' | 'Chaser NPC'
-  readonly visualProfile: string
-  readonly mechanicsRole: string
-  readonly badgeColor: string
-}
+import { getAllCharacters } from '../game/data/characterRegistry'
 
-const CHARACTERS: readonly CharacterProfile[] = [
-  {
-    id: 'dennis',
-    name: 'Dennis',
-    initials: 'DD',
-    role: 'Main Playable Character',
-    visualProfile: 'Curly dark hair, blue denim shirt, and jeans.',
-    mechanicsRole:
-      'The lead protagonist controlled by the player. Dashes, jumps, and navigates city obstacles to evade pursuers.',
-    badgeColor: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-  },
-  {
-    id: 'manish',
-    name: 'Manish',
-    initials: 'M',
-    role: 'Chaser NPC',
-    visualProfile: 'Black shirt and glasses.',
-    mechanicsRole:
-      'Determined pursuer tracking Dennis closely across level pathways with steady chasing speed.',
-    badgeColor: 'bg-slate-800 text-slate-300 border-slate-700',
-  },
-  {
-    id: 'sathish',
-    name: 'Sathish',
-    initials: 'S',
-    role: 'Chaser NPC',
-    visualProfile: 'Black Lenovo T-shirt.',
-    mechanicsRole:
-      'Aggressive pursuer closing gaps and adding pressure during tricky sidewalk bottlenecks.',
-    badgeColor: 'bg-slate-800 text-slate-300 border-slate-700',
-  },
-  {
-    id: 'rahul',
-    name: 'Rahul',
-    initials: 'R',
-    role: 'Chaser NPC',
-    visualProfile: 'Dark teal striped shirt.',
-    mechanicsRole:
-      'Strategic pursuer attempting to anticipate Dennis’s movements and cutoff escape routes.',
-    badgeColor: 'bg-slate-800 text-slate-300 border-slate-700',
-  },
-] as const
+const characters = getAllCharacters()
 
 export default function CharactersPage() {
   return (
@@ -84,7 +35,7 @@ export default function CharactersPage() {
 
       {/* Character Grid */}
       <section aria-label="Character roster cards" className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {CHARACTERS.map((char) => (
+        {characters.map((char) => (
           <article
             key={char.id}
             className="flex flex-col sm:flex-row gap-5 rounded-xl bg-slate-900/70 border border-slate-800 p-6 transition-colors motion-reduce:transition-none hover:border-slate-700 shadow-sm"
@@ -103,17 +54,17 @@ export default function CharactersPage() {
             <div className="flex-1 space-y-3">
               <div className="flex items-center justify-between flex-wrap gap-2">
                 <h2 className="text-xl font-bold text-white tracking-tight">
-                  {char.name}
+                  {char.displayName}
                 </h2>
-                <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-medium border ${char.badgeColor}`}>
-                  {char.role}
+                <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-medium border ${char.badgeColorClasses}`}>
+                  {char.uiRoleLabel}
                 </span>
               </div>
 
               <div className="space-y-1 text-xs">
                 <div className="text-slate-400">
                   <span className="font-semibold text-slate-300">Visual Profile:</span>{' '}
-                  {char.visualProfile}
+                  {char.visualProfileSummary}
                 </div>
                 <div className="text-slate-400">
                   <span className="font-semibold text-slate-300">Gameplay Role:</span>{' '}

@@ -20,6 +20,11 @@ export interface CharacterMetadata {
   readonly accentColorHex: number
   readonly description: string
   readonly visualIdentity: VisualIdentity
+  readonly initials: string
+  readonly uiRoleLabel: string
+  readonly visualProfileSummary: string
+  readonly mechanicsRole: string
+  readonly badgeColorClasses: string
 }
 
 /**
@@ -40,6 +45,12 @@ export const CHARACTER_REGISTRY: Record<CharacterId, CharacterMetadata> = {
       pants: 'Blue jeans',
       distinctiveFeature: 'Expressive curly hair silhouette & denim ensemble',
     },
+    initials: 'DD',
+    uiRoleLabel: 'Main Playable Character',
+    visualProfileSummary: 'Curly dark hair, blue denim shirt, and jeans.',
+    mechanicsRole:
+      'The lead protagonist controlled by the player. Dashes, jumps, and navigates city obstacles to evade pursuers.',
+    badgeColorClasses: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
   },
   manish: {
     id: 'manish',
@@ -54,6 +65,12 @@ export const CHARACTER_REGISTRY: Record<CharacterId, CharacterMetadata> = {
       pants: 'Dark slate trousers',
       distinctiveFeature: 'Prominent rectangular glasses visible at game scale',
     },
+    initials: 'M',
+    uiRoleLabel: 'Chaser NPC',
+    visualProfileSummary: 'Black shirt and glasses.',
+    mechanicsRole:
+      'Determined pursuer tracking Dennis closely across level pathways with steady chasing speed.',
+    badgeColorClasses: 'bg-slate-800 text-slate-300 border-slate-700',
   },
   sathish: {
     id: 'sathish',
@@ -68,6 +85,12 @@ export const CHARACTER_REGISTRY: Record<CharacterId, CharacterMetadata> = {
       pants: 'Charcoal casual pants',
       distinctiveFeature: 'Readable "Lenovo" text marking on chest',
     },
+    initials: 'S',
+    uiRoleLabel: 'Chaser NPC',
+    visualProfileSummary: 'Black Lenovo T-shirt.',
+    mechanicsRole:
+      'Aggressive pursuer closing gaps and adding pressure during tricky sidewalk bottlenecks.',
+    badgeColorClasses: 'bg-slate-800 text-slate-300 border-slate-700',
   },
   rahul: {
     id: 'rahul',
@@ -82,6 +105,12 @@ export const CHARACTER_REGISTRY: Record<CharacterId, CharacterMetadata> = {
       pants: 'Dark slate pants',
       distinctiveFeature: 'Multiple horizontal stripes clearly visible across chest',
     },
+    initials: 'R',
+    uiRoleLabel: 'Chaser NPC',
+    visualProfileSummary: 'Dark teal striped shirt.',
+    mechanicsRole:
+      'Strategic pursuer attempting to anticipate Dennis’s movements and cutoff escape routes.',
+    badgeColorClasses: 'bg-slate-800 text-slate-300 border-slate-700',
   },
 } as const
 
@@ -95,4 +124,13 @@ export function getAllChaserIds(): readonly CharacterId[] {
 
 export function getAllCharacterIds(): readonly CharacterId[] {
   return ['dennis', 'manish', 'sathish', 'rahul'] as const
+}
+
+export function getAllCharacters(): readonly CharacterMetadata[] {
+  return [
+    CHARACTER_REGISTRY.dennis,
+    CHARACTER_REGISTRY.manish,
+    CHARACTER_REGISTRY.sathish,
+    CHARACTER_REGISTRY.rahul,
+  ] as const
 }

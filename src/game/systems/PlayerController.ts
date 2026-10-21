@@ -193,9 +193,14 @@ export class PlayerController {
    * Cleans up keyboard captures, listeners, and the physics body.
    */
   public destroy(): void {
-    const kb = this.scene.input?.keyboard
-    if (kb) {
-      kb.clearCaptures()
+    try {
+      const kb = this.scene.input?.keyboard
+      // Only clear captures if the keyboard manager is still initialized
+      if (kb && 'manager' in kb && kb.manager) {
+        kb.clearCaptures()
+      }
+    } catch {
+      // Phaser input manager may have already been dismantled
     }
 
     if (this.physicsBody) {
