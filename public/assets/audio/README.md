@@ -1,7 +1,6 @@
 # Audio Assets
 
-This directory stores audio files:
-- Background music (BGM) tracks
-- Sound effects (SFX)
+This directory stores audio media for DD Game Scratch:
 
-Note: Existing BGM audio files will be supplied separately in later audio integration prompts.
+- `music/`: Background music tracks. Contains `DD Game BGM.mp3`.
+- `sfx/`: Sound effect audio clips for gameplay, collisions, and interface feedback.

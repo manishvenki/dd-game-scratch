@@ -1,29 +1,55 @@
 # Phaser 3 Game Architecture
 
-This directory houses all game-side code, configuration, entities, and systems powered by Phaser 3.
+This directory houses all game-side code, configuration, entities, and scenes powered by Phaser 3.
 
 ## Directory Structure
 
-- `config/`: Engine configurations, scale settings, physics parameters, and display modes.
-- `scenes/`: Phaser `Scene` subclasses (e.g., BootScene, PreloadScene, GameScene, HUDScene).
-- `entities/`: Game sprites and actors (Dennis player entity, chasers, obstacles).
-- `systems/`: Independent subsystems (input processing, audio orchestration, collision rules).
+- `config/`: Engine configuration factory (`gameConfig.ts`), scale settings (960×540, `Scale.RESIZE`), and renderer settings.
+- `scenes/`: Phaser `Scene` subclasses. Currently active: `BootScene.ts` (engine test & coordinate scaling scene).
+- `entities/`: Game sprites and actors (Dennis protagonist, chaser NPCs: Manish, Sathish, Rahul).
+- `systems/`: Independent subsystems (input processing, collision rules, audio orchestration).
 - `data/`: Game constants, level configurations, and dialog trees.
 
 ## React Lifecycle Integration & Cleanup Strategy
 
-React manages the surrounding web UI, while Phaser manages the canvas and game loop.
-To prevent duplicate canvases, hanging animation loops, and memory leaks during React hot-reloads or route unmounts:
+The game engine is integrated through the reusable React component [`src/components/GameCanvas.tsx`](../components/GameCanvas.tsx):
 
 1. **Mounting:**
-   - Instantiate `new Phaser.Game(config)` within a `useEffect` hook in the mounting React component (e.g., `GameCanvas`).
-   - Store the game instance in a React ref (`useRef<Phaser.Game | null>(null)`) rather than component state to prevent unnecessary re-renders.
+   - On component mount, `GameCanvas` instantiates `new Phaser.Game(createGameConfig(container, scenes))`.
+   - The game instance is stored in a `useRef<Phaser.Game | null>(null)` to ensure lifecycle isolation from React state and re-renders.
+   - Any prior child canvas nodes in the DOM container are cleared synchronously before instantiation to handle React 18/19 Strict Mode mount/unmount/remount cycles safely.
 
-2. **Destruction & Teardown:**
-   - Return a cleanup function from the `useEffect` hook.
-   - Invoke `gameRef.current.destroy(true)` (passing `true` to remove the canvas element and clear textures/cache).
-   - Set the ref value back to `null`.
+2. **Responsive Scaling (`Scale.RESIZE`):**
+   - Phaser's scale mode is configured with `mode: Phaser.Scale.RESIZE`, allowing the canvas to seamlessly fill the responsive 16:9 container on mobile and desktop without horizontal overflow.
+   - Scenes subscribe to `this.scale.on('resize', this.handleResize, this)` to reposition text, HUD elements, and graphics dynamically when viewports change or rotate.
 
-3. **Decoupling Rule:**
-   - Never run Phaser's game loop inside React state or effects.
-   - Communicate between React and Phaser through an event emitter or typed messaging interface rather than direct prop mutation.
+3. **Destruction & Teardown:**
+   - When `GameCanvas` unmounts (e.g. user navigates to Home, Levels, or Characters), the `useEffect` cleanup hook executes.
+   - `game.destroy(true)` is invoked with `true` to cancel the animation frame loop, destroy WebGL/Canvas contexts, remove the canvas from the DOM, and release texture caches.
+   - The scene unbinds its scale resize listeners during `SHUTDOWN` and `DESTROY` lifecycle events.
+   - `gameRef.current` is set to `null` to prevent memory leaks and duplicate canvases.
+
+## Future-Facing Asset-Loading Guidelines
+
+When implementing asset loaders in subsequent phases, adhere to these architectural standards:
+
+1. **Scene Preload Lifecycle:**
+   - Phaser scenes should load local assets exclusively within their `preload()` lifecycle method (e.g., in a dedicated `PreloadScene`).
+   - Use Phaser loader methods (`this.load.image`, `this.load.spritesheet`, `this.load.audio`) to ensure assets are cached before `create()` runs.
+
+2. **Asset Keys & Namespace Management:**
+   - Every asset key registered in Phaser's Cache must be unique and consistently named.
+   - Use scoped prefixes to prevent key collisions (e.g., `bg_college_street`, `sprite_dennis_run`, `audio_bgm_main`).
+
+3. **Error Handling & Diagnostics:**
+   - Listen to loader failure events (`this.load.on('loaderror', (file) => ...)`).
+   - Missing assets should produce clear console warnings with the failed file key and path rather than causing silent engine crashes.
+
+4. **Local Stable Paths & Security:**
+   - All game assets must reside locally under `/assets/` and be referenced via stable absolute paths (`/assets/...`).
+   - Never rely on arbitrary external image URLs, hotlinks, or fake placeholder services.
+   - The browser application runs in an isolated client sandbox and cannot assume access to arbitrary local paths outside the served `public/` directory.
+
+5. **Source Separation & User-Supplied Assets:**
+   - Original photos (e.g., reference portraits for Dennis, Manish, Sathish, Rahul) and music tracks (`DD Game BGM.mp3`) must be provided by the team and staged in `public/assets/` before being wired into gameplay.
+   - Never overwrite user-supplied assets. Large media files should be checked into Git thoughtfully with appropriate compression.
