@@ -6,6 +6,7 @@ class VirtualInputBridge {
   private leftDown = false
   private rightDown = false
   private jumpRequested = false
+  private attackRequested = false
 
   public setLeft(isDown: boolean): void {
     this.leftDown = isDown
@@ -17,6 +18,10 @@ class VirtualInputBridge {
 
   public triggerJump(): void {
     this.jumpRequested = true
+  }
+
+  public triggerAttack(): void {
+    this.attackRequested = true
   }
 
   public isLeft(): boolean {
@@ -36,10 +41,20 @@ class VirtualInputBridge {
     return requested
   }
 
+  /**
+   * Consumes the attack action so it only fires once per distinct press.
+   */
+  public consumeAttack(): boolean {
+    const requested = this.attackRequested
+    this.attackRequested = false
+    return requested
+  }
+
   public reset(): void {
     this.leftDown = false
     this.rightDown = false
     this.jumpRequested = false
+    this.attackRequested = false
   }
 }
 

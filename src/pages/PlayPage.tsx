@@ -4,18 +4,46 @@ import { virtualInputBridge } from '../game/systems/virtualInputBridge'
 export default function PlayPage() {
   return (
     <div className="flex flex-col gap-6">
-      {/* Page Header */}
-      <div className="space-y-1">
-        <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          PHASE 2 &bull; PLAYER MOVEMENT &amp; GAMEPLAY CONTROLS
+      {/* Page Header & Level Select */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-1">
+          <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            PHASE 3 &bull; LEVEL 1 &amp; LEVEL 2 ENCOUNTERS
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+            Playable Encounters
+          </h1>
+          <p className="text-sm text-slate-400">
+            Interactive combat and chase encounters. Take control of Dennis using keyboard or touch buttons.
+          </p>
         </div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-          Game Viewport &mdash; Side-View Stage
-        </h1>
-        <p className="text-sm text-slate-400">
-          Interactive test stage. Take control of Dennis using keyboard or mobile touch buttons.
-        </p>
+
+        {/* Level Switcher Selector */}
+        <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-800 p-1.5 rounded-xl self-start sm:self-auto">
+          <button
+            type="button"
+            id="btn-select-level-1"
+            onClick={() => {
+              window.location.hash = '#/play?level=1'
+              ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: string) => void }).__DD_LOAD_LEVEL__?.('level-1')
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 cursor-pointer"
+          >
+            Level 1: College Gate
+          </button>
+          <button
+            type="button"
+            id="btn-select-level-2"
+            onClick={() => {
+              window.location.hash = '#/play?level=2'
+              ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: string) => void }).__DD_LOAD_LEVEL__?.('level-2')
+            }}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 cursor-pointer"
+          >
+            Level 2: Street Bottleneck
+          </button>
+        </div>
       </div>
 
       {/* Main Game Viewport Container with Live Phaser Canvas & Touch Controls Overlay */}
@@ -77,8 +105,27 @@ export default function PlayPage() {
                 </button>
               </div>
 
-              {/* Jump Button */}
-              <div className="pointer-events-auto">
+              {/* Action Buttons: Jump & Attack */}
+              <div className="pointer-events-auto flex items-center gap-2">
+                {/* Attack Button */}
+                <button
+                  type="button"
+                  id="btn-touch-attack"
+                  aria-label="Attack"
+                  onPointerDown={(e) => {
+                    e.preventDefault()
+                    virtualInputBridge.triggerAttack()
+                  }}
+                  onContextMenu={(e) => e.preventDefault()}
+                  className="w-13 h-13 sm:w-15 sm:h-15 rounded-xl bg-rose-500/20 backdrop-blur-md border-2 border-rose-500/70 active:bg-rose-500/40 active:border-rose-300 active:scale-95 text-rose-300 flex flex-col items-center justify-center shadow-lg touch-none select-none cursor-pointer transition-transform motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-400"
+                >
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+                  </svg>
+                  <span className="text-[9px] font-mono font-bold uppercase tracking-wider">ATTACK</span>
+                </button>
+
+                {/* Jump Button */}
                 <button
                   type="button"
                   id="btn-touch-jump"
@@ -88,9 +135,9 @@ export default function PlayPage() {
                     virtualInputBridge.triggerJump()
                   }}
                   onContextMenu={(e) => e.preventDefault()}
-                  className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-amber-500/20 backdrop-blur-md border-2 border-amber-500/70 active:bg-amber-500/40 active:border-amber-300 active:scale-95 text-amber-300 flex flex-col items-center justify-center shadow-lg touch-none select-none cursor-pointer transition-transform motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+                  className="w-13 h-13 sm:w-15 sm:h-15 rounded-xl bg-amber-500/20 backdrop-blur-md border-2 border-amber-500/70 active:bg-amber-500/40 active:border-amber-300 active:scale-95 text-amber-300 flex flex-col items-center justify-center shadow-lg touch-none select-none cursor-pointer transition-transform motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
                 >
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 10l7-7m0 0l7 7m-7-7v18" />
                   </svg>
                   <span className="text-[9px] font-mono font-bold uppercase tracking-wider">JUMP</span>
@@ -112,14 +159,17 @@ export default function PlayPage() {
           <span className="px-1.5 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700">SPACE or ↑</span>
           <span>Jump</span>
           <span className="text-slate-600">&bull;</span>
-          <span className="text-cyan-400">Touch Buttons</span>
+          <span className="px-1.5 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-800/80">J or X</span>
+          <span>Attack</span>
+          <span className="text-slate-600">&bull;</span>
+          <span className="text-cyan-400">Touch Controls</span>
         </div>
         <div className="flex items-center gap-3">
-          <span>Stage: Bengaluru College Street</span>
+          <span>Level 1: 3 Blockers + Chase</span>
           <span className="text-slate-600">&bull;</span>
-          <span>Parallax: Active</span>
+          <span>Level 2: 2 Blockers</span>
           <span className="text-slate-600">&bull;</span>
-          <span className="text-amber-400">Chasers: Stationary</span>
+          <span className="text-emerald-400">Combat: Active</span>
         </div>
       </div>
 
@@ -128,20 +178,20 @@ export default function PlayPage() {
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            Bengaluru College Street Environment
+            Level 1 &amp; Level 2 Encounter Architecture
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Crafted via <code className="text-amber-400">BengaluruCollegeStreet.ts</code> featuring multi-layered parallax: warm daylight anime sky, distant Vidhana Soudha and tech park skyline silhouettes, campus Saracenic brick arches, iconic SLV Kaapi stall, Gulmohar blossom trees, and TenderSURE yellow-black curb pavement.
+            Data-driven level configs (<code className="text-amber-400">levelConfigs.ts</code>) define world bounds, blocker spawn coordinates, independent health/defeat states, and exit goals. Level 1 features a 3-boy confrontation followed by a chaser pursuit to the BMTC Bus Stop. Level 2 features a distinct 2-boy corridor confrontation.
           </p>
         </div>
 
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            Dynamic Camera &amp; Parallax Scrolling
+            <span className="w-2 h-2 rounded-full bg-rose-400" />
+            Arcade Comedy Combat &amp; Collision Rules
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Phaser&apos;s main camera smoothly tracks Dennis along the 2400px college street with independent parallax scroll factors (0.15 far skyline, 0.35 campus roofline, 1.0 street level). Screen HUD and mobile touch buttons stay firmly anchored to the viewport.
+            Attacks (<code className="text-rose-400">J / X</code> or Touch Attack) check facing direction and close range. Hit enemies recoil with floating arcade sparks and collapse when depleted. Defeated enemies disable their physics body so Dennis can sprint past them freely.
           </p>
         </div>
       </section>

@@ -5,7 +5,8 @@ interface PlannedLevel {
   readonly setting: string
   readonly description: string
   readonly environmentType: string
-  readonly status: 'Planned' | 'Coming Soon'
+  readonly status: 'Playable' | 'Planned' | 'Coming Soon'
+  readonly playHref?: string
 }
 
 const PLANNED_LEVELS: readonly PlannedLevel[] = [
@@ -15,19 +16,21 @@ const PLANNED_LEVELS: readonly PlannedLevel[] = [
     title: 'Bengaluru College Street',
     setting: 'Campus perimeter & bustling avenue',
     description:
-      'Challenging street-side navigation through roadside chaat stalls, morning vehicle traffic, and crowded college gate gates.',
-    environmentType: 'Urban Sidewalk',
-    status: 'Planned',
+      'Dennis confronts 3 blocking boys outside the college gate. Once cleared, an intense street pursuit begins with Manish, Sathish, and Rahul!',
+    environmentType: 'College Gate & Avenue',
+    status: 'Playable',
+    playHref: '#/play?level=1',
   },
   {
-    id: 'indiranagar',
+    id: 'street-confrontation',
     stageNumber: 'STAGE 02',
-    title: 'Indiranagar',
-    setting: 'Trendy residential & commercial lanes',
+    title: 'Commercial Lane Encounter',
+    setting: 'Avenue corridor near the market',
     description:
-      'Weaving past parked scooters, pedestrian shoppers, and complex intersections along the iconic 100 Feet Road corridor.',
-    environmentType: 'Commercial Avenue',
-    status: 'Coming Soon',
+      'Dennis is cornered by two blocking boys along a narrow street bottleneck. Neutralize both blockers and sprint to the avenue crossroad.',
+    environmentType: 'Market Corridor',
+    status: 'Playable',
+    playHref: '#/play?level=2',
   },
   {
     id: 'mg-brigade-road',
@@ -67,27 +70,27 @@ export default function LevelsPage() {
       {/* Page Header */}
       <div className="space-y-1">
         <div className="text-xs font-mono uppercase tracking-wider text-amber-400">
-          CREATIVE BLUEPRINTS &bull; 5 PLANNED STAGES
+          STAGES ROSTER &bull; 2 PLAYABLE ENCOUNTERS + 3 PLANNED
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-          Planned Levels
+          Game Stages
         </h1>
         <p className="text-sm text-slate-400">
-          Proposed creative settings inspired by prominent Bengaluru landmarks.
+          Playable street encounters and planned stages inspired by prominent Bengaluru landmarks.
         </p>
       </div>
 
       {/* Notice Banner */}
       <section aria-label="Levels status notice" className="rounded-xl bg-slate-900/60 border border-slate-800 p-4 sm:p-5 flex items-start gap-3">
-        <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex-shrink-0 flex items-center justify-center text-amber-400 text-xs font-mono font-bold">
-          i
+        <div className="w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex-shrink-0 flex items-center justify-center text-emerald-400 text-xs font-mono font-bold">
+          ✓
         </div>
         <div className="space-y-1 text-xs sm:text-sm">
           <p className="font-semibold text-slate-200">
-            Creative Concepts &mdash; Not Playable In-Game Environments
+            Phase 3 Encounters: Stages 01 and 02 Are Now Playable!
           </p>
           <p className="text-slate-400 leading-normal">
-            These five stages represent proposed creative level themes for DD Game Scratch. Stage assets, tilemaps, and obstacles will be created in future milestone prompts. None of the levels are currently playable.
+            Take on the 3-boy college gate confrontation and chaser pursuit in Stage 01, or test combat against two independent blockers in Stage 02. Subsequent stages (MG Road, Koramangala, Cubbon Park) remain planned creative concepts.
           </p>
         </div>
       </section>
@@ -104,7 +107,11 @@ export default function LevelsPage() {
                 <span className="text-xs font-mono font-semibold tracking-wider text-amber-400">
                   {level.stageNumber}
                 </span>
-                <span className="px-2.5 py-0.5 rounded text-[11px] font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                <span className={`px-2.5 py-0.5 rounded text-[11px] font-mono font-medium border ${
+                  level.status === 'Playable'
+                    ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30'
+                    : 'bg-slate-800 text-slate-300 border-slate-700'
+                }`}>
                   {level.status}
                 </span>
               </div>
@@ -125,7 +132,16 @@ export default function LevelsPage() {
 
             <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-500 font-mono">
               <span>{level.environmentType}</span>
-              <span className="text-slate-600">Unbuilt Stage</span>
+              {level.playHref ? (
+                <a
+                  href={level.playHref}
+                  className="px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 font-semibold transition-colors"
+                >
+                  Play Stage &rarr;
+                </a>
+              ) : (
+                <span className="text-slate-600">Coming Soon</span>
+              )}
             </div>
           </article>
         ))}

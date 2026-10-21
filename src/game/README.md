@@ -8,14 +8,17 @@ This directory houses all game-side code, configuration, entities, and scenes po
 - `scenes/`: Phaser `Scene` subclasses. Currently active: `BootScene.ts` (interactive side-view test stage).
 - `entities/`: Game sprites and actors.
   - [`Dennis.ts`](entities/Dennis.ts): Playable protagonist entity.
+  - [`BlockingEnemy.ts`](entities/BlockingEnemy.ts): Procedural anime blocking enemy with health and defeat states.
   - [`Chaser.ts`](entities/Chaser.ts): Abstract base class for recurring pursuers.
   - [`Manish.ts`](entities/Manish.ts): Chaser with black shirt and prominent glasses.
   - [`Sathish.ts`](entities/Sathish.ts): Chaser with black Lenovo T-shirt and readable lettering.
   - [`Rahul.ts`](entities/Rahul.ts): Chaser with dark teal multi-striped shirt.
 - `environments/`: Modular environment and parallax systems. Implemented: [`BengaluruCollegeStreet.ts`](environments/BengaluruCollegeStreet.ts).
+- `levels/`: Level configuration and types. Implemented: [`levelTypes.ts`](levels/levelTypes.ts), [`levelConfigs.ts`](levels/levelConfigs.ts).
 - `systems/`: Decoupled subsystems.
   - [`PlayerController.ts`](systems/PlayerController.ts): Controls Dennis locomotion, jumping, facing, and state synchronization.
-  - [`virtualInputBridge.ts`](systems/virtualInputBridge.ts): Typed bridge connecting mobile touch buttons to Phaser.
+  - [`CombatSystem.ts`](systems/CombatSystem.ts): Manages attack range checks, hit detection, damage, and encounter completion.
+  - [`virtualInputBridge.ts`](systems/virtualInputBridge.ts): Typed bridge connecting mobile touch buttons (move, jump, attack) to Phaser.
   - [`characterAnimations.ts`](systems/characterAnimations.ts): Animation states, keys, and texture registration.
 - `data/`: Game constants and metadata. Implemented: [`characterRegistry.ts`](data/characterRegistry.ts).
 
@@ -101,6 +104,27 @@ The environment is decoupled into an independent module with 6 visual depth laye
 - `this.cameras.main.startFollow(playerPhysicsBody, true, 0.08, 0.08, 0, 30)` smoothly tracks Dennis as he moves along the street.
 - World physics bounds clamp Dennis between `x = 30` and `x = stageWidth - 30`, preventing him from falling off or entering undefined sections.
 - Ground platform physics static body spans the entire 2400px stage at `groundY`, keeping player collision perfectly aligned with visible sidewalk paver tiles.
+
+## Level 1 & Level 2 Encounter Gameplay Architecture
+
+### 1. Level Configurations (`src/game/levels/levelConfigs.ts`)
+- **Level 1 (College Street Encounter)**:
+  - Setting: Bengaluru City College Gate avenue (2400px stage).
+  - Opening confrontation: 3 blocking boys (Ajay, Vijay, Sanjay) blocking the sidewalk path.
+  - Dennis must defeat all 3 blockers using the attack action (`J / X` or touch Attack button).
+  - Once cleared, the chaser trio (Manish, Sathish, Rahul) begins pursuing Dennis.
+  - Dennis must sprint to the BMTC Bus Stop exit (`x = 2320`) without being caught.
+- **Level 2 (Commercial Lane Confrontation)**:
+  - Setting: Roadside market street bottleneck (2200px stage).
+  - Confrontation: 2 independent blocking boys (Vikram, Kiran) with distinct positions and health bars.
+  - Dennis must defeat both blockers and sprint to the Avenue Crossroad exit (`x = 2120`).
+
+### 2. Combat & Blocking Collision Rules
+- **Physical Blocking**: Active blocking enemies possess dynamic Arcade Physics bodies that physically impede Dennis.
+- **Attack Mechanic**: Dennis strikes forward in his active facing direction (reach: 65px, cooldown: 280ms).
+- **Stylized Arcade Feedback**: Hit enemies flash, play floating hit sparks (`★ POW!`), and recoil backward.
+- **Defeat State**: When enemy HP reaches 0, their physics body is disabled (`body.enable = false`) and they slump into a transparent defeat state, allowing Dennis to run freely past them.
+- **Chaser Pursuit & Caught Condition**: During Level 1's chase, chasers advance toward Dennis along the ground. If a chaser reaches within 34px of Dennis, the game triggers a Caught overlay with a Retry option. Reaching the goal opens the Level Complete overlay.
 
 ## Future-Facing Asset-Loading Guidelines
 

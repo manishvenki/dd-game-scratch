@@ -9,16 +9,18 @@ export interface PlayerControllerConfig {
   readonly jumpSpeed?: number
   readonly initialX: number
   readonly initialY: number
+  readonly onAttack?: (data: { x: number; y: number; facing: 1 | -1 }) => void
 }
 
 /**
  * PlayerController manages player input, physics simulation,
- * horizontal movement, jumping, and visual synchronization for Dennis.
+ * horizontal movement, jumping, combat attack, and visual synchronization for Dennis.
  */
 export class PlayerController {
   private scene: Phaser.Scene
   private dennis: Dennis
   private physicsBody: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody
+  public onAttack?: (data: { x: number; y: number; facing: 1 | -1 }) => void
 
   // Movement tuning parameters
   public moveSpeed: number
@@ -28,6 +30,11 @@ export class PlayerController {
   private grounded = true
   private moving = false
   private facing: 1 | -1 = 1
+  private frozen = false
+
+  // Combat attack
+  private lastAttackTime = 0
+  private attackCooldownMs = 280
 
   // Input keys
   private cursors?: Phaser.Types.Input.Keyboard.CursorKeys
@@ -35,12 +42,15 @@ export class PlayerController {
   private keyD?: Phaser.Input.Keyboard.Key
   private keyW?: Phaser.Input.Keyboard.Key
   private keySpace?: Phaser.Input.Keyboard.Key
+  private keyJ?: Phaser.Input.Keyboard.Key
+  private keyX?: Phaser.Input.Keyboard.Key
 
   constructor(config: PlayerControllerConfig) {
     this.scene = config.scene
     this.dennis = config.dennis
     this.moveSpeed = config.moveSpeed ?? 260
     this.jumpSpeed = config.jumpSpeed ?? 520
+    this.onAttack = config.onAttack
 
     // 1. Create invisible physics proxy body for collision & gravity
     // Using a 38x80 physics proxy with origin at bottom-center (0.5, 1)
@@ -76,13 +86,15 @@ export class PlayerController {
     const kb = this.scene.input.keyboard
     if (!kb) return
 
-    // Prevent Space and Arrow keys from scrolling the webpage while playing
+    // Prevent Space, Arrow keys, and Attack keys from scrolling the webpage
     kb.addCapture([
       Phaser.Input.Keyboard.KeyCodes.SPACE,
       Phaser.Input.Keyboard.KeyCodes.UP,
       Phaser.Input.Keyboard.KeyCodes.DOWN,
       Phaser.Input.Keyboard.KeyCodes.LEFT,
       Phaser.Input.Keyboard.KeyCodes.RIGHT,
+      Phaser.Input.Keyboard.KeyCodes.J,
+      Phaser.Input.Keyboard.KeyCodes.X,
     ])
 
     this.cursors = kb.createCursorKeys()
@@ -90,6 +102,17 @@ export class PlayerController {
     this.keyD = kb.addKey(Phaser.Input.Keyboard.KeyCodes.D)
     this.keyW = kb.addKey(Phaser.Input.Keyboard.KeyCodes.W)
     this.keySpace = kb.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+    this.keyJ = kb.addKey(Phaser.Input.Keyboard.KeyCodes.J)
+    this.keyX = kb.addKey(Phaser.Input.Keyboard.KeyCodes.X)
+  }
+
+  public setFrozen(freeze: boolean): void {
+    this.frozen = freeze
+    if (freeze && this.physicsBody && this.physicsBody.body) {
+      this.physicsBody.body.setVelocityX(0)
+      this.moving = false
+      this.dennis.playAnimation('idle')
+    }
   }
 
   /**
@@ -102,6 +125,12 @@ export class PlayerController {
 
     // 1. Ground detection
     this.grounded = body.blocked.down || body.touching.down
+
+    if (this.frozen) {
+      body.setVelocityX(0)
+      this.dennis.setPosition(this.physicsBody.x, this.physicsBody.y)
+      return
+    }
 
     // 2. Poll inputs (Keyboard + Touch Virtual Input Bridge)
     const isLeft = Boolean(
@@ -123,7 +152,21 @@ export class PlayerController {
       virtualInputBridge.consumeJump()
     )
 
-    // 3. Horizontal movement
+    const attackRequested = Boolean(
+      (this.keyJ && Phaser.Input.Keyboard.JustDown(this.keyJ)) ||
+      (this.keyX && Phaser.Input.Keyboard.JustDown(this.keyX)) ||
+      virtualInputBridge.consumeAttack()
+    )
+
+    // 3. Attack Execution
+    const now = this.scene.time.now
+    if (attackRequested && now - this.lastAttackTime >= this.attackCooldownMs) {
+      this.lastAttackTime = now
+      this.dennis.triggerAttackAnimation()
+      this.onAttack?.({ x: body.x, y: body.y, facing: this.facing })
+    }
+
+    // 4. Horizontal movement
     if (isLeft && !isRight) {
       body.setVelocityX(-this.moveSpeed)
       this.facing = -1
@@ -137,27 +180,29 @@ export class PlayerController {
       this.moving = false
     }
 
-    // 4. Jump execution (single jump, fresh press only, grounded only)
+    // 5. Jump execution (single jump, fresh press only, grounded only)
     if (jumpRequested && this.grounded) {
       body.setVelocityY(-this.jumpSpeed)
       this.grounded = false
     }
 
-    // 5. Synchronize visual Dennis entity
+    // 6. Synchronize visual Dennis entity
     this.dennis.setPosition(this.physicsBody.x, this.physicsBody.y)
     this.dennis.setFacingDirection(this.facing)
 
-    // 6. Update animation states
-    if (!this.grounded) {
-      if (body.velocity.y < 0) {
-        this.dennis.playAnimation('jump')
+    // 7. Update animation states (only if not currently executing an attack swing)
+    if (this.dennis.getCurrentAnimation() !== 'attack') {
+      if (!this.grounded) {
+        if (body.velocity.y < 0) {
+          this.dennis.playAnimation('jump')
+        } else {
+          this.dennis.playAnimation('fall')
+        }
+      } else if (this.moving) {
+        this.dennis.playAnimation('run')
       } else {
-        this.dennis.playAnimation('fall')
+        this.dennis.playAnimation('idle')
       }
-    } else if (this.moving) {
-      this.dennis.playAnimation('run')
-    } else {
-      this.dennis.playAnimation('idle')
     }
   }
 

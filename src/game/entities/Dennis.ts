@@ -234,6 +234,42 @@ export class Dennis extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Triggers an arcade-comedy punch animation with visual punch swoosh.
+   */
+  public triggerAttackAnimation(): void {
+    this.playAnimation('attack')
+
+    // Create dynamic punch swoosh arc in facing direction
+    const swoosh = this.scene.add.graphics()
+    const dir = this.facingDirection
+    swoosh.lineStyle(3, 0xfbbf24, 0.9)
+    swoosh.beginPath()
+    swoosh.arc(dir * 24, -48, 16, -Math.PI / 3, Math.PI / 3, dir === -1)
+    swoosh.strokePath()
+
+    // Impact star spark
+    swoosh.fillStyle(0xffffff, 0.95)
+    swoosh.fillCircle(dir * 36, -48, 4)
+    this.add(swoosh)
+
+    // Slight forward body lunge
+    if (this.placeholderGraphics) {
+      this.placeholderGraphics.x = dir * 6
+    }
+
+    // Auto-revert attack visual after 160ms
+    this.scene.time.delayedCall(160, () => {
+      swoosh.destroy()
+      if (this.placeholderGraphics) {
+        this.placeholderGraphics.x = 0
+      }
+      if (this.currentAnimState === 'attack') {
+        this.playAnimation('idle')
+      }
+    })
+  }
+
+  /**
    * Returns the current animation state.
    */
   public getCurrentAnimation(): CharacterAnimationState {
