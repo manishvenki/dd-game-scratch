@@ -12,6 +12,7 @@ This directory houses all game-side code, configuration, entities, and scenes po
   - [`Manish.ts`](entities/Manish.ts): Chaser with black shirt and prominent glasses.
   - [`Sathish.ts`](entities/Sathish.ts): Chaser with black Lenovo T-shirt and readable lettering.
   - [`Rahul.ts`](entities/Rahul.ts): Chaser with dark teal multi-striped shirt.
+- `environments/`: Modular environment and parallax systems. Implemented: [`BengaluruCollegeStreet.ts`](environments/BengaluruCollegeStreet.ts).
 - `systems/`: Decoupled subsystems.
   - [`PlayerController.ts`](systems/PlayerController.ts): Controls Dennis locomotion, jumping, facing, and state synchronization.
   - [`virtualInputBridge.ts`](systems/virtualInputBridge.ts): Typed bridge connecting mobile touch buttons to Phaser.
@@ -76,6 +77,30 @@ The project enforces strict, immutable character identity mappings:
 - Encapsulates shared lifecycle, ground shadow rendering, identification badge generation, and procedural idle breathing tweens.
 - Subclasses (`Manish`, `Sathish`, `Rahul`) implement `renderCharacterFeatures(g)` without duplicating core entity lifecycle or animation logic.
 - Chasers stand on the ground platform as stationary observers during the test stage.
+
+## Bengaluru Environment & Parallax Architecture
+
+### 1. Parallax Layer Hierarchy (`src/game/environments/BengaluruCollegeStreet.ts`)
+The environment is decoupled into an independent module with 6 visual depth layers:
+- **Layer 1 (ScrollFactor 0): Sky & Clouds** — Warm daylight anime morning sky with subtle procedural drifting clouds and sun disc.
+- **Layer 2 (ScrollFactor 0.15): Distant Skyline** — Atmospheric silhouettes of Bengaluru IT towers and the iconic Vidhana Soudha heritage dome with red beacon mast.
+- **Layer 3 (ScrollFactor 0.35): Midground Rooflines** — Terracotta pitched campus department roofs, college clock tower, rooftop Sintex water tanks, and Rain Tree canopies.
+- **Layer 4 (ScrollFactor 1.0): World-Space Street Scenery** — Spanning the 2400px college street:
+  - Granite compound wall with wrought-iron spearhead railings.
+  - The Grand College Entrance Gate ("BENGALURU CITY COLLEGE - ESTD 1948") and security guard post.
+  - Heritage red-brick college building facade with Saracenic arches.
+  - "SLV KAAPI & TIFFIN CORNER" (authentic Bangalore Darshini with orange-white striped awning and steel filter coffee counter).
+  - "CAMPUS XEROX & STATIONERY" with blue awning and notice board.
+  - Lush Gulmohar trees with vibrant vermillion/orange blossom clusters.
+  - Indian sodium-vapor streetlights and yellow BESCOM electrical distribution boxes.
+- **Layer 5 (ScrollFactor 1.0): Ground Platform & Roadway** — TenderSURE-inspired terracotta paver tiles, classic Indian **Yellow & Black** curb stones, and charcoal asphalt road with white dashed markings.
+- **Layer 6 (ScrollFactor 0): Fixed Screen HUD** — Stage title, controls guide, and live player status anchored to the viewport.
+
+### 2. Camera Tracking & Stage Bounds
+- Stage world width extends to `Math.max(viewportWidth * 2.5, 2400)`.
+- `this.cameras.main.startFollow(playerPhysicsBody, true, 0.08, 0.08, 0, 30)` smoothly tracks Dennis as he moves along the street.
+- World physics bounds clamp Dennis between `x = 30` and `x = stageWidth - 30`, preventing him from falling off or entering undefined sections.
+- Ground platform physics static body spans the entire 2400px stage at `groundY`, keeping player collision perfectly aligned with visible sidewalk paver tiles.
 
 ## Future-Facing Asset-Loading Guidelines
 

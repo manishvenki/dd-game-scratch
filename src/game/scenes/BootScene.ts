@@ -4,15 +4,21 @@ import { Manish } from '../entities/Manish'
 import { Sathish } from '../entities/Sathish'
 import { Rahul } from '../entities/Rahul'
 import { PlayerController } from '../systems/PlayerController'
+import { BengaluruCollegeStreet } from '../environments/BengaluruCollegeStreet'
 
 export class BootScene extends Phaser.Scene {
+  // Screen-anchored HUD elements (ScrollFactor 0)
   private titleText?: Phaser.GameObjects.Text
   private subtitleText?: Phaser.GameObjects.Text
   private statusBadge?: Phaser.GameObjects.Container
   private statusText?: Phaser.GameObjects.Text
   private statusBg?: Phaser.GameObjects.Graphics
-  private gridGraphics?: Phaser.GameObjects.Graphics
-  private crosshairGraphics?: Phaser.GameObjects.Graphics
+  private controlGuideText?: Phaser.GameObjects.Text
+  private playerStatusText?: Phaser.GameObjects.Text
+  private playerStatusBg?: Phaser.GameObjects.Graphics
+
+  // Environment & Parallax
+  private bengaluruStreet?: BengaluruCollegeStreet
 
   // Characters
   private dennis?: Dennis
@@ -23,13 +29,7 @@ export class BootScene extends Phaser.Scene {
   // Movement & Physics
   private playerController?: PlayerController
   private groundGroup?: Phaser.Physics.Arcade.StaticGroup
-  private groundVisual?: Phaser.GameObjects.Graphics
   private groundCollider?: Phaser.Physics.Arcade.Collider
-
-  // Gameplay Feedback UI
-  private controlGuideText?: Phaser.GameObjects.Text
-  private playerStatusText?: Phaser.GameObjects.Text
-  private playerStatusBg?: Phaser.GameObjects.Graphics
 
   constructor() {
     super({ key: 'BootScene' })
@@ -38,71 +38,58 @@ export class BootScene extends Phaser.Scene {
   create(): void {
     const width = this.scale.width
     const height = this.scale.height
-
-    // 1. Configure World Physics Bounds
-    this.physics.world.setBounds(0, 0, width, height)
-
-    // 2. Background Grid & Corner Targeting Graphics
-    this.gridGraphics = this.add.graphics()
-    this.crosshairGraphics = this.add.graphics()
-
-    // 3. Ground Platform Visual & Static Body
-    this.groundGroup = this.physics.add.staticGroup()
-    this.groundVisual = this.add.graphics()
-    this.buildGroundPlatform(width, height)
-
-    // 4. Header UI
-    this.titleText = this.add
-      .text(0, 0, 'DD GAME SCRATCH', {
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        fontSize: '28px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-        align: 'center',
-      })
-      .setOrigin(0.5, 0.5)
-
-    this.subtitleText = this.add
-      .text(0, 0, 'Game engine connected', {
-        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        fontSize: '14px',
-        fontStyle: 'normal',
-        color: '#fbbf24', // amber-400
-        align: 'center',
-      })
-      .setOrigin(0.5, 0.5)
-
-    this.statusBg = this.add.graphics()
-    this.statusText = this.add
-      .text(0, 0, 'PHASER 3.90 • ARCADE PHYSICS & CONTROLS ACTIVE', {
-        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-        fontSize: '10px',
-        fontStyle: 'bold',
-        color: '#34d399', // emerald-400
-        align: 'center',
-      })
-      .setOrigin(0.5, 0.5)
-
-    this.statusBadge = this.add.container(0, 0, [this.statusBg, this.statusText])
-
-    // 5. Stationary Chaser Characters (Manish, Sathish, Rahul)
+    const stageWidth = this.getStageWidth(width)
     const groundY = this.getGroundY(height)
-    this.sathish = new Sathish(this, { x: 0, y: groundY, idlePhaseOffsetMs: 400 })
-    this.manish = new Manish(this, { x: 0, y: groundY, idlePhaseOffsetMs: 200 })
-    this.rahul = new Rahul(this, { x: 0, y: groundY, idlePhaseOffsetMs: 600 })
 
-    // 6. Controllable Dennis Protagonist & Player Controller
-    this.dennis = new Dennis(this, { x: width / 2, y: groundY })
+    // 1. Configure World Physics & Camera Bounds
+    this.physics.world.setBounds(0, 0, stageWidth, height)
+    this.cameras.main.setBounds(0, 0, stageWidth, height)
+
+    // 2. Build Bengaluru College Street Parallax Environment
+    this.bengaluruStreet = new BengaluruCollegeStreet({
+      scene: this,
+      stageWidth,
+      viewportWidth: width,
+      viewportHeight: height,
+      groundY,
+    })
+
+    // 3. Ground Platform Static Body (aligned with visible sidewalk/road)
+    this.groundGroup = this.physics.add.staticGroup()
+    this.buildGroundPlatform(stageWidth, height)
+
+    // 4. Stationary Chaser Characters placed at street landmarks along sidewalk
+    // Sathish near SLV Kaapi stall (x: 360)
+    this.sathish = new Sathish(this, { x: 360, y: groundY, idlePhaseOffsetMs: 400 })
+    // Manish waiting outside College Main Gate (x: 980)
+    this.manish = new Manish(this, { x: 980, y: groundY, idlePhaseOffsetMs: 200 })
+    // Rahul waiting near Campus Xerox & Gulmohar tree (x: 1420)
+    this.rahul = new Rahul(this, { x: 1420, y: groundY, idlePhaseOffsetMs: 600 })
+
+    // 5. Controllable Dennis Protagonist & Player Controller
+    // Spawns in front of the college entrance
+    const initialDennisX = 750
+    this.dennis = new Dennis(this, { x: initialDennisX, y: groundY })
     this.playerController = new PlayerController({
       scene: this,
       dennis: this.dennis,
-      initialX: width / 2,
+      initialX: initialDennisX,
       initialY: groundY,
       moveSpeed: 260,
       jumpSpeed: 520,
     })
 
-    // Setup collision between Dennis physics body and ground platform
+    // 6. Camera Follows Dennis smoothly with gentle lead
+    this.cameras.main.startFollow(
+      this.playerController.getPhysicsBody(),
+      true,
+      0.08,
+      0.08,
+      0,
+      30
+    )
+
+    // 7. Setup collision between Dennis physics body and ground platform
     if (this.groundGroup) {
       this.groundCollider = this.physics.add.collider(
         this.playerController.getPhysicsBody(),
@@ -110,18 +97,82 @@ export class BootScene extends Phaser.Scene {
       )
     }
 
-    // 7. On-Screen Control Guide & Live Status Indicators
-    this.controlGuideText = this.add
-      .text(0, 0, '[A/D or ←/→] MOVE  •  [SPACE or ↑] JUMP  •  TOUCH BUTTONS ACTIVE', {
+    // 8. Screen-Anchored HUD UI (ScrollFactor 0, High Depth)
+    this.setupScreenHud()
+
+    // 9. Initial Layout update based on current dimensions
+    this.updateLayout(width, height)
+
+    // 10. Bind scale resize event
+    this.scale.on('resize', this.handleResize, this)
+
+    // 11. Clean up event listeners on shutdown
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this)
+    this.events.once(Phaser.Scenes.Events.DESTROY, this.cleanup, this)
+  }
+
+  /**
+   * Initializes the screen-anchored HUD that stays fixed in view during camera scrolling.
+   */
+  private setupScreenHud(): void {
+    // Title
+    this.titleText = this.add
+      .text(0, 0, 'DD GAME SCRATCH', {
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontSize: '26px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        align: 'center',
+      })
+      .setOrigin(0.5, 0.5)
+      .setScrollFactor(0)
+      .setDepth(100)
+
+    // Subtitle
+    this.subtitleText = this.add
+      .text(0, 0, 'Bengaluru College Street • Parallax Active', {
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        fontSize: '13px',
+        fontStyle: 'normal',
+        color: '#fbbf24', // amber-400
+        align: 'center',
+      })
+      .setOrigin(0.5, 0.5)
+      .setScrollFactor(0)
+      .setDepth(100)
+
+    // Engine Badge
+    this.statusBg = this.add.graphics()
+    this.statusText = this.add
+      .text(0, 0, 'PHASER 3.90 • BENGALURU STREET & PARALLAX ACTIVE', {
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
         fontSize: '9.5px',
         fontStyle: 'bold',
-        color: '#94a3b8',
+        color: '#34d399', // emerald-400
         align: 'center',
       })
       .setOrigin(0.5, 0.5)
 
-    this.playerStatusBg = this.add.graphics()
+    this.statusBadge = this.add
+      .container(0, 0, [this.statusBg, this.statusText])
+      .setScrollFactor(0)
+      .setDepth(100)
+
+    // Control Guide
+    this.controlGuideText = this.add
+      .text(0, 0, '[A/D or ←/→] EXPLORE STREET  •  [SPACE or ↑] JUMP  •  TOUCH CONTROLS', {
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        fontSize: '9px',
+        fontStyle: 'bold',
+        color: '#cbd5e1',
+        align: 'center',
+      })
+      .setOrigin(0.5, 0.5)
+      .setScrollFactor(0)
+      .setDepth(100)
+
+    // Live Dennis Status
+    this.playerStatusBg = this.add.graphics().setScrollFactor(0).setDepth(100)
     this.playerStatusText = this.add
       .text(0, 0, 'STATE: GROUNDED [IDLE]', {
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
@@ -131,65 +182,48 @@ export class BootScene extends Phaser.Scene {
         align: 'center',
       })
       .setOrigin(0.5, 0.5)
-
-    // Initial Layout update based on current scale dimensions
-    this.updateLayout(width, height)
-
-    // Bind scale resize event
-    this.scale.on('resize', this.handleResize, this)
-
-    // Clean up event listener when scene is shut down or destroyed
-    this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this)
-    this.events.once(Phaser.Scenes.Events.DESTROY, this.cleanup, this)
+      .setScrollFactor(0)
+      .setDepth(101)
   }
 
   /**
    * Main game loop running every animation frame.
    */
   override update(): void {
+    if (this.bengaluruStreet) {
+      this.bengaluruStreet.update()
+    }
+
     if (this.playerController) {
       this.playerController.update()
       this.updatePlayerStatusFeedback()
     }
   }
 
+  private getStageWidth(viewportWidth: number): number {
+    return Math.max(viewportWidth * 2.5, 2400)
+  }
+
   private getGroundY(height: number): number {
     return height - 54
   }
 
-  private buildGroundPlatform(width: number, height: number): void {
+  private buildGroundPlatform(stageWidth: number, height: number): void {
     const groundY = this.getGroundY(height)
-    const platformHeight = height - groundY + 20
+    const platformHeight = height - groundY + 40
 
-    // Clear and redraw static body
+    // Clear and create ground static collision rectangle spanning entire street
     if (this.groundGroup) {
       this.groundGroup.clear(true, true)
-      // Create ground body with top surface at groundY
       const groundRect = this.add.rectangle(
-        width / 2,
+        stageWidth / 2,
         groundY + platformHeight / 2,
-        width,
+        stageWidth,
         platformHeight,
         0x000000,
         0
       )
       this.groundGroup.add(groundRect)
-    }
-
-    // Draw visual ground platform
-    if (this.groundVisual) {
-      this.groundVisual.clear()
-      // Base pavement fill
-      this.groundVisual.fillStyle(0x0f172a, 1)
-      this.groundVisual.fillRect(0, groundY, width, platformHeight)
-
-      // Sidewalk top kerb line
-      this.groundVisual.fillStyle(0x38bdf8, 0.7) // Sky blue kerb edge
-      this.groundVisual.fillRect(0, groundY, width, 2)
-
-      // Lower texture line
-      this.groundVisual.fillStyle(0x1e293b, 1)
-      this.groundVisual.fillRect(0, groundY + 3, width, platformHeight)
     }
   }
 
@@ -206,8 +240,8 @@ export class BootScene extends Phaser.Scene {
     const bgH = bounds.height + padY * 2
 
     this.playerStatusBg.clear()
-    this.playerStatusBg.fillStyle(0x0f172a, 0.85)
-    this.playerStatusBg.lineStyle(1, 0x0284c7, 0.6)
+    this.playerStatusBg.fillStyle(0x0f172a, 0.88)
+    this.playerStatusBg.lineStyle(1, 0x0284c7, 0.7)
     this.playerStatusBg.fillRoundedRect(
       this.playerStatusText.x - bgW / 2,
       this.playerStatusText.y - bgH / 2,
@@ -230,22 +264,28 @@ export class BootScene extends Phaser.Scene {
 
   private updateLayout(width: number, height: number): void {
     const centerX = width / 2
+    const stageWidth = this.getStageWidth(width)
     const groundY = this.getGroundY(height)
     const isNarrow = width < 560
     const isShort = height < 440
 
-    // Update Physics World Bounds
-    this.physics.world.setBounds(0, 0, width, height)
+    // 1. Update Physics World Bounds and Camera Bounds
+    this.physics.world.setBounds(0, 0, stageWidth, height)
+    this.cameras.main.setBounds(0, 0, stageWidth, height)
 
-    // Rebuild Ground Platform to match new viewport
-    this.buildGroundPlatform(width, height)
+    // 2. Rebuild Ground Platform to match stage width
+    this.buildGroundPlatform(stageWidth, height)
 
-    // Responsive font scaling
-    const titleSize = isNarrow ? Math.max(16, Math.floor(width * 0.048)) : 26
-    const subtitleSize = isNarrow ? Math.max(11, Math.floor(width * 0.026)) : 13
+    // 3. Resize Parallax Environment
+    if (this.bengaluruStreet) {
+      this.bengaluruStreet.resize(width, height, stageWidth, groundY)
+    }
 
-    // Position Header elements
-    const headerBaseY = isShort ? 18 : Math.max(26, height * 0.09)
+    // 4. Responsive Screen-anchored HUD scaling
+    const titleSize = isNarrow ? Math.max(16, Math.floor(width * 0.046)) : 24
+    const subtitleSize = isNarrow ? Math.max(10.5, Math.floor(width * 0.024)) : 12.5
+
+    const headerBaseY = isShort ? 16 : Math.max(22, height * 0.08)
 
     if (this.titleText) {
       this.titleText.setFontSize(`${titleSize}px`)
@@ -254,11 +294,11 @@ export class BootScene extends Phaser.Scene {
 
     if (this.subtitleText) {
       this.subtitleText.setFontSize(`${subtitleSize}px`)
-      this.subtitleText.setPosition(centerX, headerBaseY + (isShort ? 18 : 23))
+      this.subtitleText.setPosition(centerX, headerBaseY + (isShort ? 17 : 22))
     }
 
     if (this.statusBadge && this.statusText && this.statusBg) {
-      const badgeY = headerBaseY + (isShort ? 38 : 47)
+      const badgeY = headerBaseY + (isShort ? 36 : 44)
       this.statusBadge.setPosition(centerX, badgeY)
 
       const textBounds = this.statusText.getBounds()
@@ -268,85 +308,43 @@ export class BootScene extends Phaser.Scene {
       const bgH = textBounds.height + padY * 2
 
       this.statusBg.clear()
-      this.statusBg.fillStyle(0x064e3b, 0.45)
-      this.statusBg.lineStyle(1, 0x10b981, 0.4)
+      this.statusBg.fillStyle(0x064e3b, 0.6)
+      this.statusBg.lineStyle(1, 0x10b981, 0.5)
       this.statusBg.fillRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 4)
       this.statusBg.strokeRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 4)
     }
 
-    // Position Stationary Chasers along the Ground Platform
-    // Spread them across the stage so Dennis has space to run and jump around them
-    const chaserSpread = isNarrow
-      ? Math.min(85, (width - 40) / 4)
-      : Math.min(180, (width - 120) / 3.5)
-
+    // 5. Stationary Chasers maintain their landmark street positions
     if (this.sathish) {
-      this.sathish.setPosition(centerX - chaserSpread * 1.5, groundY)
+      this.sathish.setPosition(360, groundY)
     }
 
     if (this.manish) {
-      this.manish.setPosition(centerX - chaserSpread * 0.6, groundY)
+      this.manish.setPosition(980, groundY)
     }
 
     if (this.rahul) {
-      this.rahul.setPosition(centerX + chaserSpread * 1.3, groundY)
+      this.rahul.setPosition(1420, groundY)
     }
 
-    // Ensure Dennis is on the ground platform within world bounds
+    // 6. Ensure Dennis is on the ground platform within world bounds
     if (this.playerController) {
       const currentPos = this.playerController.getPosition()
-      const clampedX = Phaser.Math.Clamp(currentPos.x, 30, width - 30)
+      const clampedX = Phaser.Math.Clamp(currentPos.x, 30, stageWidth - 30)
       if (currentPos.y > groundY || currentPos.x !== clampedX) {
         this.playerController.setPosition(clampedX, groundY)
       }
     }
 
-    // Position Control Guide & Status text
+    // 7. Position Control Guide & Status text (Screen space)
     if (this.controlGuideText) {
-      const guideY = isShort ? groundY - 14 : groundY - 20
-      this.controlGuideText.setFontSize(isNarrow ? '8px' : '9.5px')
+      const guideY = isShort ? groundY - 14 : groundY - 18
+      this.controlGuideText.setFontSize(isNarrow ? '8px' : '9px')
       this.controlGuideText.setPosition(centerX, guideY)
     }
 
     if (this.playerStatusText) {
-      this.playerStatusText.setPosition(centerX, height - 24)
-    }
-
-    // Background Grid
-    if (this.gridGraphics) {
-      this.gridGraphics.clear()
-      this.gridGraphics.lineStyle(1, 0x1e293b, 0.3)
-      const step = 48
-      for (let x = step; x < width; x += step) {
-        this.gridGraphics.lineBetween(x, 0, x, height)
-      }
-      for (let y = step; y < height; y += step) {
-        this.gridGraphics.lineBetween(0, y, width, y)
-      }
-    }
-
-    // Corner targeting crosshairs
-    if (this.crosshairGraphics) {
-      this.crosshairGraphics.clear()
-      this.crosshairGraphics.lineStyle(1.5, 0xf59e0b, 0.5)
-      const len = 14
-      const pad = 14
-
-      // Top-Left
-      this.crosshairGraphics.lineBetween(pad, pad, pad + len, pad)
-      this.crosshairGraphics.lineBetween(pad, pad, pad, pad + len)
-
-      // Top-Right
-      this.crosshairGraphics.lineBetween(width - pad, pad, width - pad - len, pad)
-      this.crosshairGraphics.lineBetween(width - pad, pad, width - pad, pad + len)
-
-      // Bottom-Left
-      this.crosshairGraphics.lineBetween(pad, height - pad, pad + len, height - pad)
-      this.crosshairGraphics.lineBetween(pad, height - pad, pad, height - pad - len)
-
-      // Bottom-Right
-      this.crosshairGraphics.lineBetween(width - pad, height - pad, width - pad - len, height - pad)
-      this.crosshairGraphics.lineBetween(width - pad, height - pad, width - pad, height - pad - len)
+      this.playerStatusText.setPosition(centerX, height - 20)
     }
   }
 
@@ -356,6 +354,11 @@ export class BootScene extends Phaser.Scene {
     if (this.groundCollider) {
       this.groundCollider.destroy()
       this.groundCollider = undefined
+    }
+
+    if (this.bengaluruStreet) {
+      this.bengaluruStreet.destroy()
+      this.bengaluruStreet = undefined
     }
 
     if (this.playerController) {

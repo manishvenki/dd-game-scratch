@@ -115,11 +115,11 @@ export default function PlayPage() {
           <span className="text-cyan-400">Touch Buttons</span>
         </div>
         <div className="flex items-center gap-3">
-          <span>Dennis: Controllable</span>
+          <span>Stage: Bengaluru College Street</span>
+          <span className="text-slate-600">&bull;</span>
+          <span>Parallax: Active</span>
           <span className="text-slate-600">&bull;</span>
           <span className="text-amber-400">Chasers: Stationary</span>
-          <span className="text-slate-600">&bull;</span>
-          <span>Gravity: 1100</span>
         </div>
       </div>
 
@@ -128,20 +128,20 @@ export default function PlayPage() {
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            Arcade Physics Player Controller
+            Bengaluru College Street Environment
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Dennis is controlled via <code className="text-amber-400">PlayerController.ts</code> using an Arcade Physics proxy body paired with static ground collision. It handles continuous horizontal movement, directional facing flips, and single jump verification while preventing mid-air double jumping.
+            Crafted via <code className="text-amber-400">BengaluruCollegeStreet.ts</code> featuring multi-layered parallax: warm daylight anime sky, distant Vidhana Soudha and tech park skyline silhouettes, campus Saracenic brick arches, iconic SLV Kaapi stall, Gulmohar blossom trees, and TenderSURE yellow-black curb pavement.
           </p>
         </div>
 
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            Cross-Platform Touch &amp; Keyboard Input
+            Dynamic Camera &amp; Parallax Scrolling
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Keyboard navigation keys are captured by Phaser to prevent page scrolling. Mobile touch buttons feed directly into a decoupled <code className="text-cyan-400">virtualInputBridge.ts</code>, keeping React re-renders zeroed out of the game loop.
+            Phaser&apos;s main camera smoothly tracks Dennis along the 2400px college street with independent parallax scroll factors (0.15 far skyline, 0.35 campus roofline, 1.0 street level). Screen HUD and mobile touch buttons stay firmly anchored to the viewport.
           </p>
         </div>
       </section>

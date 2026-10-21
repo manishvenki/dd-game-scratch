@@ -195,9 +195,10 @@ export class PlayerController {
   public destroy(): void {
     try {
       const kb = this.scene.input?.keyboard
-      // Only clear captures if the keyboard manager is still initialized
-      if (kb && 'manager' in kb && kb.manager) {
-        kb.clearCaptures()
+      // Only clear captures if the keyboard manager and clearCaptures method are active
+      const manager = (kb as unknown as { manager?: { clearCaptures?: () => void } })?.manager
+      if (typeof manager?.clearCaptures === 'function') {
+        kb?.clearCaptures()
       }
     } catch {
       // Phaser input manager may have already been dismantled
