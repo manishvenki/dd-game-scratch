@@ -25,14 +25,14 @@ public/assets/
 
 ### 1. Character References (`characters/references/`)
 Reference photographs and artwork represent source material supplied by the team and are **strictly separated** from game sprites.
-The confirmed character identities and visual profiles must remain consistent across all prompts:
+The confirmed character identities and visual profiles are defined centrally in `src/game/data/characterRegistry.ts` and must remain consistent across all prompts:
 
-- **Dennis**: Main playable character; curly dark hair, blue denim shirt, and jeans.
-- **Manish**: Chaser NPC; black shirt and glasses.
-- **Sathish**: Chaser NPC; black Lenovo T-shirt.
-- **Rahul**: Chaser NPC; dark teal striped shirt.
+- **Dennis** (`protagonist`): Curly dark hair, blue denim shirt, and jeans.
+- **Manish** (`chaser`): Black shirt, dark hair, clearly visible glasses.
+- **Sathish** (`chaser`): Black Lenovo T-shirt with readable chest text marking, dark hair.
+- **Rahul** (`chaser`): Dark teal shirt with multiple visible horizontal stripes, dark hair.
 
-*Note: Reference images are source inspiration; do not treat raw photos as game sprites.*
+*Note: Reference images are source inspiration; do not treat raw photos as game sprites. Placeholder vector visuals in the game engine are temporary and distinct from final production art.*
 
 ### 2. Character Sprites (`characters/sprites/`)
 Future 2D animated spritesheets should follow a consistent naming schema and separate distinct animation states:

@@ -5,10 +5,15 @@ This directory houses all game-side code, configuration, entities, and scenes po
 ## Directory Structure
 
 - `config/`: Engine configuration factory (`gameConfig.ts`), scale settings (960×540, `Scale.RESIZE`), and renderer settings.
-- `scenes/`: Phaser `Scene` subclasses. Currently active: `BootScene.ts` (engine test, scaling & stationary character stage).
-- `entities/`: Game sprites and actors. Implemented: [`Dennis.ts`](entities/Dennis.ts) (playable protagonist).
+- `scenes/`: Phaser `Scene` subclasses. Currently active: `BootScene.ts` (engine test, scaling & 4-character stage lineup).
+- `entities/`: Game sprites and actors.
+  - [`Dennis.ts`](entities/Dennis.ts): Playable protagonist entity.
+  - [`Chaser.ts`](entities/Chaser.ts): Abstract base class for recurring pursuers.
+  - [`Manish.ts`](entities/Manish.ts): Chaser with black shirt and prominent glasses.
+  - [`Sathish.ts`](entities/Sathish.ts): Chaser with black Lenovo T-shirt and readable lettering.
+  - [`Rahul.ts`](entities/Rahul.ts): Chaser with dark teal multi-striped shirt.
 - `systems/`: Decoupled subsystems. Implemented: [`characterAnimations.ts`](systems/characterAnimations.ts) (animation states & registration).
-- `data/`: Game constants, level configurations, and dialog trees.
+- `data/`: Game constants and metadata. Implemented: [`characterRegistry.ts`](data/characterRegistry.ts) (authoritative character definitions).
 
 ## React Lifecycle Integration & Cleanup Strategy
 
@@ -29,39 +34,31 @@ The game engine is integrated through the reusable React component [`src/compone
    - The scene unbinds its scale resize listeners during `SHUTDOWN` and `DESTROY` lifecycle events.
    - `gameRef.current` is set to `null` to prevent memory leaks and duplicate canvases.
 
-## Dennis Entity & Animation Architecture
+## Core Characters & Chaser Architecture
 
-### 1. Dennis Entity Lifecycle (`src/game/entities/Dennis.ts`)
-- `Dennis` extends `Phaser.GameObjects.Container` to cleanly encapsulate visual elements, positioning, and future collision volumes.
-- Instantiated via `new Dennis(scene, { x, y, textureKey? })`.
-- During destruction, `dennis.destroy()` terminates procedural breathing tweens, clears vector graphics, removes attached labels, and unsubscribes from scene lifecycle hooks.
-- Prepared for Arcade Physics: maintains `isPhysicsEnabled()` check and can receive a physics body when movement mechanics are enabled.
+### 1. Character Registry (`src/game/data/characterRegistry.ts`)
+The project enforces strict, immutable character identity mappings:
+- **Dennis** (`protagonist`): Curly dark hair, blue denim shirt, blue jeans.
+- **Manish** (`chaser`): Dark neat hair, black shirt, clearly visible glasses.
+- **Sathish** (`chaser`): Dark textured hair, black T-shirt with readable `Lenovo` text marking.
+- **Rahul** (`chaser`): Dark tousled hair, dark teal shirt with multiple visible horizontal stripes.
 
-### 2. Placeholder vs. Production Art Separation
-- **Production Mode**: When a valid texture key is supplied and exists in `scene.textures`, `Dennis` automatically instantiates a `Phaser.GameObjects.Sprite` and binds to registered animations.
-- **Placeholder Mode**: If production assets are not yet loaded, `Dennis` renders an anime-inspired vector silhouette with confirmed clothing color blocks:
-  - Curly dark hair (`#1c1917`)
-  - Blue denim shirt (`#2563eb`) with collar/pocket stitching
-  - Blue jeans (`#1e3a8a`)
-  - Skin tone (`#fed7aa`) with expressive eye markers and ground shadow ellipse
-  - Procedural breathing tween (`Sine.easeInOut`) simulating idle presence.
-- This separation ensures gameplay logic (movement, collisions, states) does not require rewrites once production spritesheets are checked in.
+### 2. Reusable Chaser Entity Architecture (`src/game/entities/Chaser.ts`)
+- `Chaser` extends `Phaser.GameObjects.Container` as the common base class for all pursuers.
+- Encapsulates shared lifecycle, ground shadow rendering, identification badge generation, and procedural idle breathing tweens.
+- Configurable phase offsets (`idlePhaseOffsetMs`) ensure natural asynchronous idle breathing so characters do not animate as robotic clones.
+- Subclasses (`Manish`, `Sathish`, `Rahul`) implement `renderCharacterFeatures(g)` to draw their unique clothing, hair, and distinct accessories without duplicating base mechanics.
+- Prepares typed hooks for future Arcade Physics (`isPhysicsEnabled()`) and animation state transitions (`playAnimation()`).
 
-### 3. Animation State Naming Convention (`src/game/systems/characterAnimations.ts`)
-Standard animation state identifiers:
-- `idle`: `dennis_anim_idle` (looping stance)
-- `run`: `dennis_anim_run` (forward dash)
-- `jump`: `dennis_anim_jump` (takeoff/ascent)
-- `fall`: `dennis_anim_fall` (descent)
-- `attack`: `dennis_anim_attack` (action/burst)
-- `hit`: `dennis_anim_hit` (stumble/damage)
+### 3. Visuals vs. Future AI Behavior Separation
+- Current character entities represent **pure presentation and positioning containers**.
+- They are completely decoupled from movement logic, pathfinding, and chasing behavior.
+- In future prompts, AI systems (e.g., pursuit controllers, flocking algorithms, line-of-sight triggers) will operate on these entities from external systems without requiring modifications to the character renderers.
 
-### 4. Process for Integrating Future Spritesheets
-1. Place the spritesheet PNG and atlas JSON under `public/assets/characters/sprites/`.
-2. In the scene's `preload()` method, call `this.load.spritesheet('dennis_spritesheet', 'assets/characters/sprites/dennis.png', { frameWidth: W, frameHeight: H })`.
-3. In `create()`, call `registerDennisAnimations(this.anims, 'dennis_spritesheet')`.
-4. Instantiate Dennis with `new Dennis(this, { x, y, textureKey: 'dennis_spritesheet' })`.
-5. Trigger animations via `dennis.playAnimation('run')`.
+### 4. Placeholder vs. Production Art Separation
+- **Production Mode**: When production spritesheets are provided and their keys exist in `scene.textures`, entities instantiate `Phaser.GameObjects.Sprite` instances.
+- **Placeholder Mode**: When production art is absent, entities render color-blocked vector silhouettes preserving all confirmed clothing attributes and identifying features.
+- Once production spritesheets are added, the visual switch is automatic without rewriting gameplay or AI logic.
 
 ## Future-Facing Asset-Loading Guidelines
 

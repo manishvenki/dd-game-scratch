@@ -7,13 +7,13 @@ export default function PlayPage() {
       <div className="space-y-1">
         <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-          PHASE 2 &bull; CHARACTER ENTITY &amp; ANIMATION ARCHITECTURE
+          PHASE 2 &bull; CHASER CHARACTER SYSTEM
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
           Game Viewport
         </h1>
         <p className="text-sm text-slate-400">
-          Live Phaser 3 canvas with the decoupled Dennis protagonist entity and animation architecture.
+          Live Phaser 3 canvas with the complete 4-character core roster: Dennis and the three chasers.
         </p>
       </div>
 
@@ -32,14 +32,14 @@ export default function PlayPage() {
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 rounded-xl bg-slate-900/60 border border-slate-800 text-xs font-mono text-slate-400">
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
-          <span className="text-slate-200">Entity: Dennis (Stationary Placeholder)</span>
+          <span className="text-slate-200">Roster: Dennis &bull; Manish &bull; Sathish &bull; Rahul</span>
         </div>
         <div className="flex items-center gap-3">
           <span>Scale: RESIZE</span>
           <span className="text-slate-600">&bull;</span>
           <span>Scene: BootScene</span>
           <span className="text-slate-600">&bull;</span>
-          <span className="text-amber-400">State: Idle (Breathing)</span>
+          <span className="text-amber-400">Status: Stationary Placeholders</span>
         </div>
       </div>
 
@@ -48,20 +48,20 @@ export default function PlayPage() {
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            Character Entity Architecture
+            Chaser Entity Architecture
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Dennis is implemented as a decoupled <code className="text-amber-400">Dennis.ts</code> entity. It renders an anime-styled color-blocked placeholder with confirmed visual attributes (curly dark hair, blue denim shirt, jeans) and procedural idle breathing.
+            The three recurring chasers extend a common <code className="text-amber-400">Chaser.ts</code> base entity. Each character renders distinct visual signatures: Manish (black shirt, glasses), Sathish (black Lenovo T-shirt), and Rahul (dark teal striped shirt).
           </p>
         </div>
 
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-amber-400" />
-            Upcoming Movement &amp; Controls
+            Upcoming AI &amp; Pursuit Systems
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Dennis remains stationary in this stage to verify entity mounting and animation architecture. Player input (arrow keys, WASD, touch virtual pad) and physics locomotion will be integrated in subsequent prompts.
+            All four characters remain stationary in this stage to verify rendering and responsive layout. Flocking behavior, pursuit AI, and collision evasion will be integrated in subsequent gameplay prompts.
           </p>
         </div>
       </section>
