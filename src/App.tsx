@@ -7,12 +7,14 @@ import CharactersPage from './pages/CharactersPage'
 import type { PageId } from './types/navigation'
 
 function getPageFromHash(hash: string): PageId {
-  const route = hash.replace(/^#\/?/, '').trim().toLowerCase()
+  const cleanHash = hash.replace(/^#\/?/, '').trim().toLowerCase()
+  const route = cleanHash.split('?')[0]
   if (route === 'play') return 'play'
   if (route === 'levels') return 'levels'
   if (route === 'characters') return 'characters'
   return 'home'
 }
+
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>(() =>

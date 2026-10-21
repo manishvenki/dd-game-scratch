@@ -38,9 +38,10 @@ const PLANNED_LEVELS: readonly PlannedLevel[] = [
     title: 'MG Road / Brigade Road',
     setting: 'Central city retail & nightlife hub',
     description:
-      'High-energy dashes past neon shop fronts, busy footpaths, and tight alleyways with fast-moving pursuers.',
+      'High-energy sprint past neon storefronts and Namma Metro viaduct. Dennis encounters a drama rehearsal group and flees to the Metro Station before the trio catches him!',
     environmentType: 'Downtown District',
-    status: 'Planned',
+    status: 'Playable',
+    playHref: '#/play?level=3',
   },
   {
     id: 'koramangala-cafe',
@@ -48,9 +49,10 @@ const PLANNED_LEVELS: readonly PlannedLevel[] = [
     title: 'Koramangala Café',
     setting: 'Lively café indoor & patio area',
     description:
-      'Agile indoor obstacle navigation dodging outdoor seating, coffee tables, and energetic patrons in a bustling hangout.',
+      'Dennis meets his date Ananya at a cozy Koramangala café patio until the chasers crash the date, triggering a frantic dash toward 80ft Road.',
     environmentType: 'Café & Patio',
-    status: 'Coming Soon',
+    status: 'Playable',
+    playHref: '#/play?level=4',
   },
   {
     id: 'cubbon-park',
@@ -60,7 +62,7 @@ const PLANNED_LEVELS: readonly PlannedLevel[] = [
     description:
       'Scenic sprint along winding red-dirt trails, bamboo groves, park benches, and open lawns under the morning canopy.',
     environmentType: 'Parkland Trails',
-    status: 'Planned',
+    status: 'Coming Soon',
   },
 ] as const
 
@@ -70,7 +72,7 @@ export default function LevelsPage() {
       {/* Page Header */}
       <div className="space-y-1">
         <div className="text-xs font-mono uppercase tracking-wider text-amber-400">
-          STAGES ROSTER &bull; 2 PLAYABLE ENCOUNTERS + 3 PLANNED
+          STAGES ROSTER &bull; 4 PLAYABLE STAGES + 1 PLANNED
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
           Game Stages
@@ -87,10 +89,10 @@ export default function LevelsPage() {
         </div>
         <div className="space-y-1 text-xs sm:text-sm">
           <p className="font-semibold text-slate-200">
-            Phase 3 Encounters: Stages 01 and 02 Are Now Playable!
+            Phase 3 Encounters: Stages 01 to 04 Are Now Playable!
           </p>
           <p className="text-slate-400 leading-normal">
-            Take on the 3-boy college gate confrontation and chaser pursuit in Stage 01, or test combat against two independent blockers in Stage 02. Subsequent stages (MG Road, Koramangala, Cubbon Park) remain planned creative concepts.
+            Take on the college gate confrontation in Stage 01, the market corridor in Stage 02, the Brigade Road drama mix-up in Stage 03, or the Koramangala café date scramble in Stage 04 with continuous pursuit and comic Tanglish dialogues.
           </p>
         </div>
       </section>

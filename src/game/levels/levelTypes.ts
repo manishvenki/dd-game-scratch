@@ -1,4 +1,6 @@
-export type LevelId = 'level-1' | 'level-2'
+export type LevelId = 'level-1' | 'level-2' | 'level-3' | 'level-4'
+
+export type EnvironmentTheme = 'college' | 'market' | 'commercial-mg' | 'cafe-koramangala'
 
 export type EnemyState = 'idle' | 'blocking' | 'hit' | 'defeated'
 
@@ -19,6 +21,14 @@ export interface ChaserConfig {
   readonly speed: number
 }
 
+export interface LevelInteractionConfig {
+  readonly id: string
+  readonly triggerX: number
+  readonly triggerRadius: number
+  readonly label: string
+  readonly dialogueSequenceId: string
+}
+
 export interface LevelConfig {
   readonly id: LevelId
   readonly stageNumber: string
@@ -30,7 +40,10 @@ export interface LevelConfig {
   readonly playerSpawnX: number
   readonly exitGoalX: number
   readonly exitGoalLabel: string
+  readonly theme: EnvironmentTheme
   readonly blockers: readonly BlockingEnemyConfig[]
   readonly chasers?: readonly ChaserConfig[]
   readonly hasChaseSequence: boolean
+  readonly interaction?: LevelInteractionConfig
 }
+

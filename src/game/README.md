@@ -105,26 +105,39 @@ The environment is decoupled into an independent module with 6 visual depth laye
 - World physics bounds clamp Dennis between `x = 30` and `x = stageWidth - 30`, preventing him from falling off or entering undefined sections.
 - Ground platform physics static body spans the entire 2400px stage at `groundY`, keeping player collision perfectly aligned with visible sidewalk paver tiles.
 
-## Level 1 & Level 2 Encounter Gameplay Architecture
+## Level 1 to Level 4 Gameplay Architecture
 
 ### 1. Level Configurations (`src/game/levels/levelConfigs.ts`)
 - **Level 1 (College Street Encounter)**:
-  - Setting: Bengaluru City College Gate avenue (2400px stage).
-  - Opening confrontation: 3 blocking boys (Ajay, Vijay, Sanjay) blocking the sidewalk path.
-  - Dennis must defeat all 3 blockers using the attack action (`J / X` or touch Attack button).
-  - Once cleared, the chaser trio (Manish, Sathish, Rahul) begins pursuing Dennis.
-  - Dennis must sprint to the BMTC Bus Stop exit (`x = 2320`) without being caught.
+  - Setting: Bengaluru City College Gate avenue (2400px stage, `theme: 'college'`).
+  - Continuous Chase: Manish, Sathish, and Rahul begin pursuing Dennis from the opening moments.
+  - Confrontation: 3 blocking boys (Ajay, Vijay, Sanjay). Dennis must punch through or outmaneuver blockers while the trio closes in.
+  - Dennis must reach the BMTC Bus Stop exit (`x = 2320`) without being caught.
 - **Level 2 (Commercial Lane Confrontation)**:
-  - Setting: Roadside market street bottleneck (2200px stage).
-  - Confrontation: 2 independent blocking boys (Vikram, Kiran) with distinct positions and health bars.
-  - Dennis must defeat both blockers and sprint to the Avenue Crossroad exit (`x = 2120`).
+  - Setting: Roadside market street corridor (2200px stage, `theme: 'market'`).
+  - Confrontation: 2 independent blocking boys (Vikram, Kiran) with independent health and physics bodies.
+  - Dennis must neutralize both blockers and sprint to the Avenue Crossroad exit (`x = 2120`).
+- **Level 3 (MG Road / Brigade Road Reveal)**:
+  - Setting: Central commercial street with elevated Namma Metro viaduct, neon store signs, and drama rehearsal stage (2600px stage, `theme: 'commercial-mg'`).
+  - Story Encounter: Dennis spots a stylish group at `x = 920` (Drama club boys Raghu & Preetham in costume), triggering a comic Tanglish misunderstanding before the trio arrives shouting from behind.
+  - Exit: Namma Metro Station entrance (`x = 2500`).
+- **Level 4 (Koramangala Café Date)**:
+  - Setting: Cozy red-brick café with outdoor patio seating, festoon fairy lights, and umbrella tables (2600px stage, `theme: 'cafe-koramangala'`).
+  - Story Encounter: Dennis meets his date Ananya at the patio table (`x = 860`) for filter kaapi and bun maska until the trio crashes the date.
+  - Exit: Koramangala 80ft Road Junction (`x = 2500`).
 
-### 2. Combat & Blocking Collision Rules
-- **Physical Blocking**: Active blocking enemies possess dynamic Arcade Physics bodies that physically impede Dennis.
-- **Attack Mechanic**: Dennis strikes forward in his active facing direction (reach: 65px, cooldown: 280ms).
-- **Stylized Arcade Feedback**: Hit enemies flash, play floating hit sparks (`★ POW!`), and recoil backward.
-- **Defeat State**: When enemy HP reaches 0, their physics body is disabled (`body.enable = false`) and they slump into a transparent defeat state, allowing Dennis to run freely past them.
-- **Chaser Pursuit & Caught Condition**: During Level 1's chase, chasers advance toward Dennis along the ground. If a chaser reaches within 34px of Dennis, the game triggers a Caught overlay with a Retry option. Reaching the goal opens the Level Complete overlay.
+### 2. Continuous Pursuit & Critical Gameplay Rules
+- **Chasers Never Wait for Blockers**: In Level 1 (and throughout Levels 1, 3, and 4), pursuit begins right from the start. Chasers do not pause or wait during Dennis's attacks, jumps, or blocker fights.
+- **Urgency & Hesitation**: Every second Dennis spends stationary attacking blockers allows the pursuers to close the gap.
+- **Controlled Story Beats**: During scripted dialogues (Levels 3 and 4), chasers visibly advance to a dramatic proximity (`~75px`) shouting in the background, pausing catch triggers until dialogue concludes and full chase resumes.
+
+### 3. Reusable Tanglish Dialogue System (`src/game/systems/DialogueSystem.ts`)
+- **Speech Bubble Design**: Screen-anchored comic cards with speaker badge pills, speech tail pointer, and high contrast typography.
+- **Original Tanglish Script**: Character lines in authentic colloquial Bengaluru Tanglish for Manish, Sathish, Rahul, Dennis, Ananya, Raghu, and Preetham.
+- **Cross-Platform Input**: Advances on `Space`, `Enter`, click, or touch tap on mobile.
+- **Catch Sequence**: Getting caught freezes gameplay and launches a comic conversation exchange with the chaser who caught Dennis, followed by a visible "RETRY LEVEL" button.
+- **Clean Reset**: Selecting Retry completely resets player position, enemy bodies, chaser coordinates, and dialogue state cleanly without memory leaks or duplicate listeners.
+
 
 ## Future-Facing Asset-Loading Guidelines
 

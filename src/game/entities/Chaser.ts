@@ -167,6 +167,15 @@ export abstract class Chaser extends Phaser.GameObjects.Container {
     return Boolean(this.body)
   }
 
+  public setFacingDirection(direction: 1 | -1): void {
+    if (this.placeholderGraphics) {
+      this.placeholderGraphics.setScale(direction, 1)
+    }
+    if (this.productionSprite) {
+      this.productionSprite.setFlipX(direction === -1)
+    }
+  }
+
   private handleSceneShutdown(): void {
     this.destroy()
   }

@@ -1,7 +1,34 @@
+import { useState, useEffect } from 'react'
 import GameCanvas from '../components/GameCanvas'
 import { virtualInputBridge } from '../game/systems/virtualInputBridge'
 
 export default function PlayPage() {
+  const [activeLevel, setActiveLevel] = useState<string>(() => {
+    const hash = window.location.hash
+    if (hash.includes('level=4')) return 'level-4'
+    if (hash.includes('level=3')) return 'level-3'
+    if (hash.includes('level=2')) return 'level-2'
+    return 'level-1'
+  })
+
+  useEffect(() => {
+    const syncLevel = () => {
+      const hash = window.location.hash
+      if (hash.includes('level=4')) setActiveLevel('level-4')
+      else if (hash.includes('level=3')) setActiveLevel('level-3')
+      else if (hash.includes('level=2')) setActiveLevel('level-2')
+      else setActiveLevel('level-1')
+    }
+    window.addEventListener('hashchange', syncLevel)
+    return () => window.removeEventListener('hashchange', syncLevel)
+  }, [])
+
+  const switchLevel = (levelId: string, levelNum: number) => {
+    setActiveLevel(levelId)
+    window.location.hash = `#/play?level=${levelNum}`
+    ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: string) => void }).__DD_LOAD_LEVEL__?.(levelId)
+  }
+
   return (
     <div className="flex flex-col gap-6">
       {/* Page Header & Level Select */}
@@ -9,42 +36,69 @@ export default function PlayPage() {
         <div className="space-y-1">
           <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
             <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            PHASE 3 &bull; LEVEL 1 &amp; LEVEL 2 ENCOUNTERS
+            PHASE 3 &bull; LEVELS 1–4 PLAYABLE &bull; CONTINUOUS CHASE &amp; DIALOGUE
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
             Playable Encounters
           </h1>
           <p className="text-sm text-slate-400">
-            Interactive combat and chase encounters. Take control of Dennis using keyboard or touch buttons.
+            Interactive combat, continuous trio pursuit, and comic Tanglish story encounters across Bengaluru.
           </p>
         </div>
 
         {/* Level Switcher Selector */}
-        <div className="flex items-center gap-2 bg-slate-900/80 border border-slate-800 p-1.5 rounded-xl self-start sm:self-auto">
+        <div className="flex flex-wrap items-center gap-2 bg-slate-900/80 border border-slate-800 p-1.5 rounded-xl self-start sm:self-auto">
           <button
             type="button"
             id="btn-select-level-1"
-            onClick={() => {
-              window.location.hash = '#/play?level=1'
-              ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: string) => void }).__DD_LOAD_LEVEL__?.('level-1')
-            }}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 cursor-pointer"
+            onClick={() => switchLevel('level-1', 1)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+              activeLevel === 'level-1'
+                ? 'bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-sm'
+                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
+            }`}
           >
-            Level 1: College Gate
+            L1: College Gate
           </button>
           <button
             type="button"
             id="btn-select-level-2"
-            onClick={() => {
-              window.location.hash = '#/play?level=2'
-              ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: string) => void }).__DD_LOAD_LEVEL__?.('level-2')
-            }}
-            className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700 cursor-pointer"
+            onClick={() => switchLevel('level-2', 2)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+              activeLevel === 'level-2'
+                ? 'bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-sm'
+                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
+            }`}
           >
-            Level 2: Street Bottleneck
+            L2: Market Corridor
+          </button>
+          <button
+            type="button"
+            id="btn-select-level-3"
+            onClick={() => switchLevel('level-3', 3)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+              activeLevel === 'level-3'
+                ? 'bg-cyan-500/25 text-cyan-300 border-cyan-500/50 shadow-sm'
+                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
+            }`}
+          >
+            L3: MG Road Reveal
+          </button>
+          <button
+            type="button"
+            id="btn-select-level-4"
+            onClick={() => switchLevel('level-4', 4)}
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+              activeLevel === 'level-4'
+                ? 'bg-pink-500/25 text-pink-300 border-pink-500/50 shadow-sm'
+                : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
+            }`}
+          >
+            L4: Koramangala Café
           </button>
         </div>
       </div>
+
 
       {/* Main Game Viewport Container with Live Phaser Canvas & Touch Controls Overlay */}
       <section
@@ -165,11 +219,11 @@ export default function PlayPage() {
           <span className="text-cyan-400">Touch Controls</span>
         </div>
         <div className="flex items-center gap-3">
-          <span>Level 1: 3 Blockers + Chase</span>
+          <span>Stages 1–4 Active</span>
           <span className="text-slate-600">&bull;</span>
-          <span>Level 2: 2 Blockers</span>
+          <span>Continuous Pursuit: Enabled</span>
           <span className="text-slate-600">&bull;</span>
-          <span className="text-emerald-400">Combat: Active</span>
+          <span className="text-emerald-400">Comic Dialogue: Active</span>
         </div>
       </div>
 
@@ -178,20 +232,20 @@ export default function PlayPage() {
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            Level 1 &amp; Level 2 Encounter Architecture
+            Continuous Chase &amp; Independent Blocker Rules
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Data-driven level configs (<code className="text-amber-400">levelConfigs.ts</code>) define world bounds, blocker spawn coordinates, independent health/defeat states, and exit goals. Level 1 features a 3-boy confrontation followed by a chaser pursuit to the BMTC Bus Stop. Level 2 features a distinct 2-boy corridor confrontation.
+            In Stage 01, Manish, Sathish, and Rahul begin pursuing Dennis from the opening moments. The trio never waits for blockers; every second spent attacking or hesitating allows them to close the distance. Getting caught triggers a comedic Tanglish catch exchange and retry.
           </p>
         </div>
 
         <div className="bg-slate-900/50 border border-slate-800 rounded-xl p-5 space-y-2">
           <h3 className="text-sm font-bold text-white flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-rose-400" />
-            Arcade Comedy Combat &amp; Collision Rules
+            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+            Stages 03 &amp; 04: Story Beats &amp; Dialogue
           </h3>
           <p className="text-xs text-slate-400 leading-relaxed">
-            Attacks (<code className="text-rose-400">J / X</code> or Touch Attack) check facing direction and close range. Hit enemies recoil with floating arcade sparks and collapse when depleted. Defeated enemies disable their physics body so Dennis can sprint past them freely.
+            Stage 03 introduces the MG Road neon commercial avenue and a comical drama club mix-up before fleeing to the Metro. Stage 04 takes Dennis to a Koramangala café date with Ananya before the chasers crash the date and force a frantic sprint to 80ft Road.
           </p>
         </div>
       </section>

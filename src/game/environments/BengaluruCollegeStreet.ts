@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { type EnvironmentTheme } from '../levels/levelTypes'
 
 export interface BengaluruCollegeStreetConfig {
   readonly scene: Phaser.Scene
@@ -6,23 +7,21 @@ export interface BengaluruCollegeStreetConfig {
   readonly viewportWidth: number
   readonly viewportHeight: number
   readonly groundY: number
+  readonly theme?: EnvironmentTheme
 }
 
 /**
- * BengaluruCollegeStreet - Original Bengaluru-inspired anime college street environment.
+ * BengaluruCollegeStreet - Original Bengaluru-inspired anime street environment.
  *
  * Implements a layered parallax environment featuring:
- * 1. Warm daylight sky with subtle drifting clouds (ScrollFactor 0).
+ * 1. Warm daylight or twilight sky with subtle drifting clouds (ScrollFactor 0).
  * 2. Distant Bengaluru skyline with Vidhana Soudha dome & tech towers (ScrollFactor 0.15).
  * 3. Midground campus rooflines, clock tower & rain tree silhouettes (ScrollFactor 0.35).
- * 4. Interactive street scenery in world space:
- *    - College boundary stone wall with wrought-iron railings.
- *    - The Grand College Entrance Gate ("BENGALURU CITY COLLEGE").
- *    - Heritage red-brick college building facade with Saracenic arches.
- *    - "SLV KAAPI & TIFFIN CORNER" (authentic Bangalore Darshini with awning).
- *    - "CAMPUS XEROX & STATIONERY" storefront.
- *    - Vibrant blossoming Gulmohar trees & broad Rain trees.
- *    - Classic Indian sodium-vapor streetlights & yellow BESCOM distribution boxes.
+ * 4. Interactive street scenery supporting 4 distinct themes:
+ *    - 'college': Campus gate, stone walls, SLV Kaapi & Campus Xerox.
+ *    - 'market': Colorful fruit & spice stalls with striped awnings.
+ *    - 'commercial-mg': Namma Metro viaduct, neon commercial signs & drama rehearsal plaza.
+ *    - 'cafe-koramangala': Cozy red-brick café, outdoor patio, fairy lights & Ananya date table.
  * 5. Paved sidewalk with yellow-and-black curb stones and asphalt road (ScrollFactor 1.0).
  */
 export class BengaluruCollegeStreet {
@@ -31,6 +30,7 @@ export class BengaluruCollegeStreet {
   private viewportWidth: number
   private viewportHeight: number
   private groundY: number
+  private theme: EnvironmentTheme = 'college'
 
   // Parallax layer containers
   private skyGraphics?: Phaser.GameObjects.Graphics
@@ -50,9 +50,11 @@ export class BengaluruCollegeStreet {
     this.viewportWidth = config.viewportWidth
     this.viewportHeight = config.viewportHeight
     this.groundY = config.groundY
+    this.theme = config.theme ?? 'college'
 
     this.createEnvironment()
   }
+
 
   /**
    * Builds all layers of the environment.
@@ -116,53 +118,96 @@ export class BengaluruCollegeStreet {
 
     const w = this.viewportWidth + 20
     const h = this.viewportHeight + 20
-
-    // Multi-stop anime morning sky gradient
-    // Top: Crisp cerulean blue (#38bdf8 / #60a5fa)
-    // Mid: Soft azure (#93c5fd / #bae6fd)
-    // Low: Warm daylight amber-gold glow near horizon (#fed7aa / #fef08a)
     const bands = 24
     const bandHeight = Math.ceil(h / bands)
 
     for (let i = 0; i < bands; i++) {
       const ratio = i / bands
-      let r = 0x38
-      let g = 0xbd
-      let b = 0xf8
+      let color = 0x38bdf8
 
-      if (ratio < 0.45) {
-        // Upper atmosphere
-        const t = ratio / 0.45
-        r = Math.round(0x25 * (1 - t) + 0x60 * t)
-        g = Math.round(0x63 * (1 - t) + 0xa5 * t)
-        b = Math.round(0xeb * (1 - t) + 0xfa * t)
-      } else if (ratio < 0.8) {
-        // Mid sky to light blue
-        const t = (ratio - 0.45) / 0.35
-        r = Math.round(0x60 * (1 - t) + 0x93 * t)
-        g = Math.round(0xa5 * (1 - t) + 0xc5 * t)
-        b = Math.round(0xfa * (1 - t) + 0xfd * t)
+      if (this.theme === 'commercial-mg') {
+        // Twilight Neon Commercial Sky (Deep Indigo -> Magenta -> Cyan-Amber Horizon)
+        if (ratio < 0.5) {
+          const t = ratio / 0.5
+          const r = Math.round(0x1e * (1 - t) + 0x58 * t)
+          const g = Math.round(0x1b * (1 - t) + 0x1c * t)
+          const b = Math.round(0x4b * (1 - t) + 0x87 * t)
+          color = (r << 16) | (g << 8) | b
+        } else {
+          const t = (ratio - 0.5) / 0.5
+          const r = Math.round(0x58 * (1 - t) + 0x02 * t)
+          const g = Math.round(0x1c * (1 - t) + 0x84 * t)
+          const b = Math.round(0x87 * (1 - t) + 0xc7 * t)
+          color = (r << 16) | (g << 8) | b
+        }
+      } else if (this.theme === 'cafe-koramangala') {
+        // Golden Hour / Sunset Café Sky (Twilight Slate -> Warm Peach -> Amber Horizon)
+        if (ratio < 0.5) {
+          const t = ratio / 0.5
+          const r = Math.round(0x31 * (1 - t) + 0xf4 * t)
+          const g = Math.round(0x2e * (1 - t) + 0x3f * t)
+          const b = Math.round(0x81 * (1 - t) + 0x5e * t)
+          color = (r << 16) | (g << 8) | b
+        } else {
+          const t = (ratio - 0.5) / 0.5
+          const r = Math.round(0xf4 * (1 - t) + 0xfe * t)
+          const g = Math.round(0x3f * (1 - t) + 0xf0 * t)
+          const b = Math.round(0x5e * (1 - t) + 0x8a * t)
+          color = (r << 16) | (g << 8) | b
+        }
       } else {
-        // Horizon warm gold glow
-        const t = (ratio - 0.8) / 0.2
-        r = Math.round(0x93 * (1 - t) + 0xfe * t)
-        g = Math.round(0xc5 * (1 - t) + 0xd7 * t)
-        b = Math.round(0xfd * (1 - t) + 0xaa * t)
+        // Daytime College & Market Sky
+        if (ratio < 0.45) {
+          const t = ratio / 0.45
+          const r = Math.round(0x25 * (1 - t) + 0x60 * t)
+          const g = Math.round(0x63 * (1 - t) + 0xa5 * t)
+          const b = Math.round(0xeb * (1 - t) + 0xfa * t)
+          color = (r << 16) | (g << 8) | b
+        } else if (ratio < 0.8) {
+          const t = (ratio - 0.45) / 0.35
+          const r = Math.round(0x60 * (1 - t) + 0x93 * t)
+          const g = Math.round(0xa5 * (1 - t) + 0xc5 * t)
+          const b = Math.round(0xfa * (1 - t) + 0xfd * t)
+          color = (r << 16) | (g << 8) | b
+        } else {
+          const t = (ratio - 0.8) / 0.2
+          const r = Math.round(0x93 * (1 - t) + 0xfe * t)
+          const g = Math.round(0xc5 * (1 - t) + 0xd7 * t)
+          const b = Math.round(0xfd * (1 - t) + 0xaa * t)
+          color = (r << 16) | (g << 8) | b
+        }
       }
 
-      const color = (r << 16) | (g << 8) | b
       this.skyGraphics.fillStyle(color, 1)
       this.skyGraphics.fillRect(0, i * bandHeight, w, bandHeight + 1)
     }
 
-    // Distant morning sun disc
-    this.skyGraphics.fillStyle(0xfffbeb, 0.45)
-    this.skyGraphics.fillCircle(w * 0.72, h * 0.24, 46)
-    this.skyGraphics.fillStyle(0xffedd5, 0.75)
-    this.skyGraphics.fillCircle(w * 0.72, h * 0.24, 30)
-    this.skyGraphics.fillStyle(0xffffff, 0.95)
-    this.skyGraphics.fillCircle(w * 0.72, h * 0.24, 18)
+    // Celestial Bodies & Sun / Moon
+    if (this.theme === 'commercial-mg') {
+      // Crescent Moon in twilight
+      this.skyGraphics.fillStyle(0xf8fafc, 0.85)
+      this.skyGraphics.fillCircle(w * 0.76, h * 0.2, 20)
+      this.skyGraphics.fillStyle(0x3b1d6b, 0.95)
+      this.skyGraphics.fillCircle(w * 0.76 + 7, h * 0.2 - 4, 18)
+    } else if (this.theme === 'cafe-koramangala') {
+      // Soft golden hour sun disc
+      this.skyGraphics.fillStyle(0xfef08a, 0.4)
+      this.skyGraphics.fillCircle(w * 0.68, h * 0.28, 48)
+      this.skyGraphics.fillStyle(0xfde047, 0.7)
+      this.skyGraphics.fillCircle(w * 0.68, h * 0.28, 30)
+      this.skyGraphics.fillStyle(0xffffff, 0.95)
+      this.skyGraphics.fillCircle(w * 0.68, h * 0.28, 16)
+    } else {
+      // Distant morning sun disc
+      this.skyGraphics.fillStyle(0xfffbeb, 0.45)
+      this.skyGraphics.fillCircle(w * 0.72, h * 0.24, 46)
+      this.skyGraphics.fillStyle(0xffedd5, 0.75)
+      this.skyGraphics.fillCircle(w * 0.72, h * 0.24, 30)
+      this.skyGraphics.fillStyle(0xffffff, 0.95)
+      this.skyGraphics.fillCircle(w * 0.72, h * 0.24, 18)
+    }
   }
+
 
   private drawCloudGraphic(g: Phaser.GameObjects.Graphics, scale: number): void {
     g.clear()
@@ -311,18 +356,43 @@ export class BengaluruCollegeStreet {
 
   /**
    * Layer 4: Street-level Scenery (World space, ScrollFactor 1.0).
-   * Spans the full stageWidth (2400px) so Dennis can run past all street landmarks.
+   * Spans the full stageWidth so Dennis can run past distinct themed street landmarks.
    */
   private createStreetLevelScenery(): void {
     this.streetSceneryContainer = this.scene.add.container(0, 0)
     this.streetSceneryContainer.setScrollFactor(1.0, 1.0)
     this.streetSceneryContainer.setDepth(-20)
 
+    this.renderStreetSceneryContent()
+  }
+
+  public rebuildStreetLevelScenery(): void {
+    if (!this.streetSceneryContainer) return
+    this.streetSceneryContainer.removeAll(true)
+    this.renderStreetSceneryContent()
+  }
+
+  private renderStreetSceneryContent(): void {
+    if (!this.streetSceneryContainer) return
     const g = this.scene.add.graphics()
     this.streetSceneryContainer.add(g)
-
     const groundY = this.groundY
 
+    if (this.theme === 'commercial-mg') {
+      this.drawCommercialMgStreetScenery(g, groundY)
+    } else if (this.theme === 'cafe-koramangala') {
+      this.drawCafeKoramangalaStreetScenery(g, groundY)
+    } else if (this.theme === 'market') {
+      this.drawMarketStreetScenery(g, groundY)
+    } else {
+      this.drawCollegeStreetScenery(g, groundY)
+    }
+  }
+
+  /**
+   * Theme: College Street (Level 1)
+   */
+  private drawCollegeStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
     // A. College Boundary Wall spanning sections of the street
     this.drawCollegeBoundaryWall(g, 0, 520, groundY)
     this.drawCollegeBoundaryWall(g, 1160, this.stageWidth, groundY)
@@ -356,6 +426,342 @@ export class BengaluruCollegeStreet {
     // H. Text labels for shops & college gate
     this.createShopAndGateLabels()
   }
+
+  /**
+   * Theme: MG Road / Brigade Road (Level 3)
+   */
+  private drawCommercialMgStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
+    // 1. Elevated Namma Metro concrete viaduct track overhead
+    const trackY = groundY - 145
+    g.fillStyle(0x475569, 1)
+    for (let x = 180; x < this.stageWidth; x += 260) {
+      g.fillRect(x - 14, trackY + 12, 28, groundY - trackY - 12)
+      g.fillStyle(0x64748b, 1)
+      g.fillRect(x - 32, trackY, 64, 12)
+      g.fillStyle(0x475569, 1)
+    }
+    g.fillStyle(0x334155, 1)
+    g.fillRect(0, trackY, this.stageWidth, 12)
+    g.fillStyle(0x1e293b, 1)
+    g.fillRect(0, trackY + 12, this.stageWidth, 3)
+
+    // Namma Metro train on track at x: 820 to 1260
+    const trainX = 820
+    const trainW = 440
+    const trainH = 34
+    const trainY = trackY - trainH
+    g.fillStyle(0xe2e8f0, 1)
+    g.fillRoundedRect(trainX, trainY, trainW, trainH, 6)
+    g.fillStyle(0x16a34a, 1)
+    g.fillRect(trainX, trainY + 18, trainW, 6)
+    g.fillStyle(0xfef08a, 0.9)
+    for (let wx = trainX + 20; wx < trainX + trainW - 20; wx += 35) {
+      g.fillRoundedRect(wx, trainY + 6, 22, 10, 2)
+    }
+
+    // 2. Commercial Buildings on the ground
+    // A. "BRIGADE MUSIC & ARCADE" (x: 40 to 420)
+    g.fillStyle(0x1e1b4b, 0.95)
+    g.fillRect(40, groundY - 130, 380, 130)
+    g.lineStyle(2, 0x818cf8, 0.8)
+    g.strokeRect(40, groundY - 130, 380, 130)
+    g.fillStyle(0x0f172a, 0.9)
+    g.fillRect(60, groundY - 70, 340, 70)
+    g.fillStyle(0x38bdf8, 0.3)
+    g.fillRect(65, groundY - 65, 160, 60)
+    g.fillRect(235, groundY - 65, 160, 60)
+
+    // B. "CAUVERY HANDICRAFTS EMPORIUM" (x: 460 to 820)
+    g.fillStyle(0x78350f, 0.95)
+    g.fillRect(460, groundY - 135, 360, 135)
+    g.lineStyle(2, 0xf59e0b, 0.8)
+    g.strokeRect(460, groundY - 135, 360, 135)
+    g.fillStyle(0xb45309, 1)
+    g.fillRoundedRect(560, groundY - 95, 160, 95, 20)
+
+    // C. Encounter Spot: Drama Club Rehearsal Plaza at x: 860 to 1040
+    g.fillStyle(0x0f172a, 0.9)
+    g.fillRect(860, groundY - 100, 180, 100)
+    g.lineStyle(2, 0x0d9488, 1)
+    g.strokeRect(860, groundY - 100, 180, 100)
+    // Curtains
+    g.fillStyle(0x991b1b, 0.9)
+    g.fillRect(870, groundY - 95, 30, 80)
+    g.fillRect(1000, groundY - 95, 30, 80)
+    // Actor 1 (Raghu - teal drama cloak)
+    g.fillStyle(0x0d9488, 1)
+    g.fillRoundedRect(915, groundY - 50, 18, 48, 4)
+    g.fillStyle(0xfed7aa, 1)
+    g.fillCircle(924, groundY - 56, 7)
+    g.fillStyle(0xfbbf24, 1)
+    g.fillCircle(924, groundY - 60, 8)
+    // Actor 2 (Preetham - emerald drama robe)
+    g.fillStyle(0x059669, 1)
+    g.fillRoundedRect(955, groundY - 50, 18, 48, 4)
+    g.fillStyle(0xfed7aa, 1)
+    g.fillCircle(964, groundY - 56, 7)
+    g.fillStyle(0x9333ea, 1)
+    g.fillCircle(964, groundY - 60, 8)
+
+    // D. "MG ELECTRONICS HUB" (x: 1080 to 1540)
+    g.fillStyle(0x0f172a, 0.95)
+    g.fillRect(1080, groundY - 140, 460, 140)
+    g.lineStyle(2, 0x06b6d4, 0.9)
+    g.strokeRect(1080, groundY - 140, 460, 140)
+    g.fillStyle(0x0284c7, 0.25)
+    g.fillRect(1100, groundY - 80, 420, 75)
+
+    // E. "FASHION BOUTIQUE" (x: 1580 to 2060)
+    g.fillStyle(0x831843, 0.95)
+    g.fillRect(1580, groundY - 130, 480, 130)
+    g.lineStyle(2, 0xf472b6, 0.9)
+    g.strokeRect(1580, groundY - 130, 480, 130)
+
+    // F. "NAMMA METRO STATION" Entrance at x: 2100 to stageWidth
+    g.fillStyle(0x064e3b, 0.95)
+    g.fillRect(2100, groundY - 145, this.stageWidth - 2100, 145)
+    g.lineStyle(2, 0x10b981, 1)
+    g.strokeRect(2100, groundY - 145, this.stageWidth - 2100, 145)
+
+    // Modern streetlamps
+    for (let lx = 140; lx < this.stageWidth; lx += 260) {
+      this.drawModernStreetLamp(g, lx, groundY)
+    }
+
+    this.createCommercialMgLabels(groundY)
+  }
+
+  /**
+   * Theme: Koramangala Café Date (Level 4)
+   */
+  private drawCafeKoramangalaStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
+    // A. Boutique Bookstore & Florist (x: 40 to 420)
+    g.fillStyle(0x1e293b, 0.95)
+    g.fillRect(40, groundY - 120, 380, 120)
+    g.lineStyle(2, 0x38bdf8, 0.7)
+    g.strokeRect(40, groundY - 120, 380, 120)
+
+    // B. "CHAI & CHAT CAFÉ — KORAMANGALA" (x: 460 to 1120)
+    g.fillStyle(0x7f1d1d, 0.98)
+    g.fillRect(460, groundY - 145, 660, 145)
+    g.lineStyle(2, 0xf59e0b, 0.8)
+    g.strokeRect(460, groundY - 145, 660, 145)
+    g.fillStyle(0xfef08a, 0.85)
+    for (let wx = 500; wx < 1080; wx += 90) {
+      g.fillRoundedRect(wx, groundY - 110, 42, 48, 14)
+      g.lineStyle(1.5, 0x78350f, 1)
+      g.strokeRoundedRect(wx, groundY - 110, 42, 48, 14)
+    }
+
+    // Striped Patio Awning
+    const awningY = groundY - 82
+    const awningH = 26
+    for (let ax = 680; ax < 1040; ax += 20) {
+      const isGreen = Math.floor((ax - 680) / 20) % 2 === 0
+      g.fillStyle(isGreen ? 0x065f46 : 0xfef3c7, 1)
+      g.fillRect(ax, awningY, 20, awningH)
+    }
+
+    // Hanging string festoon lights
+    g.lineStyle(1.5, 0x0f172a, 0.8)
+    for (let lx = 690; lx < 1030; lx += 45) {
+      g.lineBetween(lx, awningY + awningH, lx + 45, awningY + awningH)
+      g.fillStyle(0xfbbf24, 1)
+      g.fillCircle(lx + 22, awningY + awningH + 6, 4)
+      g.fillStyle(0xfef08a, 0.4)
+      g.fillCircle(lx + 22, awningY + awningH + 6, 8)
+    }
+
+    // Outdoor Café Tables & Chairs
+    this.drawCafeTableAndChairs(g, 740, groundY, false)
+    this.drawCafeTableAndChairs(g, 860, groundY, true) // Ananya seated
+    this.drawCafeTableAndChairs(g, 980, groundY, false)
+
+    // Chalkboard menu stand at x: 690
+    g.fillStyle(0x1e293b, 1)
+    g.fillRect(685, groundY - 45, 28, 45)
+    g.lineStyle(2, 0x78350f, 1)
+    g.strokeRect(685, groundY - 45, 28, 45)
+
+    // C. "KORAMANGALA ROASTERS & BAKERY" (x: 1160 to 1660)
+    g.fillStyle(0x451a03, 0.95)
+    g.fillRect(1160, groundY - 130, 500, 130)
+    g.lineStyle(2, 0xd97706, 0.8)
+    g.strokeRect(1160, groundY - 130, 500, 130)
+
+    // D. Tree-lined avenue with Gulmohar trees
+    this.drawGulmoharTree(g, 260, groundY, 1.05)
+    this.drawGulmoharTree(g, 1850, groundY, 1.1)
+    this.drawRainTree(g, 2250, groundY, 1.05)
+
+    // Streetlights
+    const lampPositions = [120, 440, 1140, 1720, 2150, 2480]
+    for (const lampX of lampPositions) {
+      this.drawStreetLamp(g, lampX, groundY)
+    }
+
+    this.createCafeKoramangalaLabels(groundY)
+  }
+
+  /**
+   * Theme: Roadside Market (Level 2)
+   */
+  private drawMarketStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
+    // A. "SRI KRISHNA FRUITS & JUICE" (x: 240 to 580)
+    g.fillStyle(0x7c2d12, 0.95)
+    g.fillRect(240, groundY - 110, 340, 110)
+    for (let ax = 240; ax < 580; ax += 20) {
+      const isOrange = Math.floor((ax - 240) / 20) % 2 === 0
+      g.fillStyle(isOrange ? 0xea580c : 0xfef08a, 1)
+      g.fillRect(ax, groundY - 90, 20, 24)
+    }
+    g.fillStyle(0xb45309, 1)
+    g.fillRect(260, groundY - 24, 70, 24)
+    g.fillRect(350, groundY - 24, 70, 24)
+
+    // B. "MALLESHWARAM FRESH FLOWERS" (x: 820 to 1180)
+    g.fillStyle(0x064e3b, 0.95)
+    g.fillRect(820, groundY - 110, 360, 110)
+    for (let ax = 820; ax < 1180; ax += 20) {
+      const isGreen = Math.floor((ax - 820) / 20) % 2 === 0
+      g.fillStyle(isGreen ? 0x16a34a : 0xfef3c7, 1)
+      g.fillRect(ax, groundY - 90, 20, 24)
+    }
+
+    // C. "BENGALURU SPICES & CONDIMENTS" (x: 1420 to 1780)
+    g.fillStyle(0x7f1d1d, 0.95)
+    g.fillRect(1420, groundY - 110, 360, 110)
+    for (let ax = 1420; ax < 1780; ax += 20) {
+      const isRed = Math.floor((ax - 1420) / 20) % 2 === 0
+      g.fillStyle(isRed ? 0xdc2626 : 0xfef08a, 1)
+      g.fillRect(ax, groundY - 90, 20, 24)
+    }
+
+    this.drawGulmoharTree(g, 140, groundY, 1.05)
+    this.drawRainTree(g, 700, groundY, 1.0)
+    this.drawGulmoharTree(g, 1300, groundY, 1.1)
+    this.drawRainTree(g, 1920, groundY, 1.05)
+
+    const lampPositions = [180, 680, 1280, 1850, 2120]
+    for (const lampX of lampPositions) {
+      this.drawStreetLamp(g, lampX, groundY)
+    }
+
+    this.createMarketLabels(groundY)
+  }
+
+  private drawCafeTableAndChairs(g: Phaser.GameObjects.Graphics, x: number, groundY: number, hasDate: boolean): void {
+    const tableTopY = groundY - 32
+    g.fillStyle(0x78350f, 1)
+    g.fillEllipse(x, tableTopY, 44, 14)
+    g.fillStyle(0x334155, 1)
+    g.fillRect(x - 3, tableTopY, 6, 32)
+    g.fillEllipse(x, groundY - 2, 24, 6)
+
+    // Chairs
+    g.fillStyle(0x92400e, 1)
+    g.fillRect(x - 30, groundY - 36, 6, 36)
+    g.fillRect(x - 30, groundY - 20, 16, 4)
+    g.fillRect(x + 24, groundY - 36, 6, 36)
+    g.fillRect(x + 14, groundY - 20, 16, 4)
+
+    // Coffee mug
+    g.fillStyle(0xffffff, 1)
+    g.fillRect(x - 6, tableTopY - 10, 10, 8)
+    g.fillStyle(0x78350f, 1)
+    g.fillRect(x - 5, tableTopY - 9, 8, 3)
+
+    if (hasDate) {
+      // Ananya seated
+      g.fillStyle(0xdb2777, 1)
+      g.fillRoundedRect(x + 15, groundY - 52, 16, 34, 4)
+      g.fillStyle(0xfed7aa, 1)
+      g.fillCircle(x + 23, groundY - 58, 6.5)
+      g.fillStyle(0x1e1b4b, 1)
+      g.fillCircle(x + 23, groundY - 60, 8)
+      g.fillRect(x + 25, groundY - 60, 6, 20)
+    }
+  }
+
+  private drawModernStreetLamp(g: Phaser.GameObjects.Graphics, x: number, groundY: number): void {
+    const poleH = 120
+    const topY = groundY - poleH
+    g.fillStyle(0x94a3b8, 1)
+    g.fillRect(x - 2.5, topY, 5, poleH)
+    g.lineStyle(3, 0x94a3b8, 1)
+    g.lineBetween(x, topY, x + 18, topY - 8)
+    g.fillStyle(0x38bdf8, 1)
+    g.fillRoundedRect(x + 10, topY - 12, 18, 6, 2)
+    g.fillStyle(0x38bdf8, 0.08)
+    g.fillTriangle(x + 19, topY - 6, x - 15, groundY, x + 55, groundY)
+  }
+
+  private createCommercialMgLabels(groundY: number): void {
+    if (!this.streetSceneryContainer) return
+    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
+      const t = this.scene.add
+        .text(x, y, text, {
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize,
+          fontStyle: 'bold',
+          color,
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5)
+      this.streetSceneryContainer?.add(t)
+    }
+
+    addLabel(230, groundY - 110, 'BRIGADE MUSIC & GAMES\n• NEON ARCADE •', '#c084fc', '8.5px')
+    addLabel(640, groundY - 118, 'CAUVERY HANDICRAFTS EMPORIUM\n• GOVT OF KARNATAKA •', '#fbbf24', '8.5px')
+    addLabel(940, groundY - 86, 'BCC DRAMA CLUB • REHEARSAL SPOT\n[ANNUAL PLAY REHEARSAL]', '#5eead4', '7.5px')
+    addLabel(1300, groundY - 120, 'MG ELECTRONICS & GADGET HUB\n• 5G PHONES & ACCESSORIES •', '#38bdf8', '8.5px')
+    addLabel(1820, groundY - 112, 'METRO FASHION BOUTIQUE\n• NEW SEASON COLLECTION •', '#f472b6', '8.5px')
+    addLabel(2320, groundY - 128, 'NAMMA METRO • MG ROAD STATION\nENTRANCE TO PURPLE LINE →', '#34d399', '9px')
+  }
+
+  private createCafeKoramangalaLabels(groundY: number): void {
+    if (!this.streetSceneryContainer) return
+    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
+      const t = this.scene.add
+        .text(x, y, text, {
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize,
+          fontStyle: 'bold',
+          color,
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5)
+      this.streetSceneryContainer?.add(t)
+    }
+
+    addLabel(230, groundY - 105, 'ATTICUS BOOKS & GIFTS\n• NOVELS & PRINTS •', '#93c5fd', '8px')
+    addLabel(860, groundY - 128, 'CHAI & CHAT CAFÉ • KORAMANGALA\n• ARTISANAL COFFEE & BUN MASKA •', '#fef08a', '9.5px')
+    addLabel(699, groundY - 32, 'KAAPI ₹30\nBUN ₹40', '#ffffff', '5px')
+    addLabel(860, groundY - 70, 'ANANYA’S TABLE ♥', '#f472b6', '7.5px')
+    addLabel(1410, groundY - 112, 'KORAMANGALA ROASTERS BAKERY\n• SOURDOUGH & PASTRIES •', '#fdba74', '8px')
+    addLabel(2380, groundY - 115, '80FT ROAD JUNCTION\n← SONY WORLD SIGNAL', '#cbd5e1', '8.5px')
+  }
+
+  private createMarketLabels(groundY: number): void {
+    if (!this.streetSceneryContainer) return
+    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
+      const t = this.scene.add
+        .text(x, y, text, {
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize,
+          fontStyle: 'bold',
+          color,
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5)
+      this.streetSceneryContainer?.add(t)
+    }
+
+    addLabel(410, groundY - 95, 'SRI KRISHNA FRUITS & FRESH JUICE\n• MOSAMBI & MANGO •', '#fef08a', '8.5px')
+    addLabel(1000, groundY - 95, 'MALLESHWARAM FRESH FLOWERS\n• JASMINE & MARIGOLD •', '#86efac', '8.5px')
+    addLabel(1600, groundY - 95, 'BENGALURU SPICES & CONDIMENTS\n• BYADGI CHILLI & CARDAMOM •', '#fca5a5', '8.5px')
+  }
+
 
   /**
    * Draws classic Bengaluru stone-base compound wall with stone pillars & iron grills.
@@ -914,13 +1320,22 @@ export class BengaluruCollegeStreet {
   }
 
   /**
-   * Handles responsive viewport resizing.
+   * Handles responsive viewport resizing and optional theme update.
    */
-  public resize(viewportWidth: number, viewportHeight: number, stageWidth: number, groundY: number): void {
+  public resize(
+    viewportWidth: number,
+    viewportHeight: number,
+    stageWidth: number,
+    groundY: number,
+    theme?: EnvironmentTheme
+  ): void {
     this.viewportWidth = viewportWidth
     this.viewportHeight = viewportHeight
     this.stageWidth = stageWidth
     this.groundY = groundY
+    if (theme) {
+      this.theme = theme
+    }
 
     // Redraw sky gradient for new viewport dimensions
     this.drawSkyGradient()
@@ -931,7 +1346,11 @@ export class BengaluruCollegeStreet {
 
     // Redraw road & sidewalk
     this.drawRoadAndSidewalkGraphics()
+
+    // Rebuild street level scenery with updated theme
+    this.rebuildStreetLevelScenery()
   }
+
 
   /**
    * Cleanup method to free resources on scene teardown.

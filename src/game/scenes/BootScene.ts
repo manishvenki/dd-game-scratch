@@ -7,14 +7,26 @@ import { BlockingEnemy } from '../entities/BlockingEnemy'
 import { PlayerController } from '../systems/PlayerController'
 import { BengaluruCollegeStreet } from '../environments/BengaluruCollegeStreet'
 import { CombatSystem } from '../systems/CombatSystem'
-import { type LevelId, type LevelConfig } from '../levels/levelTypes'
+import { type LevelId, type LevelConfig, type LevelInteractionConfig } from '../levels/levelTypes'
 import { getLevelConfig } from '../levels/levelConfigs'
+import { DialogueSystem } from '../systems/DialogueSystem'
+import {
+  CATCH_DIALOGUE_MANISH,
+  CATCH_DIALOGUE_SATHISH,
+  CATCH_DIALOGUE_RAHUL,
+  LEVEL_3_REVEAL_DIALOGUE,
+  LEVEL_4_CAFE_DIALOGUE,
+} from '../dialogue/dialogueData'
 
 export class BootScene extends Phaser.Scene {
   // Level State
   private currentLevelId: LevelId = 'level-1'
   private levelConfig!: LevelConfig
-  private encounterState: 'intro' | 'blocking' | 'chase' | 'caught' | 'cleared' = 'intro'
+  private encounterState: 'intro' | 'active' | 'dialogue' | 'caught' | 'cleared' = 'intro'
+  private interactionTriggered = false
+
+  // Dialogue System
+  private dialogueSystem?: DialogueSystem
 
   // Screen-anchored HUD elements (ScrollFactor 0)
   private titleText?: Phaser.GameObjects.Text
@@ -58,9 +70,11 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
-    // Read initial level from URL hash query if present (e.g. #/play?level=2)
+    // Read initial level from URL hash query if present (e.g. #/play?level=3)
     this.currentLevelId = this.detectInitialLevel()
     this.levelConfig = getLevelConfig(this.currentLevelId)
+    this.encounterState = 'intro'
+    this.interactionTriggered = false
 
     const width = this.scale.width
     const height = this.scale.height
@@ -71,13 +85,14 @@ export class BootScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, stageWidth, height)
     this.cameras.main.setBounds(0, 0, stageWidth, height)
 
-    // 2. Build Bengaluru College Street Parallax Environment
+    // 2. Build Bengaluru Parallax Environment with level-specific theme
     this.bengaluruStreet = new BengaluruCollegeStreet({
       scene: this,
       stageWidth,
       viewportWidth: width,
       viewportHeight: height,
       groundY,
+      theme: this.levelConfig.theme,
     })
 
     // 3. Ground Platform Static Body (aligned with visible sidewalk/road)
@@ -87,19 +102,22 @@ export class BootScene extends Phaser.Scene {
     // 4. Setup Level Entities (Dennis, Blockers, Chasers, Exit Goal)
     this.setupLevelEntities(groundY)
 
-    // 5. Setup Screen-Anchored HUD
+    // 5. Setup Dialogue System
+    this.dialogueSystem = new DialogueSystem({ scene: this })
+
+    // 6. Setup Screen-Anchored HUD
     this.setupScreenHud()
 
-    // 6. Initial Layout update based on dimensions
+    // 7. Initial Layout update based on dimensions
     this.updateLayout(width, height)
 
-    // 7. Show Level Intro Modal / Overlay
+    // 8. Show Level Intro Modal / Overlay
     this.showLevelIntroOverlay()
 
-    // 8. Bind scale resize event
+    // 9. Bind scale resize event
     this.scale.on('resize', this.handleResize, this)
 
-    // 9. Clean up event listeners on shutdown
+    // 10. Clean up event listeners on shutdown
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this)
     this.events.once(Phaser.Scenes.Events.DESTROY, this.cleanup, this)
 
@@ -111,6 +129,8 @@ export class BootScene extends Phaser.Scene {
 
   private detectInitialLevel(): LevelId {
     const hash = window.location.hash
+    if (hash.includes('level=4')) return 'level-4'
+    if (hash.includes('level=3')) return 'level-3'
     if (hash.includes('level=2')) return 'level-2'
     return 'level-1'
   }
@@ -122,6 +142,7 @@ export class BootScene extends Phaser.Scene {
     this.currentLevelId = levelId
     this.levelConfig = getLevelConfig(levelId)
     this.encounterState = 'intro'
+    this.interactionTriggered = false
 
     const width = this.scale.width
     const height = this.scale.height
@@ -130,6 +151,12 @@ export class BootScene extends Phaser.Scene {
 
     // Clear old blockers and colliders
     this.clearEncounterEntities()
+
+    // Clear active dialogue
+    if (this.dialogueSystem) {
+      this.dialogueSystem.destroy()
+      this.dialogueSystem = new DialogueSystem({ scene: this })
+    }
 
     // Clear overlays
     if (this.overlayContainer) {
@@ -144,9 +171,9 @@ export class BootScene extends Phaser.Scene {
     // Rebuild Ground Platform
     this.buildGroundPlatform(stageWidth, height)
 
-    // Resize Environment
+    // Resize Environment with new theme
     if (this.bengaluruStreet) {
-      this.bengaluruStreet.resize(width, height, stageWidth, groundY)
+      this.bengaluruStreet.resize(width, height, stageWidth, groundY, this.levelConfig.theme)
     }
 
     // Setup new Level Entities
@@ -237,29 +264,36 @@ export class BootScene extends Phaser.Scene {
 
     // 3. Setup Chasers
     if (cfg.hasChaseSequence && cfg.chasers && cfg.chasers.length > 0) {
-      // In Level 1: Position chasers initially behind Dennis (e.g., at spawn positions)
+      const chaserConfigs = new Map(cfg.chasers.map((c) => [c.chaserId, c]))
+      const sSpawn = chaserConfigs.get('sathish')?.spawnX ?? 140
+      const mSpawn = chaserConfigs.get('manish')?.spawnX ?? 80
+      const rSpawn = chaserConfigs.get('rahul')?.spawnX ?? 20
+
       if (!this.sathish) {
-        this.sathish = new Sathish(this, { x: 200, y: groundY, idlePhaseOffsetMs: 400 })
+        this.sathish = new Sathish(this, { x: sSpawn, y: groundY, idlePhaseOffsetMs: 400 })
       } else {
-        this.sathish.setPosition(200, groundY)
+        this.sathish.setPosition(sSpawn, groundY)
+        this.sathish.setVisible(true)
       }
 
       if (!this.manish) {
-        this.manish = new Manish(this, { x: 130, y: groundY, idlePhaseOffsetMs: 200 })
+        this.manish = new Manish(this, { x: mSpawn, y: groundY, idlePhaseOffsetMs: 200 })
       } else {
-        this.manish.setPosition(130, groundY)
+        this.manish.setPosition(mSpawn, groundY)
+        this.manish.setVisible(true)
       }
 
       if (!this.rahul) {
-        this.rahul = new Rahul(this, { x: 60, y: groundY, idlePhaseOffsetMs: 600 })
+        this.rahul = new Rahul(this, { x: rSpawn, y: groundY, idlePhaseOffsetMs: 600 })
       } else {
-        this.rahul.setPosition(60, groundY)
+        this.rahul.setPosition(rSpawn, groundY)
+        this.rahul.setVisible(true)
       }
     } else {
-      // In Level 2: Chasers remain stationary background observers near beginning of stage
-      if (this.sathish) this.sathish.setPosition(160, groundY)
-      if (this.manish) this.manish.setPosition(100, groundY)
-      if (this.rahul) this.rahul.setPosition(40, groundY)
+      // Hide chasers for levels without pursuit (Level 2)
+      if (this.sathish) this.sathish.setVisible(false)
+      if (this.manish) this.manish.setVisible(false)
+      if (this.rahul) this.rahul.setVisible(false)
     }
 
     // 4. Create Exit Goal Marker at exitGoalX
@@ -270,7 +304,7 @@ export class BootScene extends Phaser.Scene {
     this.exitGoalVisual = this.add.graphics()
     const g = this.exitGoalVisual
 
-    // Animated checkpoint banner / bus stop shelter
+    // Animated checkpoint banner / exit portal
     const topY = groundY - 110
     g.fillStyle(0x0284c7, 0.9)
     g.fillRect(x - 25, topY, 50, 14)
@@ -330,7 +364,7 @@ export class BootScene extends Phaser.Scene {
     // Engine Badge
     this.statusBg = this.add.graphics()
     this.statusText = this.add
-      .text(0, 0, 'PHASER 3.90 • COMBAT & ENCOUNTERS ACTIVE', {
+      .text(0, 0, 'PHASER 3.90 • PURSUIT & COMIC DIALOGUE ACTIVE', {
         fontFamily: 'ui-monospace, Menlo, monospace',
         fontSize: '9px',
         fontStyle: 'bold',
@@ -388,6 +422,7 @@ export class BootScene extends Phaser.Scene {
 
   /**
    * Handles player attack execution against blocking enemies.
+   * Chasers do NOT pause or freeze while Dennis attacks.
    */
   private handlePlayerAttack(attackData: { x: number; y: number; facing: 1 | -1 }): void {
     if (this.encounterState === 'caught' || this.encounterState === 'cleared') return
@@ -400,54 +435,19 @@ export class BootScene extends Phaser.Scene {
     )
 
     if (result.hit) {
-      // Check if all blocking enemies have been defeated
       const allDefeated = CombatSystem.areAllEnemiesDefeated(this.blockingEnemies)
 
       if (allDefeated) {
         if (this.levelConfig.hasChaseSequence) {
-          this.triggerChaseSequence()
+          this.triggerObjectiveUpdated('ALL BLOCKERS DEFEATED! SPRINT TO THE EXIT!')
         } else {
           this.triggerObjectiveUpdated('ENCOUNTER RESOLVED! SPRINT TO THE EXIT!')
         }
       } else {
         const remaining = this.blockingEnemies.filter((e) => !e.isDefeated()).length
-        this.triggerObjectiveUpdated(`BLOCKERS REMAINING: ${remaining}`)
+        this.triggerObjectiveUpdated(`BLOCKERS REMAINING: ${remaining} • TRIO IS CLOSING IN!`)
       }
     }
-  }
-
-  /**
-   * Starts the chaser pursuit in Level 1 after the opening confrontation.
-   */
-  private triggerChaseSequence(): void {
-    this.encounterState = 'chase'
-
-    // Show temporary announcement banner
-    const width = this.scale.width
-    const banner = this.add.container(width / 2, 120).setScrollFactor(0).setDepth(120)
-    const bg = this.add.graphics()
-    bg.fillStyle(0x7f1d1d, 0.95)
-    bg.lineStyle(2, 0xef4444, 1)
-    bg.fillRoundedRect(-170, -20, 340, 40, 6)
-    bg.strokeRoundedRect(-170, -20, 340, 40, 6)
-
-    const txt = this.add.text(0, 0, 'TRIO SPOTTED DENNIS!\nCHASE IS ON! SPRINT TO THE BUS STOP!', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '11px',
-      fontStyle: 'bold',
-      color: '#fef08a',
-      align: 'center',
-    }).setOrigin(0.5, 0.5)
-
-    banner.add([bg, txt])
-
-    this.tweens.add({
-      targets: banner,
-      alpha: 0,
-      delay: 2200,
-      duration: 500,
-      onComplete: () => banner.destroy(),
-    })
   }
 
   private triggerObjectiveUpdated(text: string): void {
@@ -470,13 +470,30 @@ export class BootScene extends Phaser.Scene {
       this.updatePlayerStatusFeedback()
     }
 
-    // 1. Chaser movement during Level 1 Chase
-    if (this.encounterState === 'chase' && this.levelConfig.hasChaseSequence) {
-      this.updateChaserPursuit()
+    // 1. Chaser continuous pursuit during active gameplay or controlled approach in dialogue
+    if (this.levelConfig.hasChaseSequence) {
+      if (this.encounterState === 'active') {
+        this.updateChaserPursuit(false)
+      } else if (this.encounterState === 'dialogue') {
+        this.updateChaserPursuit(true)
+      }
     }
 
-    // 2. Level Exit Goal Reached Check
-    if (this.playerController && this.encounterState !== 'cleared' && this.encounterState !== 'caught') {
+    // 2. Story interaction proximity trigger (Levels 3 & 4)
+    if (
+      this.encounterState === 'active' &&
+      this.levelConfig.interaction &&
+      !this.interactionTriggered &&
+      this.playerController
+    ) {
+      const playerPos = this.playerController.getPosition()
+      if (Math.abs(playerPos.x - this.levelConfig.interaction.triggerX) <= this.levelConfig.interaction.triggerRadius) {
+        this.triggerStoryInteraction(this.levelConfig.interaction)
+      }
+    }
+
+    // 3. Level Exit Goal Reached Check
+    if (this.playerController && this.encounterState === 'active') {
       const playerPos = this.playerController.getPosition()
       if (playerPos.x >= this.levelConfig.exitGoalX) {
         this.triggerLevelComplete()
@@ -486,59 +503,116 @@ export class BootScene extends Phaser.Scene {
 
   /**
    * Updates horizontal chase movement for Manish, Sathish, and Rahul.
+   * Frame-rate independent with delta time.
    */
-  private updateChaserPursuit(): void {
+  private updateChaserPursuit(isDuringDialogue = false): void {
     if (!this.playerController) return
     const playerPos = this.playerController.getPosition()
 
-    // Chaser speed configurations
+    const chaserConfigs = new Map(this.levelConfig.chasers?.map((c) => [c.chaserId, c]) ?? [])
+
+    const sathishSpeed = chaserConfigs.get('sathish')?.speed ?? 180
+    const manishSpeed = chaserConfigs.get('manish')?.speed ?? 170
+    const rahulSpeed = chaserConfigs.get('rahul')?.speed ?? 160
+
     const chasers = [
-      { chaser: this.sathish, speed: 185, targetOffset: 70 },
-      { chaser: this.manish, speed: 175, targetOffset: 120 },
-      { chaser: this.rahul, speed: 165, targetOffset: 170 },
+      { chaser: this.sathish, speed: sathishSpeed, spacingOffset: 0 },
+      { chaser: this.manish, speed: manishSpeed, spacingOffset: 45 },
+      { chaser: this.rahul, speed: rahulSpeed, spacingOffset: 90 },
     ]
 
-    for (const item of chasers) {
-      if (!item.chaser) continue
-      const chaser = item.chaser
-      const dx = playerPos.x - chaser.x
+    const deltaSeconds = this.game.loop.delta / 1000
 
-      // Move horizontally towards Dennis
-      if (dx > 10) {
-        chaser.x += (item.speed * this.game.loop.delta) / 1000
-      } else if (dx < -10) {
-        chaser.x -= (item.speed * this.game.loop.delta) / 1000
+    for (const item of chasers) {
+      if (!item.chaser || !item.chaser.visible) continue
+      const chaser = item.chaser
+      const targetX = playerPos.x - item.spacingOffset
+      const dx = targetX - chaser.x
+
+      if (Math.abs(dx) > 10) {
+        // In dialogue, hold chasers at a dramatic distance so dialogue can be read
+        if (isDuringDialogue && Math.abs(chaser.x - playerPos.x) < 75) {
+          continue
+        }
+        const step = item.speed * deltaSeconds
+        const dir = dx > 0 ? 1 : -1
+        chaser.x += dir * Math.min(step, Math.abs(dx))
+        chaser.setFacingDirection(dir)
       }
 
-      // Catch check: if chaser reaches Dennis
-      const dist = Phaser.Math.Distance.Between(chaser.x, chaser.y, playerPos.x, playerPos.y)
-      if (dist < 34) {
-        this.triggerDennisCaught(chaser)
-        break
+      // Clamp to world bounds
+      chaser.x = Phaser.Math.Clamp(chaser.x, 20, this.levelConfig.stageWidth - 20)
+
+      // Catch check against Dennis's actual position
+      if (!isDuringDialogue && this.encounterState === 'active') {
+        const dist = Phaser.Math.Distance.Between(chaser.x, chaser.y, playerPos.x, playerPos.y)
+        if (dist < 34) {
+          this.triggerDennisCaught(chaser)
+          break
+        }
       }
     }
   }
 
   /**
    * Triggered when a chaser catches Dennis.
+   * Freezes gameplay and opens comic speech bubble sequence.
    */
   private triggerDennisCaught(chaser: Sathish | Manish | Rahul): void {
+    if (this.encounterState === 'caught') return
     this.encounterState = 'caught'
     this.playerController?.setFrozen(true)
 
-    // Character name
-    const chaserName = chaser instanceof Sathish ? 'Sathish' : chaser instanceof Manish ? 'Manish' : 'Rahul'
+    let chaserName = 'Rahul'
+    let dialogue = CATCH_DIALOGUE_RAHUL
 
-    this.showModalOverlay({
-      title: 'DENNIS WAS CAUGHT!',
-      subtitle: `${chaserName} caught up with Dennis!`,
-      accentColor: 0xef4444,
-      buttons: [
-        {
-          label: 'RETRY LEVEL',
-          onClick: () => this.loadLevel(this.currentLevelId),
-        },
-      ],
+    if (chaser instanceof Manish) {
+      chaserName = 'Manish'
+      dialogue = CATCH_DIALOGUE_MANISH
+    } else if (chaser instanceof Sathish) {
+      chaserName = 'Sathish'
+      dialogue = CATCH_DIALOGUE_SATHISH
+    }
+
+    // Launch comic speech bubble sequence
+    this.dialogueSystem?.startSequence(dialogue, () => {
+      this.showModalOverlay({
+        title: 'DENNIS WAS CAUGHT!',
+        subtitle: `${chaserName} and the gang caught Dennis! "Va da, first college-ku ponom!"`,
+        accentColor: 0xef4444,
+        buttons: [
+          {
+            label: 'RETRY LEVEL',
+            onClick: () => this.loadLevel(this.currentLevelId),
+          },
+        ],
+      })
+    })
+  }
+
+  /**
+   * Triggers story interaction dialogue (Level 3 Reveal or Level 4 Café Date).
+   */
+  private triggerStoryInteraction(interaction: LevelInteractionConfig): void {
+    if (this.interactionTriggered) return
+    this.interactionTriggered = true
+    this.encounterState = 'dialogue'
+    this.playerController?.setFrozen(true)
+
+    let sequence = LEVEL_3_REVEAL_DIALOGUE
+    if (interaction.dialogueSequenceId === 'level-4-cafe') {
+      sequence = LEVEL_4_CAFE_DIALOGUE
+    }
+
+    this.dialogueSystem?.startSequence(sequence, () => {
+      this.encounterState = 'active'
+      this.playerController?.setFrozen(false)
+
+      if (this.currentLevelId === 'level-3') {
+        this.triggerObjectiveUpdated('REVEAL OVER! OUTRUN THE TRIO TO NAMMA METRO ENTRANCE!')
+      } else if (this.currentLevelId === 'level-4') {
+        this.triggerObjectiveUpdated('DATE INTERRUPTED! SPRINT TO 80FT ROAD JUNCTION!')
+      }
     })
   }
 
@@ -552,7 +626,7 @@ export class BootScene extends Phaser.Scene {
     if (this.currentLevelId === 'level-1') {
       this.showModalOverlay({
         title: 'LEVEL 1 COMPLETE!',
-        subtitle: 'Dennis successfully cleared the college gate encounter and outran the trio!',
+        subtitle: 'Dennis successfully cleared the college gate encounter and outran the trio to the Bus Stop!',
         accentColor: 0x10b981,
         buttons: [
           {
@@ -565,18 +639,50 @@ export class BootScene extends Phaser.Scene {
           },
         ],
       })
-    } else {
+    } else if (this.currentLevelId === 'level-2') {
       this.showModalOverlay({
         title: 'LEVEL 2 COMPLETE!',
-        subtitle: 'Dennis defeated both street blockers and escaped to the avenue crossroad!',
+        subtitle: 'Dennis neutralized both street blockers and reached the avenue crossroad!',
         accentColor: 0x10b981,
         buttons: [
           {
-            label: 'PLAY AGAIN (LEVEL 2)',
-            onClick: () => this.loadLevel('level-2'),
+            label: 'PLAY LEVEL 3 →',
+            onClick: () => this.loadLevel('level-3'),
           },
           {
-            label: 'BACK TO LEVEL 1',
+            label: 'REPLAY LEVEL 2',
+            onClick: () => this.loadLevel('level-2'),
+          },
+        ],
+      })
+    } else if (this.currentLevelId === 'level-3') {
+      this.showModalOverlay({
+        title: 'LEVEL 3 COMPLETE!',
+        subtitle: 'Dennis survived the dramatic Brigade Road mix-up and caught the Namma Metro train!',
+        accentColor: 0x10b981,
+        buttons: [
+          {
+            label: 'PLAY LEVEL 4 →',
+            onClick: () => this.loadLevel('level-4'),
+          },
+          {
+            label: 'REPLAY LEVEL 3',
+            onClick: () => this.loadLevel('level-3'),
+          },
+        ],
+      })
+    } else {
+      this.showModalOverlay({
+        title: 'LEVEL 4 COMPLETE!',
+        subtitle: 'Dennis escaped the Koramangala café date scramble and reached the 80ft Road junction!',
+        accentColor: 0x10b981,
+        buttons: [
+          {
+            label: 'PLAY AGAIN (LEVEL 4)',
+            onClick: () => this.loadLevel('level-4'),
+          },
+          {
+            label: 'START OVER (LEVEL 1)',
             onClick: () => this.loadLevel('level-1'),
           },
         ],
@@ -654,9 +760,13 @@ export class BootScene extends Phaser.Scene {
             }
           },
         })
-        this.encounterState = 'blocking'
-        const remaining = this.blockingEnemies.filter((e) => !e.isDefeated()).length
-        this.triggerObjectiveUpdated(`OBJECTIVE: DEFEAT BLOCKERS (${remaining} REMAINING)`)
+        this.encounterState = 'active'
+        if (this.levelConfig.blockers.length > 0) {
+          const remaining = this.blockingEnemies.filter((e) => !e.isDefeated()).length
+          this.triggerObjectiveUpdated(`OBJECTIVE: DEFEAT BLOCKERS (${remaining} REMAINING) & OUTRUN TRIO!`)
+        } else {
+          this.triggerObjectiveUpdated(`OBJECTIVE: ${this.levelConfig.objectiveText}`)
+        }
       }
     }
 
@@ -853,7 +963,7 @@ export class BootScene extends Phaser.Scene {
 
     // Resize Environment
     if (this.bengaluruStreet) {
-      this.bengaluruStreet.resize(width, height, stageWidth, groundY)
+      this.bengaluruStreet.resize(width, height, stageWidth, groundY, this.levelConfig.theme)
     }
 
     // Responsive Header Positioning
@@ -927,6 +1037,11 @@ export class BootScene extends Phaser.Scene {
     }
 
     this.clearEncounterEntities()
+
+    if (this.dialogueSystem) {
+      this.dialogueSystem.destroy()
+      this.dialogueSystem = undefined
+    }
 
     if (this.overlayContainer) {
       this.overlayContainer.destroy()
