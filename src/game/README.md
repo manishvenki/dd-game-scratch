@@ -4,16 +4,19 @@ This directory houses all game-side code, configuration, entities, and scenes po
 
 ## Directory Structure
 
-- `config/`: Engine configuration factory (`gameConfig.ts`), scale settings (960×540, `Scale.RESIZE`), and renderer settings.
-- `scenes/`: Phaser `Scene` subclasses. Currently active: `BootScene.ts` (engine test, scaling & 4-character stage lineup).
+- `config/`: Engine configuration factory (`gameConfig.ts`), scale settings (960×540, `Scale.RESIZE`), and Arcade Physics (gravity: 1100).
+- `scenes/`: Phaser `Scene` subclasses. Currently active: `BootScene.ts` (interactive side-view test stage).
 - `entities/`: Game sprites and actors.
   - [`Dennis.ts`](entities/Dennis.ts): Playable protagonist entity.
   - [`Chaser.ts`](entities/Chaser.ts): Abstract base class for recurring pursuers.
   - [`Manish.ts`](entities/Manish.ts): Chaser with black shirt and prominent glasses.
   - [`Sathish.ts`](entities/Sathish.ts): Chaser with black Lenovo T-shirt and readable lettering.
   - [`Rahul.ts`](entities/Rahul.ts): Chaser with dark teal multi-striped shirt.
-- `systems/`: Decoupled subsystems. Implemented: [`characterAnimations.ts`](systems/characterAnimations.ts) (animation states & registration).
-- `data/`: Game constants and metadata. Implemented: [`characterRegistry.ts`](data/characterRegistry.ts) (authoritative character definitions).
+- `systems/`: Decoupled subsystems.
+  - [`PlayerController.ts`](systems/PlayerController.ts): Controls Dennis locomotion, jumping, facing, and state synchronization.
+  - [`virtualInputBridge.ts`](systems/virtualInputBridge.ts): Typed bridge connecting mobile touch buttons to Phaser.
+  - [`characterAnimations.ts`](systems/characterAnimations.ts): Animation states, keys, and texture registration.
+- `data/`: Game constants and metadata. Implemented: [`characterRegistry.ts`](data/characterRegistry.ts).
 
 ## React Lifecycle Integration & Cleanup Strategy
 
@@ -26,7 +29,7 @@ The game engine is integrated through the reusable React component [`src/compone
 
 2. **Responsive Scaling (`Scale.RESIZE`):**
    - Phaser's scale mode is configured with `mode: Phaser.Scale.RESIZE`, allowing the canvas to seamlessly fill the responsive 16:9 container on mobile and desktop without horizontal overflow.
-   - Scenes subscribe to `this.scale.on('resize', this.handleResize, this)` to reposition text, HUD elements, and graphics dynamically when viewports change or rotate.
+   - Scenes subscribe to `this.scale.on('resize', this.handleResize, this)` to reposition text, HUD elements, ground platforms, and graphics dynamically.
 
 3. **Destruction & Teardown:**
    - When `GameCanvas` unmounts (e.g. user navigates to Home, Levels, or Characters), the `useEffect` cleanup hook executes.
@@ -34,11 +37,36 @@ The game engine is integrated through the reusable React component [`src/compone
    - The scene unbinds its scale resize listeners during `SHUTDOWN` and `DESTROY` lifecycle events.
    - `gameRef.current` is set to `null` to prevent memory leaks and duplicate canvases.
 
+## Player Movement & Physics Architecture
+
+### 1. Selected Physics Architecture (Physics Proxy Pattern)
+Dennis is built as a composite `Phaser.GameObjects.Container` containing vector placeholder children. Attaching Arcade Physics bodies directly to complex Containers in Phaser can cause offset and scaling issues when flipping facing direction.
+- To guarantee rock-solid platforming physics, [`PlayerController.ts`](systems/PlayerController.ts) instantiates an invisible dynamic Arcade Physics sprite body (`38×80px`, bottom-center origin).
+- The physics body handles gravity (`gravity.y = 1100`), horizontal velocity, jumping impulses, world bounds collision, and ground collision with the static platform.
+- The visual entity `Dennis` synchronizes position to this physics proxy every frame (`dennis.setPosition(body.x, body.y)`).
+- When Dennis changes direction, only the visual graphics container flips (`dennis.setFacingDirection(-1 | 1)`), keeping the physics body anchor and collision box perfectly upright.
+- Chasers (Manish, Sathish, Rahul) remain stationary on the ground platform with zero physics overhead.
+
+### 2. Locomotion & Jump Mechanics
+- **Horizontal Movement**: Left/Right movement sets constant horizontal velocity (`moveSpeed: 260 px/s`). When inputs are released, velocity stops immediately without drift.
+- **Directional Facing**: Dennis faces left (`scaleX = -1`) when moving left and right (`scaleX = 1`) when moving right. The name badge remains un-mirrored for readability.
+- **Jumping**: Jump impulse (`jumpSpeed: 520 px/s`) fires only when `grounded` (`body.blocked.down || body.touching.down`).
+- **Single Jump Guard**: Holding the jump key or touch button cannot trigger repeated mid-air jumps. A jump requires a fresh press (`JustDown` or consumed virtual action).
+- **Animation States**: Dennis updates between `idle`, `run`, `jump`, and `fall` based on grounded state and velocity. Idle breathing automatically pauses during motion.
+
+### 3. Cross-Platform Input & Browser Scroll Suppression
+- **Keyboard**: Supports `A` / `D` or Arrow Keys for horizontal movement, and `Space` / `W` / `ArrowUp` for jumping.
+  - `this.input.keyboard.addCapture(['SPACE', 'UP', 'DOWN', 'LEFT', 'RIGHT'])` suppresses default browser page scrolling while the player is interacting with the canvas.
+- **Mobile Touch Controls**: On-screen directional buttons (`←`, `→`) and a prominent `JUMP` button are rendered inside the viewport overlay.
+  - Pointer events (`onPointerDown`, `onPointerUp`, `onPointerLeave`) feed directly into [`virtualInputBridge.ts`](systems/virtualInputBridge.ts).
+  - Uses `touch-action: none` and `select-none` to prevent unwanted page scrolling or text selection on mobile.
+  - Fully decoupled: zero React state in the per-frame game loop.
+
 ## Core Characters & Chaser Architecture
 
 ### 1. Character Registry (`src/game/data/characterRegistry.ts`)
 The project enforces strict, immutable character identity mappings:
-- **Dennis** (`protagonist`): Curly dark hair, blue denim shirt, blue jeans.
+- **Dennis** (`protagonist`): Curly dark hair, blue denim shirt, blue jeans. Controllable in Phase 2.
 - **Manish** (`chaser`): Dark neat hair, black shirt, clearly visible glasses.
 - **Sathish** (`chaser`): Dark textured hair, black T-shirt with readable `Lenovo` text marking.
 - **Rahul** (`chaser`): Dark tousled hair, dark teal shirt with multiple visible horizontal stripes.
@@ -46,19 +74,8 @@ The project enforces strict, immutable character identity mappings:
 ### 2. Reusable Chaser Entity Architecture (`src/game/entities/Chaser.ts`)
 - `Chaser` extends `Phaser.GameObjects.Container` as the common base class for all pursuers.
 - Encapsulates shared lifecycle, ground shadow rendering, identification badge generation, and procedural idle breathing tweens.
-- Configurable phase offsets (`idlePhaseOffsetMs`) ensure natural asynchronous idle breathing so characters do not animate as robotic clones.
-- Subclasses (`Manish`, `Sathish`, `Rahul`) implement `renderCharacterFeatures(g)` to draw their unique clothing, hair, and distinct accessories without duplicating base mechanics.
-- Prepares typed hooks for future Arcade Physics (`isPhysicsEnabled()`) and animation state transitions (`playAnimation()`).
-
-### 3. Visuals vs. Future AI Behavior Separation
-- Current character entities represent **pure presentation and positioning containers**.
-- They are completely decoupled from movement logic, pathfinding, and chasing behavior.
-- In future prompts, AI systems (e.g., pursuit controllers, flocking algorithms, line-of-sight triggers) will operate on these entities from external systems without requiring modifications to the character renderers.
-
-### 4. Placeholder vs. Production Art Separation
-- **Production Mode**: When production spritesheets are provided and their keys exist in `scene.textures`, entities instantiate `Phaser.GameObjects.Sprite` instances.
-- **Placeholder Mode**: When production art is absent, entities render color-blocked vector silhouettes preserving all confirmed clothing attributes and identifying features.
-- Once production spritesheets are added, the visual switch is automatic without rewriting gameplay or AI logic.
+- Subclasses (`Manish`, `Sathish`, `Rahul`) implement `renderCharacterFeatures(g)` without duplicating core entity lifecycle or animation logic.
+- Chasers stand on the ground platform as stationary observers during the test stage.
 
 ## Future-Facing Asset-Loading Guidelines
 

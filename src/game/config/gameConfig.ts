@@ -13,6 +13,7 @@ export const DEFAULT_GAME_DIMENSIONS: GameDimensions = {
 /**
  * Creates the base Phaser 3 configuration for DD Game Scratch.
  * Keeps game engine configuration decoupled from React UI components.
+ * Configured with Arcade Physics for 2D platforming and player movement.
  *
  * @param parent The DOM element or ID string where the canvas will be rendered.
  * @param scenes The array of Scene classes or instances to load into the game.
@@ -33,6 +34,13 @@ export function createGameConfig(
       autoCenter: Phaser.Scale.CENTER_BOTH,
       width: DEFAULT_GAME_DIMENSIONS.width,
       height: DEFAULT_GAME_DIMENSIONS.height,
+    },
+    physics: {
+      default: 'arcade',
+      arcade: {
+        gravity: { x: 0, y: 1100 },
+        debug: false,
+      },
     },
     render: {
       pixelArt: false,

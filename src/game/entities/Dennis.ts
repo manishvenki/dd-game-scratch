@@ -18,12 +18,13 @@ export interface DennisConfig {
  * - If production sprite textures are loaded, displays animated sprite.
  * - Otherwise, renders a clean, anime-styled vector silhouette with confirmed clothing-color blocks:
  *   (Curly dark hair, blue denim shirt, blue jeans).
- * - Prepares typed interfaces for future physics, input controllers, and combat systems.
+ * - Prepares typed interfaces for physics synchronization, facing direction, and animation states.
  */
 export class Dennis extends Phaser.GameObjects.Container {
   public static readonly ENTITY_NAME = 'Dennis'
 
   private currentAnimState: CharacterAnimationState = 'idle'
+  private facingDirection: 1 | -1 = 1
   private productionSprite?: Phaser.GameObjects.Sprite
   private placeholderGraphics?: Phaser.GameObjects.Graphics
   private shadowGraphics?: Phaser.GameObjects.Graphics
@@ -72,7 +73,7 @@ export class Dennis extends Phaser.GameObjects.Container {
    * Visual attributes:
    * - Curly dark hair
    * - Blue denim shirt (#2563eb)
-   * - Blue jeans (#1e40af)
+   * - Blue jeans (#1e3a8a)
    * - Restrained skin tone (#fed7aa) and ground shadow
    */
   private createPlaceholderGraphics(): void {
@@ -144,7 +145,7 @@ export class Dennis extends Phaser.GameObjects.Container {
 
     this.add(this.placeholderGraphics)
 
-    // 3. Small Identification Badge underneath
+    // 3. Small Identification Badge underneath (remains un-flipped)
     const badgeBg = this.scene.add.graphics()
     badgeBg.fillStyle(0x0f172a, 0.85)
     badgeBg.lineStyle(1, 0x3b82f6, 0.6)
@@ -183,10 +184,46 @@ export class Dennis extends Phaser.GameObjects.Container {
   }
 
   /**
+   * Updates Dennis's facing direction.
+   * Flips character visuals horizontally while keeping badge text readable.
+   */
+  public setFacingDirection(direction: 1 | -1): void {
+    if (this.facingDirection === direction) return
+    this.facingDirection = direction
+
+    if (this.placeholderGraphics) {
+      this.placeholderGraphics.setScale(direction, 1)
+    }
+
+    if (this.productionSprite) {
+      this.productionSprite.setFlipX(direction === -1)
+    }
+  }
+
+  public getFacingDirection(): 1 | -1 {
+    return this.facingDirection
+  }
+
+  /**
    * Controls the active character animation state.
    */
   public playAnimation(state: CharacterAnimationState): void {
+    if (this.currentAnimState === state) return
     this.currentAnimState = state
+
+    // Pause idle breathing tween when running or in mid-air
+    if (state === 'idle') {
+      if (this.idleTween && this.idleTween.isPaused()) {
+        this.idleTween.resume()
+      }
+    } else {
+      if (this.idleTween && this.idleTween.isPlaying()) {
+        this.idleTween.pause()
+        if (this.placeholderGraphics) {
+          this.placeholderGraphics.setScale(this.facingDirection, 1)
+        }
+      }
+    }
 
     if (this.productionSprite) {
       const animKey = DENNIS_ANIM_KEYS[state]
