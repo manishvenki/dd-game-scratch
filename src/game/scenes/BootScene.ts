@@ -1,4 +1,5 @@
 import Phaser from 'phaser'
+import { Dennis } from '../entities/Dennis'
 
 export class BootScene extends Phaser.Scene {
   private titleText?: Phaser.GameObjects.Text
@@ -9,6 +10,11 @@ export class BootScene extends Phaser.Scene {
   private gridGraphics?: Phaser.GameObjects.Graphics
   private crosshairGraphics?: Phaser.GameObjects.Graphics
 
+  // Phase 2 Character Integration
+  private dennis?: Dennis
+  private stagePlatform?: Phaser.GameObjects.Graphics
+  private characterNoticeText?: Phaser.GameObjects.Text
+
   constructor() {
     super({ key: 'BootScene' })
   }
@@ -17,12 +23,13 @@ export class BootScene extends Phaser.Scene {
     // 1. Grid & corner targeting graphics (restrained dark theme accents)
     this.gridGraphics = this.add.graphics()
     this.crosshairGraphics = this.add.graphics()
+    this.stagePlatform = this.add.graphics()
 
     // 2. Primary Title: "DD GAME SCRATCH"
     this.titleText = this.add
       .text(0, 0, 'DD GAME SCRATCH', {
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        fontSize: '36px',
+        fontSize: '32px',
         fontStyle: 'bold',
         color: '#ffffff',
         align: 'center',
@@ -33,7 +40,7 @@ export class BootScene extends Phaser.Scene {
     this.subtitleText = this.add
       .text(0, 0, 'Game engine connected', {
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        fontSize: '18px',
+        fontSize: '16px',
         fontStyle: 'normal',
         color: '#fbbf24', // amber-400
         align: 'center',
@@ -43,9 +50,9 @@ export class BootScene extends Phaser.Scene {
     // 4. Status Badge: "PHASER 3.90 • ENGINE ACTIVE"
     this.statusBg = this.add.graphics()
     this.statusText = this.add
-      .text(0, 0, 'PHASER 3.90 • ENGINE TEST SCENE ACTIVE', {
+      .text(0, 0, 'PHASER 3.90 • PHASE 2 CHARACTER ARCHITECTURE', {
         fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
-        fontSize: '11px',
+        fontSize: '10px',
         fontStyle: 'bold',
         color: '#34d399', // emerald-400
         align: 'center',
@@ -53,6 +60,22 @@ export class BootScene extends Phaser.Scene {
       .setOrigin(0.5, 0.5)
 
     this.statusBadge = this.add.container(0, 0, [this.statusBg, this.statusText])
+
+    // 5. Instantiate Dennis Character Entity (stationary integration test)
+    this.dennis = new Dennis(this, {
+      x: this.scale.width / 2,
+      y: this.scale.height - 80,
+    })
+
+    // 6. Character development status notice label
+    this.characterNoticeText = this.add
+      .text(0, 0, 'DENNIS (PROTAGONIST) • VECTOR PLACEHOLDER [CURLY HAIR / DENIM SHIRT / JEANS]', {
+        fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace',
+        fontSize: '9px',
+        color: '#94a3b8', // slate-400
+        align: 'center',
+      })
+      .setOrigin(0.5, 0.5)
 
     // Initial Layout update based on current scale dimensions
     this.updateLayout(this.scale.width, this.scale.height)
@@ -71,32 +94,34 @@ export class BootScene extends Phaser.Scene {
 
   private updateLayout(width: number, height: number): void {
     const centerX = width / 2
-    const centerY = height / 2
+    const isNarrow = width < 560
+    const isShort = height < 420
 
     // Responsive font scaling
-    const isNarrow = width < 560
-    const titleSize = isNarrow ? Math.max(20, Math.floor(width * 0.055)) : 36
-    const subtitleSize = isNarrow ? Math.max(13, Math.floor(width * 0.034)) : 18
+    const titleSize = isNarrow ? Math.max(18, Math.floor(width * 0.05)) : 30
+    const subtitleSize = isNarrow ? Math.max(12, Math.floor(width * 0.03)) : 15
+    const noticeSize = isNarrow ? 8 : 9
 
-    // Position texts
+    // Position Header elements (in top region)
+    const headerBaseY = isShort ? 24 : Math.max(34, height * 0.12)
+
     if (this.titleText) {
       this.titleText.setFontSize(`${titleSize}px`)
-      this.titleText.setPosition(centerX, centerY - 28)
+      this.titleText.setPosition(centerX, headerBaseY)
     }
 
     if (this.subtitleText) {
       this.subtitleText.setFontSize(`${subtitleSize}px`)
-      this.subtitleText.setPosition(centerX, centerY + 18)
+      this.subtitleText.setPosition(centerX, headerBaseY + (isShort ? 22 : 28))
     }
 
-    // Position and redraw status badge
     if (this.statusBadge && this.statusText && this.statusBg) {
-      const badgeY = centerY + (isNarrow ? 54 : 64)
+      const badgeY = headerBaseY + (isShort ? 46 : 58)
       this.statusBadge.setPosition(centerX, badgeY)
 
       const textBounds = this.statusText.getBounds()
-      const padX = 14
-      const padY = 5
+      const padX = 12
+      const padY = 4
       const bgW = textBounds.width + padX * 2
       const bgH = textBounds.height + padY * 2
 
@@ -107,10 +132,31 @@ export class BootScene extends Phaser.Scene {
       this.statusBg.strokeRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 4)
     }
 
+    // Position Dennis & Ground Stage Platform (in lower region)
+    const dennisY = isShort ? height - 42 : Math.max(height * 0.68, height - 75)
+
+    if (this.stagePlatform) {
+      this.stagePlatform.clear()
+      // Stage spotlight / pedestal ellipse
+      this.stagePlatform.fillStyle(0x1e293b, 0.45)
+      this.stagePlatform.fillEllipse(centerX, dennisY + 2, 120, 24)
+      this.stagePlatform.lineStyle(1, 0x3b82f6, 0.3)
+      this.stagePlatform.strokeEllipse(centerX, dennisY + 2, 120, 24)
+    }
+
+    if (this.dennis) {
+      this.dennis.setPosition(centerX, dennisY)
+    }
+
+    if (this.characterNoticeText) {
+      this.characterNoticeText.setFontSize(`${noticeSize}px`)
+      this.characterNoticeText.setPosition(centerX, dennisY + (isShort ? 24 : 32))
+    }
+
     // Background grid
     if (this.gridGraphics) {
       this.gridGraphics.clear()
-      this.gridGraphics.lineStyle(1, 0x1e293b, 0.35) // slate-800
+      this.gridGraphics.lineStyle(1, 0x1e293b, 0.3) // slate-800
       const step = 48
       for (let x = step; x < width; x += step) {
         this.gridGraphics.lineBetween(x, 0, x, height)
@@ -124,8 +170,8 @@ export class BootScene extends Phaser.Scene {
     if (this.crosshairGraphics) {
       this.crosshairGraphics.clear()
       this.crosshairGraphics.lineStyle(1.5, 0xf59e0b, 0.5) // amber-500
-      const len = 16
-      const pad = 16
+      const len = 14
+      const pad = 14
 
       // Top-Left
       this.crosshairGraphics.lineBetween(pad, pad, pad + len, pad)
@@ -147,5 +193,10 @@ export class BootScene extends Phaser.Scene {
 
   private cleanup(): void {
     this.scale.off('resize', this.handleResize, this)
+
+    if (this.dennis) {
+      this.dennis.destroy()
+      this.dennis = undefined
+    }
   }
 }
