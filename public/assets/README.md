@@ -46,11 +46,11 @@ Future 2D animated spritesheets should follow a consistent naming schema and sep
 Level background artwork and parallax layers should be categorized by stage number and setting name:
 - Format: `level[XX]_[setting]_[layer].[ext]`
 - Planned Bengaluru settings:
-  1. `level01_college_street/` (sky, buildings, sidewalk, foreground props)
-  2. `level02_indiranagar/` (commercial street, shops, traffic)
-  3. `level03_mg_road/` (night skyline, neon storefronts, pedestrian zone)
-  4. `level04_koramangala/` (café interior, counter, outdoor patio)
-  5. `level05_cubbon_park/` (tree canopy, park trails, bamboo grove)
+  1. `level01_college_street/` (sky, heritage college gate, stone walls, SLV Kaapi)
+  2. `level02_thatha_tea/` (Thatha Tea stall, samovar, Kammanahalli crossroad)
+  3. `level03_mg_road/` (night skyline, neon corridor, Namma Metro station)
+  4. `level04_rajkumar_park/` (Dr. Rajkumar Park gates, iron railings, walking trails)
+  5. `level05_cubbon_park/` (tree canopy, red-dirt trails, bamboo grove, Bandstand)
 
 ### 4. Audio (`audio/`)
 - **Music (`audio/music/`)**:

@@ -27,11 +27,13 @@ export default function PlayPage() {
   useEffect(() => {
     const syncLevel = () => {
       const hash = window.location.hash
-      if (hash.includes('level=5')) setActiveLevel('level-5')
-      else if (hash.includes('level=4')) setActiveLevel('level-4')
-      else if (hash.includes('level=3')) setActiveLevel('level-3')
-      else if (hash.includes('level=2')) setActiveLevel('level-2')
-      else setActiveLevel('level-1')
+      let lvl = 'level-1'
+      if (hash.includes('level=5')) lvl = 'level-5'
+      else if (hash.includes('level=4')) lvl = 'level-4'
+      else if (hash.includes('level=3')) lvl = 'level-3'
+      else if (hash.includes('level=2')) lvl = 'level-2'
+      setActiveLevel(lvl)
+      ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: string, force?: boolean) => void }).__DD_LOAD_LEVEL__?.(lvl, false)
     }
     window.addEventListener('hashchange', syncLevel)
     return () => window.removeEventListener('hashchange', syncLevel)

@@ -31,6 +31,7 @@ export class DialogueSystem {
   private currentSequence?: DialogueSequence
   private currentLineIndex = 0
   private isAdvancing = false
+  private activeSequenceCallback?: () => void
 
   // Visual sub-elements
   private bubbleBg?: Phaser.GameObjects.Graphics
@@ -108,14 +109,7 @@ export class DialogueSystem {
 
     this.currentSequence = sequence
     this.currentLineIndex = 0
-
-    if (onComplete) {
-      const origOnComplete = this.onSequenceComplete
-      this.onSequenceComplete = (seqId) => {
-        origOnComplete?.(seqId)
-        onComplete()
-      }
-    }
+    this.activeSequenceCallback = onComplete
 
     this.buildDialogueContainer()
     this.displayCurrentLine()
@@ -394,10 +388,13 @@ export class DialogueSystem {
     this.currentLineIndex++
     if (this.currentLineIndex >= this.currentSequence.lines.length) {
       const completedId = this.currentSequence.id
+      const cb = this.activeSequenceCallback
+      this.activeSequenceCallback = undefined
       this.destroyContainer()
       this.currentSequence = undefined
       this.isAdvancing = false
       this.onSequenceComplete?.(completedId)
+      cb?.()
       return
     }
 
@@ -421,6 +418,7 @@ export class DialogueSystem {
   }
 
   public destroy(): void {
+    this.activeSequenceCallback = undefined
     this.destroyContainer()
 
     if (this.spaceKey) {

@@ -215,6 +215,22 @@ export class PlayerController {
     this.dennis.setPosition(x, y)
   }
 
+  /**
+   * Fully resets player physics, movement flags, attack cooldowns, and animations.
+   * Used during level restarts and level transitions.
+   */
+  public reset(x: number, y: number): void {
+    this.setPosition(x, y)
+    this.grounded = true
+    this.moving = false
+    this.facing = 1
+    this.frozen = false
+    this.lastAttackTime = 0
+    this.dennis.setFacingDirection(1)
+    this.dennis.playAnimation('idle')
+    virtualInputBridge.reset()
+  }
+
   public getPosition(): { x: number; y: number } {
     return { x: this.physicsBody.x, y: this.physicsBody.y }
   }

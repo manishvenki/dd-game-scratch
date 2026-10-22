@@ -36,6 +36,10 @@ export class BootScene extends Phaser.Scene {
     | 'CHASE_RESUMED' = 'CHASE_ACTIVE'
   private chasersPaused = false
 
+  // Encounter Progression & Exit State
+  private isLevelCompleting = false
+  private isExitUnlocked = false
+
   // Dialogue System
   private dialogueSystem?: DialogueSystem
 
@@ -86,6 +90,10 @@ export class BootScene extends Phaser.Scene {
     this.levelConfig = getLevelConfig(this.currentLevelId)
     this.encounterState = 'intro'
     this.interactionTriggered = false
+    this.level3EncounterState = 'CHASE_ACTIVE'
+    this.chasersPaused = false
+    this.isLevelCompleting = false
+    this.isExitUnlocked = this.levelConfig.blockers.length === 0
 
     const width = this.scale.width
     const height = this.scale.height
@@ -136,7 +144,13 @@ export class BootScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.DESTROY, this.cleanup, this)
 
     // Expose global hook for level switching from React UI
-    ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: LevelId) => void }).__DD_LOAD_LEVEL__ = (id: LevelId) => {
+    ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: LevelId, force?: boolean) => void }).__DD_LOAD_LEVEL__ = (
+      id: LevelId,
+      force = false
+    ) => {
+      if (!force && this.currentLevelId === id && (this.encounterState === 'intro' || this.encounterState === 'active')) {
+        return
+      }
       this.loadLevel(id)
     }
   }
@@ -152,6 +166,7 @@ export class BootScene extends Phaser.Scene {
 
   /**
    * Switches to and initializes a specific level cleanly.
+   * Completely resets all player, blocker, chaser, and dialogue states.
    */
   public loadLevel(levelId: LevelId): void {
     this.currentLevelId = levelId
@@ -160,13 +175,28 @@ export class BootScene extends Phaser.Scene {
     this.interactionTriggered = false
     this.level3EncounterState = 'CHASE_ACTIVE'
     this.chasersPaused = false
+    this.isLevelCompleting = false
+    this.isExitUnlocked = this.levelConfig.blockers.length === 0
+
+    // Synchronize URL hash with active level so React tabs and navigation stay in sync
+    const levelNumMap: Record<LevelId, number> = {
+      'level-1': 1,
+      'level-2': 2,
+      'level-3': 3,
+      'level-4': 4,
+      'level-5': 5,
+    }
+    const targetHash = `#/play?level=${levelNumMap[levelId]}`
+    if (window.location.hash !== targetHash) {
+      window.location.hash = targetHash
+    }
 
     const width = this.scale.width
     const height = this.scale.height
     const stageWidth = this.levelConfig.stageWidth
     const groundY = this.getGroundY(height)
 
-    // Clear old blockers and colliders
+    // Clear old blockers, colliders, and exit markers
     this.clearEncounterEntities()
 
     // Clear active dialogue with character position resolver
@@ -263,8 +293,7 @@ export class BootScene extends Phaser.Scene {
         )
       }
     } else {
-      this.playerController?.setPosition(cfg.playerSpawnX, groundY)
-      this.playerController?.setFrozen(false)
+      this.playerController?.reset(cfg.playerSpawnX, groundY)
     }
 
     // 2. Spawn Blocking Enemies for this level
@@ -293,6 +322,7 @@ export class BootScene extends Phaser.Scene {
         this.sathish = new Sathish(this, { x: sSpawn, y: groundY, idlePhaseOffsetMs: 400 })
       } else {
         this.sathish.setPosition(sSpawn, groundY)
+        this.sathish.setFacingDirection(1)
         this.sathish.setVisible(true)
       }
 
@@ -300,6 +330,7 @@ export class BootScene extends Phaser.Scene {
         this.manish = new Manish(this, { x: mSpawn, y: groundY, idlePhaseOffsetMs: 200 })
       } else {
         this.manish.setPosition(mSpawn, groundY)
+        this.manish.setFacingDirection(1)
         this.manish.setVisible(true)
       }
 
@@ -307,48 +338,98 @@ export class BootScene extends Phaser.Scene {
         this.rahul = new Rahul(this, { x: rSpawn, y: groundY, idlePhaseOffsetMs: 600 })
       } else {
         this.rahul.setPosition(rSpawn, groundY)
+        this.rahul.setFacingDirection(1)
         this.rahul.setVisible(true)
       }
     } else {
-      // Hide chasers for levels without pursuit (Level 2)
+      // Hide chasers for levels without pursuit
       if (this.sathish) this.sathish.setVisible(false)
       if (this.manish) this.manish.setVisible(false)
       if (this.rahul) this.rahul.setVisible(false)
     }
 
-    // 4. Create Exit Goal Marker at exitGoalX
-    this.createExitGoalVisual(cfg.exitGoalX, groundY, cfg.exitGoalLabel)
+    // 4. Create Exit Goal Marker at exitGoalX with initial lock state
+    this.createExitGoalVisual(cfg.exitGoalX, groundY, cfg.exitGoalLabel, this.isExitUnlocked)
   }
 
-  private createExitGoalVisual(x: number, groundY: number, label: string): void {
+  private createExitGoalVisual(x: number, groundY: number, label: string, isUnlocked = false): void {
+    this.isExitUnlocked = isUnlocked
     this.exitGoalVisual = this.add.graphics()
-    const g = this.exitGoalVisual
-
-    // Animated checkpoint banner / exit portal
-    const topY = groundY - 110
-    g.fillStyle(0x0284c7, 0.9)
-    g.fillRect(x - 25, topY, 50, 14)
-    g.lineStyle(2, 0x38bdf8, 1)
-    g.strokeRect(x - 25, topY, 50, 14)
-
-    // Poles
-    g.fillStyle(0x334155, 1)
-    g.fillRect(x - 22, topY + 14, 4, 96)
-    g.fillRect(x + 18, topY + 14, 4, 96)
-
-    // Pulsing goal arrow
-    g.fillStyle(0xfbbf24, 0.9)
-    g.fillTriangle(x - 12, topY - 16, x + 12, topY - 16, x, topY - 4)
-
     this.exitGoalLabel = this.add
-      .text(x, topY + 7, label, {
+      .text(x, groundY - 103, '', {
         fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '7px',
+        fontSize: '7.5px',
         fontStyle: 'bold',
         color: '#ffffff',
         align: 'center',
       })
       .setOrigin(0.5, 0.5)
+
+    this.renderExitGoalVisual(x, groundY, label, isUnlocked)
+  }
+
+  public updateExitVisual(isUnlocked: boolean): void {
+    this.isExitUnlocked = isUnlocked
+    const groundY = this.getGroundY(this.scale.height)
+    this.renderExitGoalVisual(
+      this.levelConfig.exitGoalX,
+      groundY,
+      this.levelConfig.exitGoalLabel,
+      isUnlocked
+    )
+  }
+
+  private renderExitGoalVisual(x: number, groundY: number, label: string, isUnlocked: boolean): void {
+    if (!this.exitGoalVisual) return
+    const g = this.exitGoalVisual
+    g.clear()
+
+    const topY = groundY - 110
+
+    if (isUnlocked) {
+      // Radiant Emerald open portal
+      g.fillStyle(0x064e3b, 0.95)
+      g.fillRect(x - 32, topY, 64, 15)
+      g.lineStyle(2, 0x10b981, 1)
+      g.strokeRect(x - 32, topY, 64, 15)
+
+      // Poles with emerald brackets
+      g.fillStyle(0x1e293b, 1)
+      g.fillRect(x - 28, topY + 15, 5, 95)
+      g.fillRect(x + 23, topY + 15, 5, 95)
+      g.fillStyle(0x34d399, 1)
+      g.fillRect(x - 29, topY + 20, 7, 3)
+      g.fillRect(x + 22, topY + 20, 7, 3)
+
+      // Pulsing green open arrow
+      g.fillStyle(0x34d399, 1)
+      g.fillTriangle(x - 12, topY - 16, x + 12, topY - 16, x, topY - 3)
+
+      if (this.exitGoalLabel) {
+        this.exitGoalLabel.setText(`★ ${label} [OPEN] ★`)
+        this.exitGoalLabel.setColor('#ffffff')
+      }
+    } else {
+      // Amber/Zinc locked gate
+      g.fillStyle(0x18181b, 0.95)
+      g.fillRect(x - 32, topY, 64, 15)
+      g.lineStyle(2, 0xf59e0b, 0.9)
+      g.strokeRect(x - 32, topY, 64, 15)
+
+      // Poles
+      g.fillStyle(0x27272a, 1)
+      g.fillRect(x - 28, topY + 15, 5, 95)
+      g.fillRect(x + 23, topY + 15, 5, 95)
+
+      // Amber downward arrow
+      g.fillStyle(0xf59e0b, 0.95)
+      g.fillTriangle(x - 10, topY - 14, x + 10, topY - 14, x, topY - 3)
+
+      if (this.exitGoalLabel) {
+        this.exitGoalLabel.setText(`⛔ ${label} [LOCKED]`)
+        this.exitGoalLabel.setColor('#fef08a')
+      }
+    }
   }
 
   /**
@@ -468,10 +549,12 @@ export class BootScene extends Phaser.Scene {
       const allDefeated = CombatSystem.areAllEnemiesDefeated(this.blockingEnemies)
 
       if (allDefeated) {
+        this.isExitUnlocked = true
+        this.updateExitVisual(true)
         if (this.levelConfig.hasChaseSequence) {
-          this.triggerObjectiveUpdated('ALL BLOCKERS DEFEATED! SPRINT TO THE EXIT!')
+          this.triggerObjectiveUpdated(`ALL BLOCKERS DEFEATED! SPRINT TO ${this.levelConfig.exitGoalLabel}!`)
         } else {
-          this.triggerObjectiveUpdated('ENCOUNTER RESOLVED! SPRINT TO THE EXIT!')
+          this.triggerObjectiveUpdated(`ENCOUNTER RESOLVED! SPRINT TO ${this.levelConfig.exitGoalLabel}!`)
         }
       } else {
         const remaining = this.blockingEnemies.filter((e) => !e.isDefeated()).length
@@ -527,11 +610,18 @@ export class BootScene extends Phaser.Scene {
       }
     }
 
-    // 3. Level Exit Goal Reached Check
-    if (this.playerController && this.encounterState === 'active') {
+    // 3. Level Exit Goal Reached Check (Enforces Blocker Defeat Before Exit)
+    if (this.playerController && this.encounterState === 'active' && !this.isLevelCompleting) {
       const playerPos = this.playerController.getPosition()
       if (playerPos.x >= this.levelConfig.exitGoalX) {
-        this.triggerLevelComplete()
+        const allDefeated = CombatSystem.areAllEnemiesDefeated(this.blockingEnemies)
+        if (allDefeated) {
+          this.triggerLevelComplete()
+        } else {
+          this.playerController.setPosition(this.levelConfig.exitGoalX - 12, playerPos.y)
+          const remaining = this.blockingEnemies.filter((e) => !e.isDefeated()).length
+          this.triggerObjectiveUpdated(`EXIT LOCKED! DEFEAT ALL BLOCKERS (${remaining} REMAINING) FIRST!`)
+        }
       }
     }
   }
@@ -618,7 +708,15 @@ export class BootScene extends Phaser.Scene {
         buttons: [
           {
             label: 'RETRY LEVEL',
+            color: 0xef4444,
             onClick: () => this.loadLevel(this.currentLevelId),
+          },
+          {
+            label: 'LEVEL SELECT',
+            color: 0x64748b,
+            onClick: () => {
+              window.location.hash = '#/levels'
+            },
           },
         ],
       })
@@ -733,73 +831,111 @@ export class BootScene extends Phaser.Scene {
   }
 
   /**
-   * Triggered when Dennis reaches the exit goal.
+   * Triggered when Dennis reaches the exit goal with all blockers defeated.
    */
   private triggerLevelComplete(): void {
+    if (this.isLevelCompleting) return
+    this.isLevelCompleting = true
     this.encounterState = 'cleared'
     this.playerController?.setFrozen(true)
 
     if (this.currentLevelId === 'level-1') {
       this.showModalOverlay({
-        title: 'LEVEL 1 COMPLETE!',
-        subtitle: 'Dennis successfully cleared the college gate encounter and outran the trio to the Bus Stop!',
+        title: 'STAGE 01 COMPLETE!',
+        subtitle: 'Dennis knocked past Ajay, Vijay & Sanjay at the college gate and reached the BMTC Bus Stop before the trio!',
         accentColor: 0x10b981,
         buttons: [
           {
-            label: 'PLAY LEVEL 2 →',
+            label: 'PLAY STAGE 02 →',
+            color: 0x10b981,
             onClick: () => this.loadLevel('level-2'),
           },
           {
-            label: 'REPLAY LEVEL 1',
+            label: 'REPLAY STAGE 01',
+            color: 0x0284c7,
             onClick: () => this.loadLevel('level-1'),
+          },
+          {
+            label: 'LEVEL SELECT',
+            color: 0xd97706,
+            onClick: () => {
+              window.location.hash = '#/levels'
+            },
           },
         ],
       })
     } else if (this.currentLevelId === 'level-2') {
       this.showModalOverlay({
-        title: 'LEVEL 2 COMPLETE!',
-        subtitle: 'Dennis successfully knocked past Vikram & Kiran at Thatha Tea and sprinted to the Kammanahalli crossroad!',
+        title: 'STAGE 02 COMPLETE!',
+        subtitle: 'Dennis knocked past Vikram & Kiran at Thatha Tea and sprinted clear to the Kammanahalli crossroad!',
         accentColor: 0x10b981,
         buttons: [
           {
-            label: 'PLAY LEVEL 3 →',
+            label: 'PLAY STAGE 03 →',
+            color: 0x10b981,
             onClick: () => this.loadLevel('level-3'),
           },
           {
-            label: 'REPLAY LEVEL 2',
+            label: 'REPLAY STAGE 02',
+            color: 0x0284c7,
             onClick: () => this.loadLevel('level-2'),
+          },
+          {
+            label: 'LEVEL SELECT',
+            color: 0xd97706,
+            onClick: () => {
+              window.location.hash = '#/levels'
+            },
           },
         ],
       })
     } else if (this.currentLevelId === 'level-3') {
       this.showModalOverlay({
-        title: 'LEVEL 3 COMPLETE!',
-        subtitle: 'Dennis uncovered the Brigade Road drama rehearsal, cleared the blocker, and reached the Namma Metro train!',
+        title: 'STAGE 03 COMPLETE!',
+        subtitle: 'Dennis uncovered the Brigade Road drama rehearsal, cleared lead Raghu, and caught the Namma Metro train!',
         accentColor: 0x10b981,
         buttons: [
           {
-            label: 'PLAY LEVEL 4 →',
+            label: 'PLAY STAGE 04 →',
+            color: 0x10b981,
             onClick: () => this.loadLevel('level-4'),
           },
           {
-            label: 'REPLAY LEVEL 3',
+            label: 'REPLAY STAGE 03',
+            color: 0x0284c7,
             onClick: () => this.loadLevel('level-3'),
+          },
+          {
+            label: 'LEVEL SELECT',
+            color: 0xd97706,
+            onClick: () => {
+              window.location.hash = '#/levels'
+            },
           },
         ],
       })
     } else if (this.currentLevelId === 'level-4') {
       this.showModalOverlay({
-        title: 'LEVEL 4 COMPLETE!',
-        subtitle: 'Dennis outran the trio through Dr. Rajkumar Park and sprinted through the Park Main Gate exit!',
+        title: 'STAGE 04 COMPLETE!',
+        subtitle: 'Dennis outran the trio through Dr. Rajkumar Park, knocked through Chethan & Suresh, and exited the Main Gate!',
         accentColor: 0x10b981,
         buttons: [
           {
-            label: 'PLAY LEVEL 5 →',
+            label: 'PLAY STAGE 05 →',
+            color: 0x10b981,
             onClick: () => this.loadLevel('level-5'),
           },
           {
-            label: 'REPLAY LEVEL 4',
+            label: 'REPLAY STAGE 04',
+            color: 0x0284c7,
             onClick: () => this.loadLevel('level-4'),
+          },
+          {
+            label: 'LEVEL SELECT',
+            color: 0xd97706,
+            onClick: () => {
+              window.location.hash = '#/levels'
+            },
           },
         ],
       })
@@ -818,7 +954,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   /**
-   * Shows the opening level introduction overlay.
+   * Shows the opening level introduction overlay with Tanglish objective lines.
    */
   private showLevelIntroOverlay(): void {
     const cfg = this.levelConfig
@@ -826,47 +962,56 @@ export class BootScene extends Phaser.Scene {
     const height = this.scale.height
 
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(200)
-    const cardW = Math.min(width - 32, 420)
-    const cardH = 175
+    const cardW = Math.min(width - 32, 430)
+    const cardH = 180
 
     const bg = this.add.graphics()
-    bg.fillStyle(0x090d16, 0.95)
+    bg.fillStyle(0x090d16, 0.96)
     bg.lineStyle(2, 0xf59e0b, 0.9) // amber-500
     bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
     bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
 
-    const stageNum = this.add.text(0, -cardH / 2 + 22, cfg.stageNumber, {
-      fontFamily: 'ui-monospace, Menlo, monospace',
-      fontSize: '11px',
-      fontStyle: 'bold',
-      color: '#f59e0b',
-    }).setOrigin(0.5, 0.5)
+    const stageNum = this.add
+      .text(0, -cardH / 2 + 22, cfg.stageNumber, {
+        fontFamily: 'ui-monospace, Menlo, monospace',
+        fontSize: '11px',
+        fontStyle: 'bold',
+        color: '#f59e0b',
+      })
+      .setOrigin(0.5, 0.5)
 
-    const title = this.add.text(0, -cardH / 2 + 45, cfg.title.toUpperCase(), {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '18px',
-      fontStyle: 'bold',
-      color: '#ffffff',
-    }).setOrigin(0.5, 0.5)
+    const title = this.add
+      .text(0, -cardH / 2 + 45, cfg.title.toUpperCase(), {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '17px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5, 0.5)
 
-    const obj = this.add.text(0, -cardH / 2 + 82, cfg.objectiveText, {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '11px',
-      color: '#cbd5e1',
-      align: 'center',
-      wordWrap: { width: cardW - 36 },
-    }).setOrigin(0.5, 0.5)
+    const introText = cfg.tanglishIntro ?? cfg.objectiveText
+    const obj = this.add
+      .text(0, -cardH / 2 + 84, introText, {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '11px',
+        color: '#cbd5e1',
+        align: 'center',
+        wordWrap: { width: cardW - 36 },
+      })
+      .setOrigin(0.5, 0.5)
 
     const startBtnBg = this.add.graphics()
     startBtnBg.fillStyle(0xd97706, 1)
-    startBtnBg.fillRoundedRect(-cardW / 2 + 20, 38, cardW - 40, 34, 6)
+    startBtnBg.fillRoundedRect(-cardW / 2 + 20, 40, cardW - 40, 32, 6)
 
-    const startBtnTxt = this.add.text(0, 55, 'START ENCOUNTER (TAP OR MOVE)', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '11px',
-      fontStyle: 'bold',
-      color: '#ffffff',
-    }).setOrigin(0.5, 0.5)
+    const startBtnTxt = this.add
+      .text(0, 56, 'START ENCOUNTER [TAP OR ANY KEY TO SPRINT]', {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '10.5px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5, 0.5)
 
     overlay.add([bg, stageNum, title, obj, startBtnBg, startBtnTxt])
     this.overlayContainer = overlay
@@ -875,11 +1020,14 @@ export class BootScene extends Phaser.Scene {
     const dismiss = () => {
       if (dismissed) return
       dismissed = true
+      this.input.off('pointerdown', dismiss)
+      this.input.keyboard?.off('keydown', onKeyDown)
+
       if (this.overlayContainer === overlay) {
         this.tweens.add({
           targets: overlay,
           alpha: 0,
-          duration: 180,
+          duration: 160,
           onComplete: () => {
             overlay.destroy()
             if (this.overlayContainer === overlay) {
@@ -888,6 +1036,7 @@ export class BootScene extends Phaser.Scene {
           },
         })
         this.encounterState = 'active'
+        this.playerController?.setFrozen(false)
         if (this.levelConfig.blockers.length > 0) {
           const remaining = this.blockingEnemies.filter((e) => !e.isDefeated()).length
           this.triggerObjectiveUpdated(`OBJECTIVE: DEFEAT BLOCKERS (${remaining} REMAINING) & OUTRUN TRIO!`)
@@ -897,21 +1046,20 @@ export class BootScene extends Phaser.Scene {
       }
     }
 
-    // Dismiss on pointerdown anywhere on canvas
+    const onKeyDown = () => dismiss()
     this.input.once('pointerdown', dismiss)
-
-    // Auto-dismiss after 2.5s so gameplay proceeds seamlessly
+    this.input.keyboard?.once('keydown', onKeyDown)
     this.time.delayedCall(2500, dismiss)
   }
 
   /**
-   * Reusable modal overlay for Victory / Defeat.
+   * Reusable modal overlay for Victory / Defeat with precise button hit testing and debounce.
    */
   private showModalOverlay(config: {
     title: string
     subtitle: string
     accentColor: number
-    buttons: Array<{ label: string; onClick: () => void }>
+    buttons: Array<{ label: string; color?: number; onClick: () => void }>
   }): void {
     if (this.overlayContainer) {
       this.overlayContainer.destroy()
@@ -921,72 +1069,112 @@ export class BootScene extends Phaser.Scene {
     const height = this.scale.height
 
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(200)
-    const cardW = Math.min(width - 32, 400)
-    const cardH = 175
+    const cardW = Math.min(width - 24, 430)
+    const cardH = 185
 
+    // Full-screen semi-transparent backdrop
+    const backdrop = this.add.graphics()
+    backdrop.fillStyle(0x000000, 0.72)
+    backdrop.fillRect(-width / 2, -height / 2, width, height)
+
+    // Modal Card Box
     const bg = this.add.graphics()
-    bg.fillStyle(0x090d16, 0.95)
+    bg.fillStyle(0x090d16, 0.98)
     bg.lineStyle(2, config.accentColor, 1)
     bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
     bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
 
-    const title = this.add.text(0, -cardH / 2 + 32, config.title, {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '18px',
-      fontStyle: 'bold',
-      color: '#ffffff',
-    }).setOrigin(0.5, 0.5)
+    const title = this.add
+      .text(0, -cardH / 2 + 28, config.title, {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '17px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+      })
+      .setOrigin(0.5, 0.5)
 
-    const sub = this.add.text(0, -cardH / 2 + 65, config.subtitle, {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '11.5px',
-      color: '#cbd5e1',
-      align: 'center',
-      wordWrap: { width: cardW - 36 },
-    }).setOrigin(0.5, 0.5)
+    const sub = this.add
+      .text(0, -cardH / 2 + 65, config.subtitle, {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '11px',
+        color: '#cbd5e1',
+        align: 'center',
+        wordWrap: { width: cardW - 32 },
+      })
+      .setOrigin(0.5, 0.5)
 
-    overlay.add([bg, title, sub])
+    overlay.add([backdrop, bg, title, sub])
 
     // Render Buttons
     const btnCount = config.buttons.length
-    const btnW = btnCount === 1 ? 160 : 130
-    const totalW = btnCount * btnW + (btnCount - 1) * 12
+    const btnW = Math.min(125, (cardW - 32 - (btnCount - 1) * 8) / btnCount)
+    const btnH = 32
+    const gap = 8
+    const totalW = btnCount * btnW + (btnCount - 1) * gap
     const startX = -totalW / 2 + btnW / 2
+    const btnY = cardH / 2 - 28
+
+    const buttonBounds: Array<{
+      minX: number
+      maxX: number
+      minY: number
+      maxY: number
+      onClick: () => void
+    }> = []
 
     config.buttons.forEach((btnCfg, index) => {
-      const bx = startX + index * (btnW + 12)
-      const bBg = this.add.graphics()
-      bBg.fillStyle(config.accentColor, 1)
-      bBg.fillRoundedRect(bx - btnW / 2, 40, btnW, 30, 6)
+      const bx = startX + index * (btnW + gap)
+      const bColor = btnCfg.color ?? config.accentColor
 
-      const bTxt = this.add.text(bx, 55, btnCfg.label, {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '10px',
-        fontStyle: 'bold',
-        color: '#ffffff',
-      }).setOrigin(0.5, 0.5)
+      const bBg = this.add.graphics()
+      bBg.fillStyle(bColor, 1)
+      bBg.fillRoundedRect(bx - btnW / 2, btnY - btnH / 2, btnW, btnH, 6)
+
+      const bTxt = this.add
+        .text(bx, btnY, btnCfg.label, {
+          fontFamily: 'system-ui, sans-serif',
+          fontSize: btnCount > 2 ? '8.5px' : '9.5px',
+          fontStyle: 'bold',
+          color: '#ffffff',
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5)
 
       overlay.add([bBg, bTxt])
+
+      buttonBounds.push({
+        minX: bx - btnW / 2,
+        maxX: bx + btnW / 2,
+        minY: btnY - btnH / 2,
+        maxY: btnY + btnH / 2,
+        onClick: btnCfg.onClick,
+      })
     })
 
     this.overlayContainer = overlay
 
-    // Direct pointer down on screen executes button action
-    this.input.once('pointerdown', (pointer: Phaser.Input.Pointer) => {
+    // Debounced pointerdown with exact button bounding-box hit testing
+    const createdTime = this.time.now
+    const pointerHandler = (pointer: Phaser.Input.Pointer) => {
       if (this.overlayContainer !== overlay) return
-      overlay.destroy()
-      this.overlayContainer = undefined
+      // Ignore clicks within 180ms of overlay creation to prevent accidental pass-through
+      if (this.time.now - createdTime < 180) return
 
-      if (config.buttons.length > 1) {
-        if (pointer.x < width / 2) {
-          config.buttons[0].onClick()
-        } else {
-          config.buttons[1].onClick()
+      const relX = pointer.x - width / 2
+      const relY = pointer.y - height / 2
+
+      for (const btn of buttonBounds) {
+        if (relX >= btn.minX && relX <= btn.maxX && relY >= btn.minY && relY <= btn.maxY) {
+          overlay.destroy()
+          this.overlayContainer = undefined
+          this.input.off('pointerdown', pointerHandler)
+          btn.onClick()
+          break
         }
-      } else {
-        config.buttons[0].onClick()
       }
-    })
+    }
+
+    this.input.on('pointerdown', pointerHandler)
   }
 
   /**
@@ -1124,9 +1312,11 @@ export class BootScene extends Phaser.Scene {
 
     this.overlayContainer = overlay
 
-    // Direct pointer down to click the exact button zone
+    // Direct pointer down to click the exact button zone with input debounce
+    const createdTime = this.time.now
     const pointerHandler = (pointer: Phaser.Input.Pointer) => {
       if (this.overlayContainer !== overlay) return
+      if (this.time.now - createdTime < 180) return
       const relX = pointer.x - width / 2
       const relY = pointer.y - height / 2
 

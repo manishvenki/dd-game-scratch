@@ -217,6 +217,45 @@ In Level 3 (MG Road / Brigade Road), Dennis encounters the Annual Day drama rehe
 
 ---
 
+## Level Progression, Exit Gating & Retry Reliability
+
+### 1. Exit Gating & Completion Conditions
+- **State-Driven Exit Goal**: The exit goal visual dynamically reflects the stage objective:
+  - `[LOCKED]`: If any required blocking enemies remain undefeated, the exit gate remains locked with amber warning indicators, and Dennis is constrained from exiting prematurely.
+  - `[OPEN]`: Defeating all stage blockers automatically unlocks the exit portal with a glowing emerald banner and pulsing beacon. Dennis crossing the exit line completes the stage.
+- **Idempotent Transitions**: `isLevelCompleting` guard ensures level completion transitions and dialogue triggers execute exactly once, even with rapid frame loops or multiple trigger touches.
+- **3-Button Stage Complete Modal**:
+  - `PLAY NEXT STAGE →`: Advances sequentially along the 5-stage Bangalore route (L1 $\to$ L2 $\to$ L3 $\to$ L4 $\to$ L5).
+  - `REPLAY STAGE`: Fully resets and replays the current stage.
+  - `LEVEL SELECT`: Returns to the level selection menu (`#/levels`).
+- **Debounced Interaction**: Modals implement a 180ms input debounce and exact bounding-box hit testing, preventing dialogue-advance taps from accidentally dismissing the overlay or triggering premature navigation.
+
+### 2. Comprehensive Retry & Reset Lifecycle
+When a stage is restarted (via Retry button, level switch, or catch recovery):
+- **Player Controller**: `playerController.reset()` resets Dennis's physics coordinates, zeroes horizontal and vertical velocity, resets grounded and facing state (`facing = 1`), clears attack cooldown timers, restores the `idle` animation, and resets the virtual input bridge.
+- **Blockers & Physics Colliders**: Completely clears old blocker containers and Arcade colliders from memory and freshly reinstantiates blocker entities with full configured HP and active collision bodies.
+- **Chasers**: Resets Sathish, Manish, and Rahul to their stage spawn coordinates, unfreezes pause flags, restores facing direction (`facing = 1`), and synchronizes pursuit speeds.
+- **Dialogue & Story State**: Fully disposes of active speech bubbles and sequence callbacks, resets `l3EncounterState = 'CHASE_ACTIVE'`, and resets interaction flags.
+- **URL Hash Synchronization**: URL hash updates automatically (e.g. `#/play?level=2`), synchronizing React stage navigation tabs and browser history without redundant reloads.
+
+---
+
+## End-to-End Verification & Regression Testing
+
+The 5-stage adventure was verified end-to-end through automated static checks and browser testing:
+- **Type Safety**: `npm run typecheck` passed with 0 errors (`tsc -b --noEmit`).
+- **Linter**: `npm run lint` passed with 0 warnings and 0 errors across all 32 project files.
+- **Production Bundle**: `npm run build` compiled cleanly in 1.94s (`dist/index.html`, `dist/assets/index-*.css`, `dist/assets/index-*.js`).
+- **Browser Playtesting**:
+  - **Stage 01 (College Gate)**: Intro overlay displays Tanglish text, combat against Ajay, Vijay, and Sanjay decrements health pips, exit gate transitions from `[LOCKED]` to `[OPEN]`, and completing the stage presents the 3-button modal.
+  - **Stage 02 (Thatha Tea)**: Clean progression to Kalyan Nagar environment with tea stall frontage, samovar, and Kammanahalli crossroad exit.
+  - **Stage 03 (MG Road)**: Encounter at $x=920$ freezes chasers, plays comic reveal dialogue above characters, defeating Raghu resumes pursuit, and Dennis escapes to Namma Metro.
+  - **Stage 04 (Dr. Rajkumar Park)**: Park environment, iron boundary railings, walking trails, and park blocker combat verified.
+  - **Stage 05 (Cubbon Park Finale)**: Sunset lighting, Bandstand exit, victory dialogue, and Grand Victory screen featuring **Developed by its2much Mv** and stage completion summary verified.
+  - **Audio & BGM**: Continuous loop across stage transitions, user-gesture startup, and responsive mute/unmute verified.
+
+---
+
 ## Important Project Notes & Limitations
 
 - **Physical Device Orientation Testing**: Mobile landscape behavior and orientation locking were validated via browser devtools emulation. Behavior on physical iOS Safari devices relies on graceful CSS landscape fallbacks, as Apple WebKit restricts programmatic `screen.orientation.lock`.

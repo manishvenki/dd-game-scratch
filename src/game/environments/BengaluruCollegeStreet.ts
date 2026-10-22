@@ -17,11 +17,12 @@ export interface BengaluruCollegeStreetConfig {
  * 1. Warm daylight or twilight sky with subtle drifting clouds (ScrollFactor 0).
  * 2. Distant Bengaluru skyline with Vidhana Soudha dome & tech towers (ScrollFactor 0.15).
  * 3. Midground campus rooflines, clock tower & rain tree silhouettes (ScrollFactor 0.35).
- * 4. Interactive street scenery supporting 4 distinct themes:
+ * 4. Interactive street scenery supporting 5 distinct Bengaluru themes:
  *    - 'college': Campus gate, stone walls, SLV Kaapi & Campus Xerox.
- *    - 'market': Colorful fruit & spice stalls with striped awnings.
+ *    - 'thatha-tea': Thatha Tea storefront, counter, brass samovar & Kammanahalli crossroad.
  *    - 'commercial-mg': Namma Metro viaduct, neon commercial signs & drama rehearsal plaza.
- *    - 'cafe-koramangala': Cozy red-brick café, outdoor patio, fairy lights & Ananya date table.
+ *    - 'park-rajkumar': Dr. Rajkumar Park ornamental gates, iron boundary railings & walking trails.
+ *    - 'park-cubbon': Lush green canopy, red-dirt trails, bamboo grove & historic Bandstand.
  * 5. Paved sidewalk with yellow-and-black curb stones and asphalt road (ScrollFactor 1.0).
  */
 export class BengaluruCollegeStreet {
@@ -140,8 +141,8 @@ export class BengaluruCollegeStreet {
           const b = Math.round(0x87 * (1 - t) + 0xc7 * t)
           color = (r << 16) | (g << 8) | b
         }
-      } else if (this.theme === 'cafe-koramangala') {
-        // Golden Hour / Sunset Café Sky (Twilight Slate -> Warm Peach -> Amber Horizon)
+      } else if (this.theme === 'park-rajkumar' || this.theme === 'cafe-koramangala') {
+        // Golden Hour / Park Sky (Twilight Slate -> Warm Peach -> Amber Horizon)
         if (ratio < 0.5) {
           const t = ratio / 0.5
           const r = Math.round(0x31 * (1 - t) + 0xf4 * t)
@@ -210,8 +211,8 @@ export class BengaluruCollegeStreet {
       this.skyGraphics.fillCircle(w * 0.76, h * 0.2, 20)
       this.skyGraphics.fillStyle(0x3b1d6b, 0.95)
       this.skyGraphics.fillCircle(w * 0.76 + 7, h * 0.2 - 4, 18)
-    } else if (this.theme === 'cafe-koramangala') {
-      // Soft golden hour sun disc
+    } else if (this.theme === 'park-rajkumar' || this.theme === 'cafe-koramangala') {
+      // Soft golden hour sun disc filtering through park foliage
       this.skyGraphics.fillStyle(0xfef08a, 0.4)
       this.skyGraphics.fillCircle(w * 0.68, h * 0.28, 48)
       this.skyGraphics.fillStyle(0xfde047, 0.7)

@@ -43,6 +43,7 @@ export interface LevelConfig {
   readonly subtitle: string
   readonly setting: string
   readonly objectiveText: string
+  readonly tanglishIntro?: string
   readonly stageWidth: number
   readonly playerSpawnX: number
   readonly exitGoalX: number
