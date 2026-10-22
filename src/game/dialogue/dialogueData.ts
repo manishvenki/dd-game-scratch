@@ -205,3 +205,46 @@ export const LEVEL_4_CAFE_DIALOGUE: DialogueSequence = {
     },
   ],
 }
+
+// 4. Level 5 Cubbon Park Grand Victory Sequence Dialogue
+export const LEVEL_5_VICTORY_DIALOGUE: DialogueSequence = {
+  id: 'level-5-victory',
+  title: 'CUBBON PARK GRAND FINALE',
+  lines: [
+    {
+      id: 'l5_1',
+      speakerId: 'dennis',
+      speakerName: 'DENNIS',
+      text: 'Haaash... Finally Cubbon Park Bandstand vandhaachu! 5 stages sprint panniyum energy kuraiyala!',
+      badgeColorHex: 0x0284c7, // Dennis Sky Blue
+    },
+    {
+      id: 'l5_2',
+      speakerId: 'manish',
+      speakerName: 'MANISH',
+      text: 'Pant... pant... Dennis nillu da! Bengaluru muzhukka odiyachu... Enakku breath-ey illa da!',
+      badgeColorHex: 0xdc2626, // Manish Red
+    },
+    {
+      id: 'l5_3',
+      speakerId: 'sathish',
+      speakerName: 'SATHISH',
+      text: 'Macha Dennis, un sprint speed vera level! We admit it... Unna pudikka mudiyadhu da. Truce pannalaama?',
+      badgeColorHex: 0x16a34a, // Sathish Green
+    },
+    {
+      id: 'l5_4',
+      speakerId: 'rahul',
+      speakerName: 'RAHUL',
+      text: 'Aama da, surrender aayittom! Assignment apram paakalaam... Park gate-la hot Masala Puri & Filter Coffee treat vai!',
+      badgeColorHex: 0x9333ea, // Rahul Purple
+    },
+    {
+      id: 'l5_5',
+      speakerId: 'dennis',
+      speakerName: 'DENNIS',
+      text: 'Haha! Deal da machas! Five stages cleared in style! Vaanga hot Masala Puri saapidalaam!',
+      badgeColorHex: 0x0284c7,
+    },
+  ],
+}

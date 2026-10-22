@@ -146,11 +146,54 @@ export const LEVEL_4_CONFIG: LevelConfig = {
   },
 }
 
+export const LEVEL_5_CONFIG: LevelConfig = {
+  id: 'level-5',
+  stageNumber: 'STAGE 05',
+  title: 'Cubbon Park Grand Finale',
+  subtitle: 'Lush Green Canopy & Bandstand',
+  setting: 'Historic green haven with red-dirt trails, bamboo groves, park benches & the Bandstand',
+  objectiveText: 'The trio is right behind you! Knock through the park blockers and sprint to the Cubbon Park Bandstand!',
+  stageWidth: 2600,
+  playerSpawnX: 340,
+  exitGoalX: 2500,
+  exitGoalLabel: 'CUBBON PARK BANDSTAND',
+  theme: 'park-cubbon',
+  blockers: [
+    {
+      id: 'blocker-5-1',
+      name: 'Arun',
+      initialX: 980,
+      maxHp: 3,
+      shirtColorHex: 0x059669, // Forest/Emerald green
+      pantsColorHex: 0x1e293b,
+      hairstyle: 'crew',
+      badgeLabel: 'ARUN [BLOCKER]',
+    },
+    {
+      id: 'blocker-5-2',
+      name: 'Deepak',
+      initialX: 1560,
+      maxHp: 3,
+      shirtColorHex: 0xd97706, // Amber
+      pantsColorHex: 0x334155,
+      hairstyle: 'spiky',
+      badgeLabel: 'DEEPAK [BLOCKER]',
+    },
+  ],
+  chasers: [
+    { chaserId: 'sathish', spawnX: 130, speed: 195 },
+    { chaserId: 'manish', spawnX: 70, speed: 185 },
+    { chaserId: 'rahul', spawnX: 10, speed: 175 },
+  ],
+  hasChaseSequence: true,
+}
+
 export const ALL_LEVELS: Record<LevelId, LevelConfig> = {
   'level-1': LEVEL_1_CONFIG,
   'level-2': LEVEL_2_CONFIG,
   'level-3': LEVEL_3_CONFIG,
   'level-4': LEVEL_4_CONFIG,
+  'level-5': LEVEL_5_CONFIG,
 }
 
 export function getLevelConfig(id: LevelId): LevelConfig {

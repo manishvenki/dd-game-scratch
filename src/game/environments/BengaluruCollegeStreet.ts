@@ -155,6 +155,27 @@ export class BengaluruCollegeStreet {
           const b = Math.round(0x5e * (1 - t) + 0x8a * t)
           color = (r << 16) | (g << 8) | b
         }
+      } else if (this.theme === 'park-cubbon') {
+        // Warm sunset park sky (Deep Twilight Sapphire -> Rich Terracotta Orange -> Warm Golden Horizon)
+        if (ratio < 0.4) {
+          const t = ratio / 0.4
+          const r = Math.round(0x1e * (1 - t) + 0xc2 * t)
+          const g = Math.round(0x29 * (1 - t) + 0x41 * t)
+          const b = Math.round(0x4b * (1 - t) + 0x0c * t)
+          color = (r << 16) | (g << 8) | b
+        } else if (ratio < 0.75) {
+          const t = (ratio - 0.4) / 0.35
+          const r = Math.round(0xc2 * (1 - t) + 0xf5 * t)
+          const g = Math.round(0x41 * (1 - t) + 0x9e * t)
+          const b = Math.round(0x0c * (1 - t) + 0x0b * t)
+          color = (r << 16) | (g << 8) | b
+        } else {
+          const t = (ratio - 0.75) / 0.25
+          const r = Math.round(0xf5 * (1 - t) + 0xfd * t)
+          const g = Math.round(0x9e * (1 - t) + 0xe0 * t)
+          const b = Math.round(0x0b * (1 - t) + 0x47 * t)
+          color = (r << 16) | (g << 8) | b
+        }
       } else {
         // Daytime College & Market Sky
         if (ratio < 0.45) {
@@ -197,6 +218,14 @@ export class BengaluruCollegeStreet {
       this.skyGraphics.fillCircle(w * 0.68, h * 0.28, 30)
       this.skyGraphics.fillStyle(0xffffff, 0.95)
       this.skyGraphics.fillCircle(w * 0.68, h * 0.28, 16)
+    } else if (this.theme === 'park-cubbon') {
+      // Warm late afternoon sunset disc filtering through Cubbon Park canopy
+      this.skyGraphics.fillStyle(0xfde047, 0.35)
+      this.skyGraphics.fillCircle(w * 0.74, h * 0.28, 54)
+      this.skyGraphics.fillStyle(0xfbbf24, 0.65)
+      this.skyGraphics.fillCircle(w * 0.74, h * 0.28, 34)
+      this.skyGraphics.fillStyle(0xfffbeb, 0.95)
+      this.skyGraphics.fillCircle(w * 0.74, h * 0.28, 18)
     } else {
       // Distant morning sun disc
       this.skyGraphics.fillStyle(0xfffbeb, 0.45)
@@ -241,6 +270,11 @@ export class BengaluruCollegeStreet {
 
     const totalWidth = this.stageWidth * 0.6 + this.viewportWidth
     const horizonY = this.groundY - 110
+
+    if (this.theme === 'park-cubbon') {
+      this.drawParkCubbonFarSkyline(g, totalWidth, horizonY)
+      return
+    }
 
     // Distant atmospheric silhouette color (#3b5278 with transparency)
     g.fillStyle(0x3b5278, 0.45)
@@ -303,6 +337,11 @@ export class BengaluruCollegeStreet {
 
     const totalWidth = this.stageWidth * 0.8 + this.viewportWidth
     const baseY = this.groundY - 60
+
+    if (this.theme === 'park-cubbon') {
+      this.drawParkCubbonMidSkyline(g, totalWidth, baseY)
+      return
+    }
 
     // Midground buildings: Campus department blocks, water tank, clock tower
     g.fillStyle(0x475569, 0.65)
@@ -384,6 +423,8 @@ export class BengaluruCollegeStreet {
       this.drawCafeKoramangalaStreetScenery(g, groundY)
     } else if (this.theme === 'market') {
       this.drawMarketStreetScenery(g, groundY)
+    } else if (this.theme === 'park-cubbon') {
+      this.drawParkCubbonStreetScenery(g, groundY)
     } else {
       this.drawCollegeStreetScenery(g, groundY)
     }
@@ -762,6 +803,448 @@ export class BengaluruCollegeStreet {
     addLabel(1600, groundY - 95, 'BENGALURU SPICES & CONDIMENTS\n• BYADGI CHILLI & CARDAMOM •', '#fca5a5', '8.5px')
   }
 
+  /**
+   * Theme: Cubbon Park (Level 5) - Distant Skyline
+   */
+  private drawParkCubbonFarSkyline(g: Phaser.GameObjects.Graphics, totalWidth: number, horizonY: number): void {
+    // 1. Distant lush canopy layer along horizon
+    g.fillStyle(0x14532d, 0.35)
+    for (let x = 20; x < totalWidth; x += 85) {
+      const r = 38 + ((x * 19) % 24)
+      g.fillCircle(x, horizonY - 20, r)
+      g.fillCircle(x + 24, horizonY - 28, r - 6)
+      g.fillCircle(x - 18, horizonY - 18, r - 8)
+    }
+
+    // 2. Iconic Heritage High Court (Attara Kacheri) Red Brick Silhouette at x = 520
+    const hcX = 520
+    const hcW = 240
+    const hcH = 65
+    g.fillStyle(0x7f1d1d, 0.45) // Pompeian Red
+    g.fillRect(hcX, horizonY - hcH, hcW, hcH + 30)
+    // Classical portico with pediment
+    g.beginPath()
+    g.moveTo(hcX + 70, horizonY - hcH)
+    g.lineTo(hcX + 170, horizonY - hcH)
+    g.lineTo(hcX + 120, horizonY - hcH - 22)
+    g.closePath()
+    g.fillPath()
+    // Colonnade columns
+    for (let cx = hcX + 10; cx < hcX + hcW - 10; cx += 18) {
+      g.fillRect(cx, horizonY - hcH + 8, 4, hcH - 8)
+    }
+
+    // 3. Vidhana Soudha Central Dome Silhouette at x = 1120
+    const vsX = 1120
+    g.fillStyle(0x334155, 0.45)
+    g.fillRect(vsX - 35, horizonY - 45, 70, 55)
+    g.fillCircle(vsX, horizonY - 50, 26)
+    g.fillRect(vsX - 2, horizonY - 82, 4, 12)
+    g.fillCircle(vsX, horizonY - 82, 3)
+
+    // 4. Distant Giant Rain Tree silhouetted tops
+    g.fillStyle(0x064e3b, 0.4)
+    for (let x = 80; x < totalWidth; x += 190) {
+      g.fillCircle(x, horizonY - 42, 48)
+      g.fillCircle(x + 30, horizonY - 48, 42)
+    }
+  }
+
+  /**
+   * Theme: Cubbon Park (Level 5) - Midground Parallax
+   */
+  private drawParkCubbonMidSkyline(g: Phaser.GameObjects.Graphics, totalWidth: number, baseY: number): void {
+    // Rolling midground park green slopes
+    g.fillStyle(0x166534, 0.5)
+    for (let x = 0; x < totalWidth; x += 180) {
+      g.fillCircle(x, baseY - 30, 75)
+    }
+
+    // Midground Rain Trees with glowing amber rim-lighting from sunset
+    g.fillStyle(0x14532d, 0.6)
+    for (let x = 60; x < totalWidth; x += 220) {
+      g.fillCircle(x, baseY - 50, 52)
+      g.fillCircle(x + 35, baseY - 62, 44)
+      g.fillCircle(x - 30, baseY - 48, 46)
+    }
+
+    // Midground Victorian garden gazebo silhouette at x = 760 and 1640
+    for (const gzX of [760, 1640]) {
+      if (gzX < totalWidth) {
+        g.fillStyle(0x1e293b, 0.6)
+        g.fillRect(gzX - 20, baseY - 45, 40, 45)
+        g.beginPath()
+        g.moveTo(gzX - 25, baseY - 45)
+        g.lineTo(gzX + 25, baseY - 45)
+        g.lineTo(gzX, baseY - 68)
+        g.closePath()
+        g.fillPath()
+      }
+    }
+  }
+
+  /**
+   * Theme: Cubbon Park (Level 5) - Full Street/Park Scenery
+   */
+  private drawParkCubbonStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
+    // 1. Lush Green Lawn Background across entire stage
+    g.fillStyle(0x065f46, 0.95)
+    g.fillRect(0, groundY - 65, this.stageWidth, 65)
+
+    // Ornamental Stone Garden Border
+    g.fillStyle(0x475569, 1)
+    g.fillRect(0, groundY - 14, this.stageWidth, 14)
+    g.fillStyle(0x64748b, 1)
+    g.fillRect(0, groundY - 14, this.stageWidth, 3)
+
+    // Decorative Flower Beds (Marigold orange/yellow and Bougainvillea magenta)
+    for (let fx = 40; fx < this.stageWidth - 280; fx += 110) {
+      // Shrub foliage
+      g.fillStyle(0x047857, 1)
+      g.fillCircle(fx, groundY - 24, 14)
+      g.fillCircle(fx + 16, groundY - 26, 16)
+      g.fillCircle(fx + 30, groundY - 22, 12)
+
+      // Blossoms
+      const isPink = (fx / 110) % 2 === 0
+      g.fillStyle(isPink ? 0xec4899 : 0xfbbf24, 1)
+      g.fillCircle(fx - 4, groundY - 28, 3.5)
+      g.fillCircle(fx + 8, groundY - 32, 4)
+      g.fillCircle(fx + 22, groundY - 30, 3.5)
+      g.fillCircle(fx + 14, groundY - 22, 3)
+    }
+
+    // 2. Majestic Rain Trees (Samanea saman) along the parkway
+    this.drawRainTree(g, 140, groundY, 1.15)
+    this.drawRainTree(g, 680, groundY, 1.1)
+    this.drawRainTree(g, 1220, groundY, 1.12)
+    this.drawRainTree(g, 1760, groundY, 1.15)
+    this.drawRainTree(g, 2180, groundY, 1.08)
+
+    // 3. Fiery Gulmohar Trees with sunset red flowers
+    this.drawGulmoharTree(g, 440, groundY, 1.08)
+    this.drawGulmoharTree(g, 980, groundY, 1.1)
+    this.drawGulmoharTree(g, 1500, groundY, 1.05)
+    this.drawGulmoharTree(g, 2040, groundY, 1.08)
+
+    // 4. Tall Bamboo Groves with clustered canes and leafy sprays
+    this.drawBambooGrove(g, 270, groundY, 1.0)
+    this.drawBambooGrove(g, 840, groundY, 1.1)
+    this.drawBambooGrove(g, 1370, groundY, 1.05)
+    this.drawBambooGrove(g, 1900, groundY, 1.0)
+
+    // 5. Classic Cubbon Park Wooden and Wrought-Iron Benches
+    this.drawParkBench(g, 350, groundY)
+    this.drawParkBench(g, 760, groundY)
+    this.drawParkBench(g, 1100, groundY)
+    this.drawParkBench(g, 1620, groundY)
+    this.drawParkBench(g, 2120, groundY)
+
+    // 6. Victorian Wrought-Iron Lamp Posts with warm evening glow
+    const lampPositions = [180, 520, 900, 1180, 1440, 1700, 1980, 2260, 2520]
+    for (const lampX of lampPositions) {
+      this.drawVictorianParkLamp(g, lampX, groundY)
+    }
+
+    // 7. Historic Queen Victoria Statue Canopy at x = 1040
+    this.drawQueenVictoriaCanopy(g, 1040, groundY)
+
+    // 8. Grand Finale Destination: The Historic Cubbon Park Bandstand at x = 2400 (x: 2270 to 2530)
+    this.drawBandstandPavilion(g, 2400, groundY)
+
+    // 9. Signage & Landmark Labels
+    this.createParkCubbonLabels(groundY)
+  }
+
+  /**
+   * Draws a lush Bamboo Grove cluster with segmented stems and feathery foliage.
+   */
+  private drawBambooGrove(g: Phaser.GameObjects.Graphics, x: number, groundY: number, scale = 1.0): void {
+    const canes = [
+      { dx: -18, h: 110 * scale, thick: 4.5 },
+      { dx: -10, h: 125 * scale, thick: 5 },
+      { dx: -2, h: 135 * scale, thick: 5.5 },
+      { dx: 6, h: 128 * scale, thick: 5 },
+      { dx: 14, h: 118 * scale, thick: 4.5 },
+      { dx: 22, h: 105 * scale, thick: 4 },
+    ]
+
+    for (const cane of canes) {
+      const cx = x + cane.dx
+      const topY = groundY - cane.h
+
+      // Green bamboo culm (#65a30d)
+      g.fillStyle(0x65a30d, 1)
+      g.fillRect(cx - cane.thick / 2, topY, cane.thick, cane.h)
+
+      // Bamboo ring nodes every 16px
+      g.fillStyle(0x365314, 1)
+      for (let ny = topY + 12; ny < groundY - 6; ny += 18) {
+        g.fillRect(cx - cane.thick / 2 - 1, ny, cane.thick + 2, 2.5)
+      }
+
+      // Sprays of narrow pointed leaves
+      g.fillStyle(0x84cc16, 0.9)
+      for (let ly = topY; ly < topY + 45; ly += 14) {
+        g.fillTriangle(cx, ly, cx - 18, ly - 8, cx - 14, ly + 2)
+        g.fillTriangle(cx, ly + 4, cx + 18, ly - 4, cx + 14, ly + 6)
+      }
+    }
+  }
+
+  /**
+   * Draws an ornate Victorian cast-iron park lamppost with glowing warm lantern.
+   */
+  private drawVictorianParkLamp(g: Phaser.GameObjects.Graphics, x: number, groundY: number): void {
+    const lampH = 130
+    const topY = groundY - lampH
+
+    // Black cast-iron fluted base & post (#0f172a)
+    g.fillStyle(0x0f172a, 1)
+    g.fillRect(x - 6, groundY - 14, 12, 14)
+    g.fillRect(x - 3, topY + 22, 6, lampH - 22)
+    // Decorative collars
+    g.fillRect(x - 5, groundY - 32, 10, 4)
+    g.fillRect(x - 5, topY + 45, 10, 4)
+
+    // Victorian scrollwork bracket arms
+    g.lineStyle(2, 0x0f172a, 1)
+    g.beginPath()
+    g.moveTo(x - 12, topY + 28)
+    g.lineTo(x, topY + 16)
+    g.lineTo(x + 12, topY + 28)
+    g.strokePath()
+
+    // Hexagonal Lantern Casing
+    g.fillStyle(0x1e293b, 1)
+    g.fillRect(x - 8, topY + 8, 16, 14)
+    // Pointed lantern cap
+    g.beginPath()
+    g.moveTo(x - 10, topY + 8)
+    g.lineTo(x + 10, topY + 8)
+    g.lineTo(x, topY - 2)
+    g.closePath()
+    g.fillPath()
+    // Finial ball
+    g.fillCircle(x, topY - 4, 2.5)
+
+    // Glowing warm amber lantern pane
+    g.fillStyle(0xfbbf24, 1)
+    g.fillRect(x - 6, topY + 10, 12, 10)
+    g.fillStyle(0xfef08a, 0.95)
+    g.fillCircle(x, topY + 15, 3.5)
+
+    // Soft warm illumination cone on the ground
+    g.fillStyle(0xfef08a, 0.12)
+    g.fillTriangle(x, topY + 16, x - 32, groundY, x + 32, groundY)
+  }
+
+  /**
+   * Draws a classic Victorian wooden garden park bench with green cast-iron ends.
+   */
+  private drawParkBench(g: Phaser.GameObjects.Graphics, x: number, groundY: number): void {
+    const benchW = 56
+    const benchH = 34
+    const topY = groundY - benchH
+
+    // Dark green ornate cast-iron legs & armrests (#064e3b)
+    g.fillStyle(0x064e3b, 1)
+    g.fillRect(x - benchW / 2, groundY - 20, 5, 20)
+    g.fillRect(x + benchW / 2 - 5, groundY - 20, 5, 20)
+    // Curved armrests
+    g.fillRect(x - benchW / 2 - 3, topY + 10, 7, 5)
+    g.fillRect(x + benchW / 2 - 4, topY + 10, 7, 5)
+
+    // Teak wooden seat and backrest slats (#92400e / #b45309)
+    g.fillStyle(0x92400e, 1)
+    // Backrest slats
+    g.fillRect(x - benchW / 2, topY + 2, benchW, 5)
+    g.fillRect(x - benchW / 2, topY + 9, benchW, 5)
+    // Seat slats
+    g.fillStyle(0xb45309, 1)
+    g.fillRect(x - benchW / 2 - 2, groundY - 18, benchW + 4, 4)
+    g.fillRect(x - benchW / 2 - 2, groundY - 13, benchW + 4, 4)
+  }
+
+  /**
+   * Draws Queen Victoria Statue canopy monument.
+   */
+  private drawQueenVictoriaCanopy(g: Phaser.GameObjects.Graphics, x: number, groundY: number): void {
+    const baseW = 70
+    const baseH = 95
+    const topY = groundY - baseH
+
+    // Stone plinth
+    g.fillStyle(0x475569, 1)
+    g.fillRect(x - baseW / 2, groundY - 24, baseW, 24)
+    g.fillStyle(0x334155, 1)
+    g.fillRect(x - baseW / 2 - 4, groundY - 6, baseW + 8, 6)
+
+    // Victorian columns supporting statue canopy
+    g.fillStyle(0xf1f5f9, 1)
+    g.fillRect(x - 22, topY + 20, 6, 52)
+    g.fillRect(x + 16, topY + 20, 6, 52)
+
+    // Bronze statue silhouette
+    g.fillStyle(0x78350f, 1)
+    g.fillRoundedRect(x - 10, groundY - 58, 20, 34, 4)
+    g.fillCircle(x, groundY - 64, 7)
+    g.fillStyle(0xf59e0b, 1) // Crown glint
+    g.fillRect(x - 5, groundY - 73, 10, 4)
+
+    // Canopy domed roof
+    g.fillStyle(0x991b1b, 1)
+    g.beginPath()
+    g.moveTo(x - 28, topY + 20)
+    g.lineTo(x + 28, topY + 20)
+    g.lineTo(x, topY)
+    g.closePath()
+    g.fillPath()
+    g.fillStyle(0xf59e0b, 1)
+    g.fillCircle(x, topY - 3, 3.5)
+  }
+
+  /**
+   * Historic Cubbon Park Bandstand - Octagonal Victorian Pavilion (1868)
+   */
+  private drawBandstandPavilion(g: Phaser.GameObjects.Graphics, centerX: number, groundY: number): void {
+    const plinthW = 260
+    const plinthH = 32
+    const plinthTopY = groundY - plinthH
+
+    // 1. Octagonal Stone Base Plinth (#475569 granite)
+    g.fillStyle(0x475569, 1)
+    g.fillRect(centerX - plinthW / 2, plinthTopY, plinthW, plinthH)
+    g.fillStyle(0x334155, 1)
+    g.fillRect(centerX - plinthW / 2 - 6, groundY - 8, plinthW + 12, 8)
+    // Cornice band
+    g.fillStyle(0x64748b, 1)
+    g.fillRect(centerX - plinthW / 2 - 3, plinthTopY - 3, plinthW + 6, 4)
+
+    // Central Stone Steps
+    const stepsW = 76
+    const stepH = 8
+    for (let s = 0; s < 3; s++) {
+      g.fillStyle(0x64748b, 1)
+      g.fillRect(centerX - (stepsW + s * 10) / 2, groundY - (s + 1) * stepH, stepsW + s * 10, stepH)
+      g.lineStyle(1, 0x1e293b, 0.7)
+      g.strokeRect(centerX - (stepsW + s * 10) / 2, groundY - (s + 1) * stepH, stepsW + s * 10, stepH)
+    }
+
+    // 2. Wrought-Iron Balustrade / Railings
+    const railY = plinthTopY - 22
+    g.fillStyle(0x0f172a, 1)
+    g.fillRect(centerX - plinthW / 2 + 10, railY, plinthW - 20, 3)
+    g.lineStyle(1.5, 0x0f172a, 0.85)
+    for (let rx = centerX - plinthW / 2 + 15; rx <= centerX + plinthW / 2 - 15; rx += 9) {
+      if (Math.abs(rx - centerX) > 36) {
+        g.lineBetween(rx, railY, rx, plinthTopY)
+      }
+    }
+
+    // 3. Classical Victorian Cast-Iron Pillars (6 White Fluted Columns)
+    const pillarH = 92
+    const columnTopY = plinthTopY - pillarH
+    const colPositions = [
+      centerX - 110,
+      centerX - 66,
+      centerX - 24,
+      centerX + 24,
+      centerX + 66,
+      centerX + 110,
+    ]
+
+    for (const cx of colPositions) {
+      // Column shaft
+      g.fillStyle(0xf8fafc, 1)
+      g.fillRect(cx - 3.5, columnTopY, 7, pillarH)
+      // Base plinth
+      g.fillStyle(0xcbd5e1, 1)
+      g.fillRect(cx - 5.5, plinthTopY - 6, 11, 6)
+      // Ionic capital
+      g.fillStyle(0xe2e8f0, 1)
+      g.fillRect(cx - 6.5, columnTopY, 13, 6)
+      g.fillStyle(0xf59e0b, 1) // Brass capital rosette
+      g.fillCircle(cx, columnTopY + 3, 2.5)
+    }
+
+    // Victorian decorative wrought-iron spandrel arches between columns
+    g.lineStyle(2, 0x0f172a, 0.9)
+    for (let i = 0; i < colPositions.length - 1; i++) {
+      const c1 = colPositions[i]
+      const c2 = colPositions[i + 1]
+      const midX = (c1 + c2) / 2
+      g.beginPath()
+      g.arc(midX, columnTopY + 12, (c2 - c1) / 2, Math.PI, 0, false)
+      g.strokePath()
+    }
+
+    // 4. Octagonal Terracotta Tiled Roof Canopy (#991b1b)
+    const roofBaseY = columnTopY
+    const roofApexY = roofBaseY - 48
+    g.fillStyle(0x991b1b, 1)
+    g.beginPath()
+    g.moveTo(centerX - plinthW / 2 - 12, roofBaseY)
+    g.lineTo(centerX + plinthW / 2 + 12, roofBaseY)
+    g.lineTo(centerX + 60, roofApexY)
+    g.lineTo(centerX - 60, roofApexY)
+    g.closePath()
+    g.fillPath()
+
+    // Upper Cupola Roof Dome
+    const cupolaApexY = roofApexY - 24
+    g.fillStyle(0xb91c1c, 1)
+    g.beginPath()
+    g.moveTo(centerX - 62, roofApexY)
+    g.lineTo(centerX + 62, roofApexY)
+    g.lineTo(centerX, cupolaApexY)
+    g.closePath()
+    g.fillPath()
+
+    // Decorative White Scalloped Valance / Eaves Trim
+    g.fillStyle(0xffffff, 1)
+    g.fillRect(centerX - plinthW / 2 - 14, roofBaseY - 2, plinthW + 28, 4)
+    for (let vx = centerX - plinthW / 2 - 10; vx <= centerX + plinthW / 2 + 10; vx += 14) {
+      g.fillCircle(vx, roofBaseY + 3, 3)
+    }
+
+    // Golden Finial Spire at Apex
+    g.fillStyle(0xf59e0b, 1)
+    g.fillRect(centerX - 2, cupolaApexY - 22, 4, 22)
+    g.fillCircle(centerX, cupolaApexY - 22, 4)
+    g.fillCircle(centerX, cupolaApexY - 11, 3)
+
+    // Interior Warm Chandelier Glow beneath Pavilion Ceiling
+    g.fillStyle(0xfef08a, 0.3)
+    g.fillCircle(centerX, columnTopY + 30, 48)
+    g.fillStyle(0xfbbf24, 1)
+    g.fillCircle(centerX, columnTopY + 16, 5)
+  }
+
+  /**
+   * Text Signboards for Cubbon Park
+   */
+  private createParkCubbonLabels(groundY: number): void {
+    if (!this.streetSceneryContainer) return
+    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
+      const t = this.scene.add
+        .text(x, y, text, {
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize,
+          fontStyle: 'bold',
+          color,
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5)
+      this.streetSceneryContainer?.add(t)
+    }
+
+    addLabel(180, groundY - 110, 'CUBBON PARK BOTANICAL HAVEN\n• ESTD 1870 •', '#86efac', '8.5px')
+    addLabel(840, groundY - 95, 'QUEEN VICTORIA PROMENADE\n← ROSE GARDEN • LOTUS POND →', '#fef08a', '8.5px')
+    addLabel(1480, groundY - 95, 'BAMBOO GROVE TRAIL\n• JOGGING & CYCLING LANE •', '#86efac', '8.5px')
+    addLabel(1980, groundY - 105, 'CENTRAL PARK LAWNS\n• HOT FILTER COFFEE & MASALA PURI →', '#fbbf24', '8.5px')
+    addLabel(2400, groundY - 150, 'HISTORIC CUBBON PARK BANDSTAND\n• 1868 HERITAGE PAVILION •', '#fef3c7', '9.5px')
+  }
 
   /**
    * Draws classic Bengaluru stone-base compound wall with stone pillars & iron grills.
@@ -1227,6 +1710,38 @@ export class BengaluruCollegeStreet {
     const totalWidth = this.stageWidth
     const groundY = this.groundY
     const roadDepth = this.viewportHeight - groundY + 40
+
+    if (this.theme === 'park-cubbon') {
+      // 1. Red earthen park jogging trail (y: groundY to groundY + 18)
+      g.fillStyle(0x9a3412, 1) // Rich Terracotta red-earth trail
+      g.fillRect(0, groundY, totalWidth, 18)
+
+      // Trail surface texture & sandy flecks
+      g.fillStyle(0xb45309, 0.8)
+      for (let x = 12; x < totalWidth; x += 32) {
+        g.fillRect(x, groundY + 4, 14, 2)
+        g.fillRect(x + 16, groundY + 11, 8, 2)
+      }
+
+      // 2. Weathered Stone Curb & Grass Lawn Border (y: groundY + 18 to groundY + 24)
+      g.fillStyle(0x475569, 1) // Slate curb stones
+      g.fillRect(0, groundY + 18, totalWidth, 6)
+      g.fillStyle(0x64748b, 0.8)
+      for (let x = 0; x < totalWidth; x += 36) {
+        g.lineBetween(x, groundY + 18, x, groundY + 24)
+      }
+
+      // 3. Lower Earthen Running Pathway (y: groundY + 24 to bottom)
+      g.fillStyle(0x78350f, 1) // Deep earth/clay path
+      g.fillRect(0, groundY + 24, totalWidth, roadDepth)
+
+      // Lush grass border fringe along the bottom edge
+      g.fillStyle(0x065f46, 0.9)
+      for (let x = 0; x < totalWidth; x += 18) {
+        g.fillTriangle(x, groundY + 24, x + 18, groundY + 24, x + 9, groundY + 20)
+      }
+      return
+    }
 
     // 1. Sidewalk Footpath Pavement (y: groundY to groundY + 16)
     // TenderSURE style checkered terracotta paver tiles

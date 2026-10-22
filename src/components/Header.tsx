@@ -47,7 +47,7 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
               </span>
             </div>
             <span className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
-              Darling Dennis Game
+              Darling Dennis Game &bull; <span className="text-amber-400/90 font-semibold normal-case">by its2much Mv</span>
             </span>
           </a>
 

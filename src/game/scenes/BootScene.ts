@@ -16,6 +16,7 @@ import {
   CATCH_DIALOGUE_RAHUL,
   LEVEL_3_REVEAL_DIALOGUE,
   LEVEL_4_CAFE_DIALOGUE,
+  LEVEL_5_VICTORY_DIALOGUE,
 } from '../dialogue/dialogueData'
 
 export class BootScene extends Phaser.Scene {
@@ -129,6 +130,7 @@ export class BootScene extends Phaser.Scene {
 
   private detectInitialLevel(): LevelId {
     const hash = window.location.hash
+    if (hash.includes('level=5')) return 'level-5'
     if (hash.includes('level=4')) return 'level-4'
     if (hash.includes('level=3')) return 'level-3'
     if (hash.includes('level=2')) return 'level-2'
@@ -671,21 +673,32 @@ export class BootScene extends Phaser.Scene {
           },
         ],
       })
-    } else {
+    } else if (this.currentLevelId === 'level-4') {
       this.showModalOverlay({
         title: 'LEVEL 4 COMPLETE!',
         subtitle: 'Dennis escaped the Koramangala café date scramble and reached the 80ft Road junction!',
         accentColor: 0x10b981,
         buttons: [
           {
-            label: 'PLAY AGAIN (LEVEL 4)',
-            onClick: () => this.loadLevel('level-4'),
+            label: 'PLAY LEVEL 5 →',
+            onClick: () => this.loadLevel('level-5'),
           },
           {
-            label: 'START OVER (LEVEL 1)',
-            onClick: () => this.loadLevel('level-1'),
+            label: 'REPLAY LEVEL 4',
+            onClick: () => this.loadLevel('level-4'),
           },
         ],
+      })
+    } else {
+      // LEVEL 5 - CUBBON PARK GRAND FINALE
+      if (this.sathish) this.sathish.setFacingDirection(-1)
+      if (this.manish) this.manish.setFacingDirection(-1)
+      if (this.rahul) this.rahul.setFacingDirection(-1)
+
+      this.triggerObjectiveUpdated('CUBBON PARK REACHED! CELEBRATING GRAND VICTORY!')
+
+      this.dialogueSystem?.startSequence(LEVEL_5_VICTORY_DIALOGUE, () => {
+        this.showGrandVictoryModal()
       })
     }
   }
@@ -860,6 +873,164 @@ export class BootScene extends Phaser.Scene {
         config.buttons[0].onClick()
       }
     })
+  }
+
+  /**
+   * Grand Finale Victory Screen celebrating the completion of all 5 stages.
+   * Features the five-level completion state and official developer branding:
+   * "Developed by its2much Mv"
+   */
+  private showGrandVictoryModal(): void {
+    if (this.overlayContainer) {
+      this.overlayContainer.destroy()
+    }
+
+    const width = this.scale.width
+    const height = this.scale.height
+
+    const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(250)
+    const cardW = Math.min(width - 24, 460)
+    const cardH = Math.min(height - 24, 250)
+
+    const bg = this.add.graphics()
+    bg.fillStyle(0x090d16, 0.98)
+    bg.lineStyle(2.5, 0xf59e0b, 1) // Amber-500
+    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 10)
+    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 10)
+
+    // Inner subtle glow border
+    bg.lineStyle(1, 0x10b981, 0.5)
+    bg.strokeRoundedRect(-cardW / 2 + 4, -cardH / 2 + 4, cardW - 8, cardH - 8, 8)
+
+    // Celebration Ribbon Banner
+    const ribbonY = -cardH / 2 + 22
+    const trophyText = this.add.text(0, ribbonY, '★ GRAND VICTORY — ADVENTURE COMPLETED! ★', {
+      fontFamily: 'system-ui, sans-serif',
+      fontSize: '13.5px',
+      fontStyle: 'bold',
+      color: '#f59e0b',
+    }).setOrigin(0.5, 0.5)
+
+    const subtitleText = this.add.text(0, ribbonY + 20, 'Dennis survived all 5 Bengaluru chases from College Gate to Cubbon Park!', {
+      fontFamily: 'system-ui, sans-serif',
+      fontSize: '10px',
+      color: '#cbd5e1',
+      align: 'center',
+      wordWrap: { width: cardW - 32 },
+    }).setOrigin(0.5, 0.5)
+
+    // 5-Level Completion Card Grid / Summary
+    const stageSummaryY = ribbonY + 54
+    const summaryBg = this.add.graphics()
+    summaryBg.fillStyle(0x0f172a, 0.9)
+    summaryBg.lineStyle(1, 0x334155, 0.8)
+    const sumW = cardW - 32
+    const sumH = 56
+    summaryBg.fillRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 6)
+    summaryBg.strokeRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 6)
+
+    const stage123 = this.add.text(0, stageSummaryY + 6, '✓ STAGE 01: College Gate   ✓ STAGE 02: Market Corridor   ✓ STAGE 03: MG Road', {
+      fontFamily: 'ui-monospace, Menlo, monospace',
+      fontSize: '7.5px',
+      fontStyle: 'bold',
+      color: '#34d399', // Emerald
+      align: 'center',
+    }).setOrigin(0.5, 0.5)
+
+    const stage45 = this.add.text(0, stageSummaryY + 28, '✓ STAGE 04: Koramangala Café   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
+      fontFamily: 'ui-monospace, Menlo, monospace',
+      fontSize: '7.5px',
+      fontStyle: 'bold',
+      color: '#fef08a', // Yellow
+      align: 'center',
+    }).setOrigin(0.5, 0.5)
+
+    // Developer Credit - Prominent & Tasteful
+    const creditY = stageSummaryY + 64
+    const devCreditText = this.add.text(0, creditY, 'Developed by its2much Mv', {
+      fontFamily: 'system-ui, sans-serif',
+      fontSize: '12px',
+      fontStyle: 'bold',
+      color: '#fbbf24', // Amber-400
+    }).setOrigin(0.5, 0.5)
+
+    // Optional subtle teaser
+    const teaserText = this.add.text(0, creditY + 16, 'More of Dennis\'s story coming soon...', {
+      fontFamily: 'system-ui, sans-serif',
+      fontSize: '9px',
+      fontStyle: 'italic',
+      color: '#94a3b8',
+    }).setOrigin(0.5, 0.5)
+
+    overlay.add([bg, trophyText, subtitleText, summaryBg, stage123, stage45, devCreditText, teaserText])
+
+    // Buttons: [REPLAY LEVEL 5], [REPLAY FROM L1], [MAIN MENU]
+    const btnConfigs = [
+      {
+        label: 'REPLAY LEVEL 5',
+        color: 0x10b981, // Emerald
+        onClick: () => this.loadLevel('level-5'),
+      },
+      {
+        label: 'REPLAY FROM L1',
+        color: 0x3b82f6, // Blue
+        onClick: () => this.loadLevel('level-1'),
+      },
+      {
+        label: 'MAIN MENU',
+        color: 0xd97706, // Amber
+        onClick: () => {
+          window.location.hash = '#/'
+        },
+      },
+    ]
+
+    const btnCount = btnConfigs.length
+    const btnW = Math.min(125, (cardW - 48) / btnCount)
+    const gap = 8
+    const totalButtonsW = btnCount * btnW + (btnCount - 1) * gap
+    const startX = -totalButtonsW / 2 + btnW / 2
+    const btnY = cardH / 2 - 24
+
+    btnConfigs.forEach((cfg, idx) => {
+      const bx = startX + idx * (btnW + gap)
+      const btnBg = this.add.graphics()
+      btnBg.fillStyle(cfg.color, 1)
+      btnBg.fillRoundedRect(bx - btnW / 2, btnY - 14, btnW, 28, 6)
+
+      const btnTxt = this.add.text(bx, btnY, cfg.label, {
+        fontFamily: 'system-ui, sans-serif',
+        fontSize: '9px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+      }).setOrigin(0.5, 0.5)
+
+      overlay.add([btnBg, btnTxt])
+    })
+
+    this.overlayContainer = overlay
+
+    // Direct pointer down to click the exact button zone
+    const pointerHandler = (pointer: Phaser.Input.Pointer) => {
+      if (this.overlayContainer !== overlay) return
+      const relX = pointer.x - width / 2
+      const relY = pointer.y - height / 2
+
+      // Check if clicked in button row
+      if (relY >= btnY - 20 && relY <= btnY + 20) {
+        btnConfigs.forEach((cfg, idx) => {
+          const bx = startX + idx * (btnW + gap)
+          if (Math.abs(relX - bx) <= btnW / 2 + 4) {
+            overlay.destroy()
+            this.overlayContainer = undefined
+            this.input.off('pointerdown', pointerHandler)
+            cfg.onClick()
+          }
+        })
+      }
+    }
+
+    this.input.on('pointerdown', pointerHandler)
   }
 
   private updateObjectiveBadge(): void {

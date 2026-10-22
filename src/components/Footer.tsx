@@ -13,6 +13,8 @@ export default function Footer({ onNavigate }: FooterProps) {
             DD Game Scratch &bull; Darling Dennis Game
           </span>
           <span className="hidden sm:inline text-slate-700">&bull;</span>
+          <span className="text-amber-400/90 font-medium">Developed by its2much Mv</span>
+          <span className="hidden sm:inline text-slate-700">&bull;</span>
           <span>A 2D comedy chase adventure inspired by Bengaluru</span>
         </div>
 
@@ -36,7 +38,7 @@ export default function Footer({ onNavigate }: FooterProps) {
             onClick={() => onNavigate('levels')}
             className="hover:text-slate-300 focus-visible:outline-none focus-visible:text-amber-400 underline-offset-4 hover:underline cursor-pointer"
           >
-            Planned Levels
+            Stages
           </button>
           <button
             type="button"
@@ -47,8 +49,9 @@ export default function Footer({ onNavigate }: FooterProps) {
           </button>
         </div>
       </div>
-      <div className="max-w-6xl mx-auto mt-4 pt-4 border-t border-slate-900 text-center text-[11px] text-slate-600">
-        Phase 1 Active &bull; Technical Foundation &amp; Responsive Shell &bull; Gameplay integration reserved for subsequent phases
+      <div className="max-w-6xl mx-auto mt-4 pt-4 border-t border-slate-900 text-center text-[11px] text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
+        <span>Stages 1–5 Playable &bull; Continuous Chase &bull; Final Victory Finale</span>
+        <span className="text-amber-400/80 font-medium">Developed by its2much Mv</span>
       </div>
     </footer>
   )

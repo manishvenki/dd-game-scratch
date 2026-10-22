@@ -57,12 +57,13 @@ const PLANNED_LEVELS: readonly PlannedLevel[] = [
   {
     id: 'cubbon-park',
     stageNumber: 'STAGE 05',
-    title: 'Cubbon Park',
-    setting: 'Historic green park pathways',
+    title: 'Cubbon Park Grand Finale',
+    setting: 'Historic green park trails & Bandstand',
     description:
-      'Scenic sprint along winding red-dirt trails, bamboo groves, park benches, and open lawns under the morning canopy.',
-    environmentType: 'Parkland Trails',
-    status: 'Coming Soon',
+      'The epic 5-level adventure conclusion! Sprint past lush red-dirt paths, bamboo groves, park benches, and Victorian lamps to reach the historic Cubbon Park Bandstand and claim final victory!',
+    environmentType: 'Parkland Trails & Bandstand',
+    status: 'Playable',
+    playHref: '#/play?level=5',
   },
 ] as const
 
@@ -72,13 +73,13 @@ export default function LevelsPage() {
       {/* Page Header */}
       <div className="space-y-1">
         <div className="text-xs font-mono uppercase tracking-wider text-amber-400">
-          STAGES ROSTER &bull; 4 PLAYABLE STAGES + 1 PLANNED
+          STAGES ROSTER &bull; ALL 5 STAGES PLAYABLE &bull; GRAND FINALE READY
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
           Game Stages
         </h1>
         <p className="text-sm text-slate-400">
-          Playable street encounters and planned stages inspired by prominent Bengaluru landmarks.
+          Playable Bengaluru street encounters spanning from the College Gate to the lush Bandstand of Cubbon Park.
         </p>
       </div>
 
@@ -89,10 +90,10 @@ export default function LevelsPage() {
         </div>
         <div className="space-y-1 text-xs sm:text-sm">
           <p className="font-semibold text-slate-200">
-            Phase 3 Encounters: Stages 01 to 04 Are Now Playable!
+            Adventure Complete: All 5 Stages Are Now Fully Playable!
           </p>
           <p className="text-slate-400 leading-normal">
-            Take on the college gate confrontation in Stage 01, the market corridor in Stage 02, the Brigade Road drama mix-up in Stage 03, or the Koramangala café date scramble in Stage 04 with continuous pursuit and comic Tanglish dialogues.
+            Play through all 5 levels: Stage 01 College Gate, Stage 02 Market Corridor, Stage 03 MG Road Reveal, Stage 04 Koramangala Café Date, and Stage 05 Cubbon Park Grand Finale with continuous trio pursuit, comic Tanglish catch dialogues, and victory celebration.
           </p>
         </div>
       </section>
