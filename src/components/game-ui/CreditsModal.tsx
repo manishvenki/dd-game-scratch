@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { audioManager } from '../../game/systems/AudioManager'
 
 interface CreditsModalProps {
   readonly isOpen: boolean
@@ -11,6 +12,7 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
+        audioManager.playSfx('cancel')
         onClose()
       }
     }
@@ -19,6 +21,11 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
   }, [isOpen, onClose])
 
   if (!isOpen) return null
+
+  const handleClose = () => {
+    audioManager.playSfx('confirm')
+    onClose()
+  }
 
   return (
     <div
@@ -46,7 +53,7 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
 
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
             className="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
             aria-label="Close credits"
           >
@@ -108,13 +115,13 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
 
         {/* Footer */}
         <div className="flex items-center justify-between pt-2 border-t border-slate-800">
-          <div className="text-[11px] font-mono text-amber-400/90">
+          <div className="text-xs font-gta-heading text-amber-400/90 font-bold">
             Developed by its2much Mv
           </div>
           <button
             type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-lg text-xs font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 cursor-pointer transition-colors"
+            onClick={handleClose}
+            className="gta-btn px-4 py-1.5 rounded-lg text-xs font-gta-heading font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 cursor-pointer transition-colors"
           >
             Close
           </button>

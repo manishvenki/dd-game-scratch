@@ -2,8 +2,6 @@ import { useState, useEffect } from 'react'
 import Layout from './components/Layout'
 import HomePage from './pages/HomePage'
 import PlayPage from './pages/PlayPage'
-import LevelsPage from './pages/LevelsPage'
-import CharactersPage from './pages/CharactersPage'
 import type { PageId } from './types/navigation'
 
 function getPageFromHash(hash: string): PageId {
@@ -14,7 +12,6 @@ function getPageFromHash(hash: string): PageId {
   if (route === 'characters') return 'characters'
   return 'home'
 }
-
 
 export default function App() {
   const [currentPage, setCurrentPage] = useState<PageId>(() =>
@@ -35,7 +32,6 @@ export default function App() {
     if (window.location.hash !== targetHash) {
       window.location.hash = targetHash
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const renderActivePage = () => {
@@ -45,9 +41,9 @@ export default function App() {
       case 'play':
         return <PlayPage />
       case 'levels':
-        return <LevelsPage />
+        return <HomePage onNavigate={navigateTo} initialModal="stages" />
       case 'characters':
-        return <CharactersPage />
+        return <HomePage onNavigate={navigateTo} initialModal="characters" />
       default:
         return <HomePage onNavigate={navigateTo} />
     }

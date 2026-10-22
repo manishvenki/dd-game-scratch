@@ -1,0 +1,53 @@
+interface RotateOverlayProps {
+  readonly isPortrait: boolean
+  readonly onDismiss?: () => void
+}
+
+export default function RotateOverlay({ isPortrait, onDismiss }: RotateOverlayProps) {
+  if (!isPortrait) return null
+
+  return (
+    <div
+      role="alert"
+      aria-live="assertive"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center p-6 bg-slate-950/95 backdrop-blur-lg text-center select-none"
+    >
+      {/* Animated Rotating Phone Device Icon */}
+      <div className="relative w-24 h-24 mb-6 flex items-center justify-center">
+        <div className="absolute inset-0 rounded-full bg-amber-500/10 animate-ping" />
+        <div className="w-16 h-28 border-4 border-amber-400 rounded-2xl flex flex-col items-center justify-between p-2 animate-[spin_3s_ease-in-out_infinite] shadow-xl shadow-amber-500/20 bg-slate-900">
+          <div className="w-4 h-1 bg-amber-400/60 rounded-full" />
+          <div className="text-xl">🔄</div>
+          <div className="w-3 h-3 border border-amber-400 rounded-full" />
+        </div>
+      </div>
+
+      <div className="max-w-sm space-y-2">
+        <div className="inline-block px-3 py-1 rounded text-xs font-gta-heading tracking-wider font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+          LANDSCAPE REQUIRED
+        </div>
+        <h2 className="gta-title text-3xl sm:text-4xl font-black text-white uppercase tracking-wider">
+          PLEASE ROTATE YOUR DEVICE
+        </h2>
+        <p className="text-sm font-gta-body text-slate-300 leading-relaxed">
+          DD Game Scratch is an action-adventure chase game optimized for widescreen landscape gameplay.
+        </p>
+        <p className="text-xs font-gta-heading text-amber-400/80 pt-2">
+          Turn your phone sideways to continue Dennis&apos;s adventure &bull; Progress is preserved!
+        </p>
+
+        {onDismiss && (
+          <div className="pt-4">
+            <button
+              type="button"
+              onClick={onDismiss}
+              className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-slate-200 text-xs font-mono border border-slate-700 cursor-pointer"
+            >
+              Continue anyway in portrait
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

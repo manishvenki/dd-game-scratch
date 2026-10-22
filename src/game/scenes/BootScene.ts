@@ -19,6 +19,7 @@ import {
   LEVEL_5_VICTORY_DIALOGUE,
 } from '../dialogue/dialogueData'
 import { GAME_FONTS, ensureGameFontsLoaded } from '../config/typography'
+import { audioManager } from '../systems/AudioManager'
 
 export class BootScene extends Phaser.Scene {
   // Level State
@@ -26,6 +27,7 @@ export class BootScene extends Phaser.Scene {
   private levelConfig!: LevelConfig
   private encounterState: 'intro' | 'active' | 'dialogue' | 'caught' | 'cleared' = 'intro'
   private interactionTriggered = false
+  private isGamePaused = false
 
   // Level 3 Special Encounter State Machine
   private level3EncounterState:
@@ -145,7 +147,7 @@ export class BootScene extends Phaser.Scene {
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, this.cleanup, this)
     this.events.once(Phaser.Scenes.Events.DESTROY, this.cleanup, this)
 
-    // Expose global hook for level switching from React UI
+    // Expose global hook for level switching and pause from React UI
     ;(window as unknown as { __DD_LOAD_LEVEL__?: (id: LevelId, force?: boolean) => void }).__DD_LOAD_LEVEL__ = (
       id: LevelId,
       force = false
@@ -155,6 +157,23 @@ export class BootScene extends Phaser.Scene {
       }
       this.loadLevel(id)
     }
+
+    window.__DD_IS_PAUSED__ = false
+    window.__DD_TOGGLE_PAUSE__ = () => this.togglePause()
+    window.__DD_SET_PAUSED__ = (p: boolean) => {
+      this.setGamePaused(p)
+    }
+    window.__DD_RESTART_LEVEL__ = () => this.loadLevel(this.currentLevelId)
+
+    this.input.keyboard?.on('keydown-ESC', () => {
+      this.togglePause()
+    })
+    this.input.keyboard?.on('keydown-P', () => {
+      this.togglePause()
+    })
+
+    // Set BGM track to gameplay
+    audioManager.setMusicTrack('gameplay')
   }
 
   private detectInitialLevel(): LevelId {
@@ -179,6 +198,11 @@ export class BootScene extends Phaser.Scene {
     this.chasersPaused = false
     this.isLevelCompleting = false
     this.isExitUnlocked = this.levelConfig.blockers.length === 0
+    this.isGamePaused = false
+    window.__DD_IS_PAUSED__ = false
+    this.physics.resume()
+    audioManager.setMusicTrack('gameplay')
+    window.dispatchEvent(new CustomEvent('dd_game_pause_change', { detail: { paused: false } }))
 
     // Synchronize URL hash with active level so React tabs and navigation stay in sync
     const levelNumMap: Record<LevelId, number> = {
@@ -540,6 +564,7 @@ export class BootScene extends Phaser.Scene {
     )
 
     if (result.hit) {
+      audioManager.playSfx(result.defeated ? 'defeat' : 'hit')
       // Level 3 Special Encounter State Machine:
       // When Dennis defeats the drama lead blocker Raghu, resume chasers!
       if (this.currentLevelId === 'level-3') {
@@ -553,6 +578,7 @@ export class BootScene extends Phaser.Scene {
       const allDefeated = CombatSystem.areAllEnemiesDefeated(this.blockingEnemies)
 
       if (allDefeated) {
+        audioManager.playSfx('unlock')
         this.isExitUnlocked = true
         this.updateExitVisual(true)
         if (this.levelConfig.hasChaseSequence) {
@@ -578,6 +604,8 @@ export class BootScene extends Phaser.Scene {
    * Per-frame update loop.
    */
   override update(): void {
+    if (this.isGamePaused) return
+
     if (this.bengaluruStreet) {
       this.bengaluruStreet.update()
     }
@@ -675,6 +703,9 @@ export class BootScene extends Phaser.Scene {
       // Catch check against Dennis's actual position
       if (!isDuringDialogue && this.encounterState === 'active') {
         const dist = Phaser.Math.Distance.Between(chaser.x, chaser.y, playerPos.x, playerPos.y)
+        if (dist < 75 && dist >= 34) {
+          audioManager.playSfx('tension')
+        }
         if (dist < 34) {
           this.triggerDennisCaught(chaser)
           break
@@ -691,6 +722,7 @@ export class BootScene extends Phaser.Scene {
     if (this.encounterState === 'caught') return
     this.encounterState = 'caught'
     this.playerController?.setFrozen(true)
+    audioManager.playSfx('game-over')
 
     let chaserName = 'Rahul'
     let dialogue = CATCH_DIALOGUE_RAHUL
@@ -722,9 +754,48 @@ export class BootScene extends Phaser.Scene {
               window.location.hash = '#/levels'
             },
           },
+          {
+            label: 'MAIN MENU',
+            color: 0xd97706,
+            onClick: () => {
+              window.location.hash = '#/'
+            },
+          },
         ],
       })
     })
+  }
+
+  public togglePause(): boolean {
+    return this.setGamePaused(!this.isGamePaused)
+  }
+
+  public setGamePaused(paused: boolean): boolean {
+    if (this.encounterState === 'caught' || this.encounterState === 'cleared') {
+      return false
+    }
+    if (this.isGamePaused === paused) return this.isGamePaused
+    this.isGamePaused = paused
+    window.__DD_IS_PAUSED__ = paused
+
+    if (paused) {
+      this.physics.pause()
+      this.playerController?.setFrozen(true)
+      audioManager.playSfx('pause')
+      window.dispatchEvent(new CustomEvent('dd_game_pause_change', { detail: { paused: true } }))
+    } else {
+      this.physics.resume()
+      if (this.encounterState === 'active') {
+        this.playerController?.setFrozen(false)
+      }
+      audioManager.playSfx('resume')
+      window.dispatchEvent(new CustomEvent('dd_game_pause_change', { detail: { paused: false } }))
+    }
+    return this.isGamePaused
+  }
+
+  public isPaused(): boolean {
+    return this.isGamePaused
   }
 
   public getLevel3EncounterState(): string {
@@ -842,6 +913,7 @@ export class BootScene extends Phaser.Scene {
     this.isLevelCompleting = true
     this.encounterState = 'cleared'
     this.playerController?.setFrozen(true)
+    audioManager.playSfx('stage-complete')
 
     if (this.currentLevelId === 'level-1') {
       this.showModalOverlay({
@@ -1191,6 +1263,8 @@ export class BootScene extends Phaser.Scene {
    * "Developed by its2much Mv"
    */
   private showGrandVictoryModal(): void {
+    audioManager.setMusicTrack('victory')
+    audioManager.playSfx('stage-complete')
     if (this.overlayContainer) {
       this.overlayContainer.destroy()
     }

@@ -1,149 +1,8 @@
 # DD Game Scratch (Darling Dennis Game)
 
-A web-based 2D game application built with React, Phaser 3, TypeScript, Vite, and Tailwind CSS v4.
+A standalone 2D anime comedy-adventure chase game built with React 19, Phaser 3.90, TypeScript, Vite 8, and Tailwind CSS v4.
 
-In DD Game Scratch, React manages the web application shell, menus, and responsive page layouts, while Phaser 3 operates the canvas, game loop, physics, input, animation, camera, and audio rendering.
-
----
-
-## Technology Stack
-
-- **UI Shell**: [React 19](https://react.dev/)
-- **Game Engine**: [Phaser 3](https://phaser.io/) (v3.90+)
-- **Build Tool**: [Vite 8](https://vite.dev/)
-- **Type Safety**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with `@tailwindcss/vite`
-- **Linter**: [oxlint](https://oxc.rs/)
-- **Version Control**: Git
-
----
-
-## Prerequisites
-
-- **Node.js**: `v20.19.0+` or `v22.12.0+` (Vite 8 requirement; tested and verified on Node `v20.20.0`)
-- **npm**: `v10+` (tested and verified on npm `11.7.0`)
-- **Git**: Installed for local version control
-
----
-
-## Getting Started
-
-### 1. Installation
-
-Install all project dependencies:
-
-```bash
-npm install
-```
-
-### 2. Windows Desktop Launcher & Shortcut (One-Click Chrome Launch)
-
-DD Game Scratch includes a dedicated Windows desktop launcher and custom anime game icon:
-
-1. **One-Time Desktop Shortcut Setup**:
-   Run the PowerShell shortcut installer script:
-   ```powershell
-   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-desktop-shortcut.ps1
-   ```
-   This automatically detects your Windows Desktop (including OneDrive-redirected desktops) and installs/updates **`DD Game Scratch.lnk`** pointing directly to:
-   `cmd.exe /c "C:\DD Game\dd-game-scratch\scripts\launch-dd-game.bat"`
-   with working directory set to the project root and custom application icon (`scripts\dd-game-icon.ico`).
-
-2. **Double-Click Play**:
-   Double-click the **`DD Game Scratch`** shortcut on your Windows desktop. The launcher script (`scripts\launch-dd-game.bat`):
-   - Resolves the project directory automatically via `%~dp0..`, independent of the caller's working directory.
-   - Verifies Node.js (`v20.19+`) and npm availability.
-   - Verifies project dependencies and runs `npm install` safely only if `node_modules` is absent.
-   - Checks if port `5173` is already responding with DD Game Scratch before reusing or starting Vite, preventing collisions with unrelated services.
-   - Starts the local Vite server in the background without spawning duplicate servers on repeated clicks.
-   - Captures logs to `logs\launcher.log` for inspection.
-   - Polls `http://localhost:5173/` until genuinely responding.
-   - Detects Google Chrome automatically across standard 64-bit/32-bit Program Files, LocalAppData, and Windows App Paths registry, launching Chrome directly to `http://localhost:5173/`. If Chrome is unavailable, it gracefully falls back to the system default browser.
-
-3. **Launcher Troubleshooting**:
-   - **Inspect Launcher Log**: Check `logs\launcher.log` in the project root to review startup steps, port checks, and browser launch commands.
-   - **Chrome Not Opening**: Ensure Google Chrome is installed at `C:\Program Files\Google\Chrome\Application\chrome.exe` (or in `%LocalAppData%`). If Chrome is not installed, the launcher will fall back to `start http://localhost:5173/`.
-   - **Port Conflicts**: If port 5173 is occupied by an unrelated application that does not serve DD Game Scratch, the launcher warns you without killing unrelated processes. To free the port, close the conflicting process or change the port in `vite.config.ts`.
-   - **Node.js / npm Missing**: Ensure Node.js `v20.19+` is added to your Windows system `PATH`. Restart your command prompt or terminal after installing Node.js.
-   - **Repair Shortcut**: Re-run `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-desktop-shortcut.ps1` at any time to refresh the desktop shortcut.
-
-### 3. Development Server
-
-Start the local Vite development server with Hot Module Replacement (HMR):
-
-```bash
-npm run dev
-```
-
-### 4. Production Build
-
-Compile TypeScript and generate the optimized production bundle in `dist/`:
-
-```bash
-npm run build
-```
-
-Preview the production build locally:
-
-```bash
-npm run preview
-```
-
-### 5. Code Quality & Type Checking
-
-Run static linting checks:
-
-```bash
-npm run lint
-```
-
-Run TypeScript verification without emitting output:
-
-```bash
-npm run typecheck
-```
-
----
-
-## Folder Structure Overview
-
-```
-dd-game-scratch/
-├── public/
-│   ├── assets/
-│   │   ├── characters/
-│   │   │   └── references/   # Character reference images (Dennis, Manish, Sathish, Rahul)
-│   │   ├── backgrounds/      # Environment artwork, parallax layers, and tilesets
-│   │   ├── audio/            # Background music (BGM) and sound effects (SFX)
-│   │   └── ui/               # Game HUD elements, icons, and dialog frames
-├── src/
-│   ├── components/           # React UI components (shell, overlays, HUD, controls)
-│   ├── pages/                # Top-level screen views (e.g., GameView)
-│   ├── game/
-│   │   ├── config/           # Typed Phaser game configuration factories
-│   │   ├── scenes/           # Phaser Scene classes (Boot, Preload, Game)
-│   │   ├── entities/         # Game characters, sprites, and interactables
-│   │   ├── systems/          # Physics, collision, audio, and camera systems
-│   │   ├── data/             # Static game data, level tuning, and dialog scripts
-│   │   └── README.md         # Architecture notes & React-Phaser lifecycle cleanup
-│   ├── styles/               # Custom CSS styles and design tokens
-│   ├── App.tsx               # Main application starter interface
-│   ├── main.tsx              # React application entry point
-│   └── index.css             # Tailwind CSS v4 entry point (@import "tailwindcss";)
-├── index.html                # Application HTML root
-├── package.json              # Project dependencies and npm scripts
-├── tsconfig.json             # TypeScript root project references
-└── vite.config.ts            # Vite configuration with React and Tailwind v4 plugins
-```
-
----
-
-## Phaser Integration & React Lifecycle
-
-React and Phaser are strictly decoupled:
-- **Game Loop Isolation**: The game loop is handled entirely inside Phaser 3 and is never driven by React state or effects.
-- **Component Lifecycle**: When Phaser is mounted in a React component, the instance is referenced via `useRef<Phaser.Game | null>(null)`. Upon component unmount, `game.destroy(true)` is invoked to cleanly tear down WebGL contexts, event listeners, and textures, preventing memory leaks and duplicate canvas instances.
-- **Configuration**: Engine setup is centralized in [`src/game/config/gameConfig.ts`](src/game/config/gameConfig.ts).
+DD Game Scratch is designed as a **pure, immersive landscape-only game**. All visible website conventions (headers, footers, page scroll, content cards, and webpage navigation) have been completely removed in favor of a unified arcade game-shell architecture.
 
 ---
 
@@ -151,173 +10,138 @@ React and Phaser are strictly decoupled:
 
 **Developed by its2much Mv**
 
-Official game branding is prominently and tastefully integrated into:
-- Home page hero badge and main navigation.
-- Persistent site footer across all views.
-- Level 5 Grand Finale Victory screen celebrating all 5 completed stages.
+Official branding is prominently and tastefully integrated across:
+- Main Menu HUD and Thatha Tea status bar.
+- In-game HUD overlay and Pause Menu.
+- Stage selection briefings and Character Roster.
+- Level 5 Grand Finale Victory screen celebrating all 5 completed Bengaluru stages.
 
 ---
 
-## GTA-Inspired Game Typography System
+## 1. Pure Landscape Game Experience
 
-DD Game Scratch uses an action-game typography suite inspired by the bold, urban, and confident tone of classic open-world games:
+DD Game Scratch runs exclusively inside a fixed, full-viewport landscape game canvas with zero document scrolling:
 
-- **Typography Stack**:
-  - **Primary Display & Headings**: `Teko` (condensed uppercase display font; open-source via Google Fonts, SIL Open Font License).
-  - **Navigation, Subheadings & Badges**: `Barlow Condensed` (semi-condensed grotesque; open-source via Google Fonts, SIL Open Font License).
-  - **Dialogue & Body Text**: `Inter` (neutral, hyper-readable neo-grotesque; open-source via Google Fonts, SIL Open Font License).
-  - **Fallbacks**: `'Impact', 'Arial Narrow', 'Trebuchet MS', sans-serif`.
-
-- **Centralized Tokens & Utilities**:
-  - **Phaser 3 Canvas**: Centralized in [`src/game/config/typography.ts`](src/game/config/typography.ts) via `GAME_FONTS` and `ensureGameFontsLoaded()`.
-  - **React UI & Tailwind CSS**: Utility classes defined in [`src/index.css`](src/index.css):
-    - `.gta-title`: Bold condensed title font with letter spacing and subtle text shadow.
-    - `.gta-subtitle`: Condensed uppercase sub-heading font.
-    - `.gta-btn`: Punchy arcade action button font styling.
-    - `.gta-badge`: High-visibility status and tag font styling.
-    - `.font-gta-display`, `.font-gta-heading`, `.font-gta-body`.
-
-- **Unified Canvas & DOM Coverage**:
-  - Main menu title, buttons, and status indicators.
-  - In-game HUD (stage cards, blocker count, health indicators, sprint gauge).
-  - Stage signboards (Bengaluru City College, Thatha Tea, SLV Kaapi, Dr. Rajkumar Park, Cubbon Park).
-  - Dynamic character badges (`DENNIS [PROTAG]`, `MANISH [CHASER]`, `SATHISH [CHASER]`, `RAHUL [CHASER]`, `[BLOCKER]`).
-  - Character-anchored comic dialogue bubbles and Tanglish conversations.
-  - Stage-complete overlays, retry screens, and Grand Victory ceremony.
+- **100% Full-Viewport Shell**: Root elements (`html, body, #root`) are locked to `100vw` by `100vh` with `overflow: hidden`, `position: fixed`, and `touch-action: manipulation`.
+- **Zero Website Conventions**: No website headers, footers, long-scrolling pages, cards, or external webpage links.
+- **Cohesive 12-State Game Architecture**:
+  1. **Main Menu**: Live animated Thatha Tea backdrop scene in Kalyan Nagar, with high-impact arcade menu panel (`Play Game`, `Stages`, `Cast`, `Settings`, `Credits`).
+  2. **Level Selection**: Game-native landscape modal (`StageSelectModal`) featuring all 5 Bengaluru missions, objectives, encounter details, and launch controls.
+  3. **Character Selection**: Game-native landscape roster (`CharacterSelectModal`) profiling protagonist **Dennis** and pursuers **Manish**, **Sathish**, and **Rahul**.
+  4. **Settings**: Dual-channel audio mixer, fullscreen toggle, controls guide, and restore defaults.
+  5. **Credits**: Official credits modal featuring developer attribution (`Developed by its2much Mv`), sound design, typography, and engine credits.
+  6. **Gameplay**: Full-bleed live Phaser 3 viewport with minimalist in-game HUD bar (`⏸ PAUSE`, stage indicator, sound toggle, fullscreen toggle).
+  7. **Pause Menu**: In-game modal (`PauseMenuModal`) that cleanly freezes physics, player input, chasers, and blockers without resetting coordinates or dialogue. Options: `RESUME GAME`, `RESTART LEVEL`, `AUDIO & SETTINGS`, `MAIN MENU`.
+  8. **Dialogue & Story Events**: Dynamic character-anchored Tanglish speech bubbles tracking speakers with head offsets and comic tails.
+  9. **Stage Complete**: Interactive 3-button modal (`PLAY NEXT STAGE →`, `REPLAY STAGE`, `LEVEL SELECT`).
+  10. **Game Over**: Catch event screen with character-anchored Tanglish capture lines, defeat sound, `RETRY LEVEL`, `LEVEL SELECT`, and `MAIN MENU`.
+  11. **Victory Finale**: Historic Cubbon Park Bandstand grand victory screen with full 5-stage checklist, victory fanfare, and developer branding.
+  12. **Retry & Confirmation Dialogues**: Debounced input overlays for seamless restart and stage navigation.
 
 ---
 
-## Playable Stages & Adventure Overview
+## 2. Complete Audio Architecture
 
-DD Game Scratch features a 5-level comedy chase adventure inspired by prominent Bengaluru landmarks:
+Audio is centralized in [`src/game/systems/AudioManager.ts`](src/game/systems/AudioManager.ts) and [`src/game/systems/SoundSynthesizer.ts`](src/game/systems/SoundSynthesizer.ts), featuring dual independent channels with Web Audio synthesis and original asset playback:
 
-1. **Stage 01: Bengaluru College Street**: Dennis must knock through 3 blocking boys (Ajay, Vijay, Sanjay) and outrun the trio (Manish, Sathish, Rahul) to the BMTC Bus Stop.
-2. **Stage 02: Thatha Tea, Kalyan Nagar**: An iconic Bengaluru tea stall opposite Dr. Rajkumar Park in the Kalyan Nagar / Kammanahalli area. Dennis knocks past blockers Vikram & Kiran and sprints to the Kammanahalli crossroad.
-3. **Stage 03: MG Road / Brigade Road**: Downtown retail hub featuring elevated Namma Metro tracks, a hilarious Annual Day drama club rehearsal reveal encounter, a blocker fight with Raghu, and a frantic sprint to the metro station.
-4. **Stage 04: Dr. Rajkumar Park**: Lush neighborhood park with ornamental cast-iron gates, tree canopies, walking paths, and park benches. Dennis breaks through park blockers and sprints to the Park Main Gate exit.
-5. **Stage 05: Cubbon Park Grand Finale**: The adventure's climax! Dennis dashes along winding red-dirt trails, bamboo groves, flowering Gulmohar canopies, and park benches under warm late-afternoon sunset lighting to reach the historic 1868 Cubbon Park Bandstand.
+### 2.1 Dual-Channel Audio Mixer & Persistence
+- **Music Channel**: Dedicated volume slider (0–100%) and mute toggle, controlling all BGM tracks. Persisted to `localStorage` (`dd_game_music_volume`, `dd_game_music_muted`).
+- **Sound Effects (SFX) Channel**: Dedicated volume slider (0–100%) and mute toggle, controlling interaction, combat, dialogue, and environment sounds. Persisted to `localStorage` (`dd_game_sfx_volume`, `dd_game_sfx_muted`).
+- **Channel Independence**: Adjusting music volume never affects SFX volume, and muting SFX never mutes music.
 
----
+### 2.2 Music States & Tracks
+1. **Gameplay BGM (CRITICAL PRESERVATION)**:
+   - File: `public/assets/audio/music/DD Game BGM.mp3` (original source: `C:\DD Game\DD Game BGM.mp3`).
+   - 100% preserved in its original format, pitch, speed, and continuous looping behavior.
+2. **Main Menu BGM (`main-menu`)**:
+   - Original warm, lighthearted acoustic marimba & kalimba procedural synthesis evoking Dennis relaxing at Thatha Tea.
+3. **Level Selection BGM (`level-select`)**:
+   - Energetic, adventurous minor-pentatonic synth arpeggios building anticipation for the Bengaluru chase.
+4. **Character Selection BGM (`character-select`)**:
+   - Playful, bouncy comedic groove highlighting the banter between Dennis and the trio.
+5. **Victory Fanfare (`victory`)**:
+   - Grand celebratory brass-style fanfare for the Level 5 Cubbon Park finale.
+6. **Game Over Sting (`game-over`)**:
+   - Comedic downward trombone slide when Dennis gets caught by the trio.
 
-## Final Victory Sequence & Story Boundary
-
-When Dennis clears the required objectives in Level 5 and reaches the Cubbon Park Bandstand:
-1. Active gameplay and chaser pursuit safely stop.
-2. A short, original comic Tanglish dialogue sequence triggers between Dennis and the panting trio, ending with a friendly truce and a promise of Masala Puri and Filter Coffee at the park gate.
-3. The **Grand Victory Screen** presents:
-   - Full 5-stage adventure completion checklist (`STAGE 01` to `STAGE 05` cleared).
-   - Official developer branding: **Developed by its2much Mv**.
-   - A subtle teaser: *"More of Dennis's story coming soon..."*
-   - Working buttons to **Replay Level 5**, **Replay from Level 1**, and return to the **Main Menu**.
-
-*Story Boundary*: The Kristu Jayanti University (KJU) epilogue and Manisha love-story arc are reserved for a future expansion prompt and are intentionally not revealed prematurely.
-
----
-
-## Background Music (BGM) System
-
-- **Asset Location**: `public/assets/audio/music/DD Game BGM.mp3`.
-- **User Gesture Playback**: BGM initiates on deliberate user interaction (e.g. clicking the "Play Game" button or first canvas tap), adhering to modern browser autoplay policies.
-- **Centralized Singleton**: Managed via [`src/game/systems/AudioManager.ts`](src/game/systems/AudioManager.ts), ensuring exactly one audio instance that loops seamlessly across React re-renders, scene restarts, and level switches without restarting playback from 0:00.
-- **Mute & Volume Controls**: An accessible HUD button allows instant mute/unmute toggling, with preferences persisted in `localStorage` (`dd_game_bgm_muted`).
-- **Resilience**: Audio errors or browser play promise rejections are caught gracefully without affecting gameplay physics or progression.
+### 2.3 Interactive Sound Effects (SFX)
+- **Menu & Navigation**: `click` (crisp UI tick), `confirm` (bright arcade chime), `cancel` (subtle low blip), `pause` (gentle chime), `resume` (ascending pitch blip).
+- **Dennis Locomotion & Combat**: `jump` (upward pitch sweep), `land` (soft ground thud), `attack` (whoosh swipe), `hit` (impact punch), `defeat` (knockout burst).
+- **Story & Stage**: `dialogue` (subtle comic typewriter pop), `unlock` (sparkling chime when blockers are cleared), `tension` (dramatic low pulse when chasers close within 75px), `stage-complete` (victorious ascending arpeggio).
+- **Anti-Fatigue Rate Limiting**: Repeated actions (attacks, footsteps, tension checks) use timestamp-based throttling to prevent noise clutter.
 
 ---
 
-## Full-Screen Landscape & Mobile Experience
+## 3. Landscape & Orientation System
 
-- **Widescreen Viewport**: Active gameplay takes full advantage of available landscape screen space, adapting Phaser cameras and `Scale.RESIZE` dynamically without stretching.
-- **Screen Orientation Lock**: When entering fullscreen, the game requests a landscape orientation lock via `screen.orientation.lock('landscape')` when supported.
-- **Portrait Advisory Overlay**: On mobile devices in portrait mode, a clear rotation advisory overlay prompts the player to rotate their phone sideways for optimal widescreen controls, with a graceful dismiss option.
-- **Responsive Controls**: Ergonomic virtual touch buttons (Left, Right, Jump, Attack) are docked at the screen corners to prevent overlapping the HUD, dialogue bubbles, or protagonist.
-- **Desktop Keyboard Support**: Movement (`A`/`D` or `←`/`→`), Jump (`Space` or `↑`), and Directional Attack (`J` or `X`).
-
----
-
-## Combat System & Cross-Level Blocker Health
-
-- **Input & Triggers**: Attack is triggered via `J` or `X` keys on desktop, or the dedicated virtual attack button on mobile touch devices.
-- **Unified Combat Architecture**: Handled centrally through [`src/game/systems/CombatSystem.ts`](src/game/systems/CombatSystem.ts) across all 5 levels.
-- **Attack Geometry & Range**:
-  - Horizontal range: `dx <= 75px` in Dennis's current facing direction (`facing = 1` or `-1`).
-  - Contact tolerance: Allows up to `16px` overlap behind origin to eliminate deadzones at point-blank collision range.
-  - Vertical tolerance: `60px` vertical alignment or vertical span overlap, allowing grounded Dennis and slight airborne hops to strike blockers while preventing hits on targets far above or below.
-- **Damage & Defeat Lifecycle**:
-  - Each valid hit applies `1` damage point and triggers white flash recoil, floating `★ POW!` arcade indicator, and health pip reduction (`♥ ♥`).
-  - At `0` HP, blocker enters `defeated` state, displays `★ DOWN!` and slumped graphics, completely disables Arcade physics collision, and stops receiving further damage.
-  - Defeated blockers no longer obstruct exits or trigger collision callbacks.
+- **Primary Landscape Layout**: The UI dynamically adapts to ultra-wide displays, laptops, tablets, and mobile landscape screens.
+- **Orientation Lock**: Programmatic lock (`screen.orientation.lock('landscape')`) is requested where supported by browser APIs.
+- **Rotate Device Overlay (`RotateOverlay`)**:
+  - Automatically covers the viewport when a mobile device is held in portrait (`innerHeight > innerWidth && innerWidth < 850`).
+  - Displays an animated rotating smartphone visual with GTA-styled instruction.
+  - Underlying Phaser canvas, player coordinates, chasers, blockers, dialogue, and audio are completely preserved without scene resets.
+  - Instantly disappears and resumes active gameplay as soon as the player rotates back to landscape.
+- **Fullscreen Mode**: Toggleable from the HUD and Settings modal via the standard Fullscreen API with graceful fallback.
 
 ---
 
-## Character-Anchored Dialogue System
+## 4. Playable Stages & Bengaluru Route
 
-- **World-to-Screen Tracking**: Dialogue bubbles in [`src/game/systems/DialogueSystem.ts`](src/game/systems/DialogueSystem.ts) dynamically calculate world coordinates for any speaking entity (Dennis, Manish, Sathish, Rahul, blockers, or story NPCs) and convert them to camera screen coordinates each frame.
-- **Positioning & Head Offset**: Anchors above the speaker's head with a `16px` vertical offset, automatically flipping below the character if near the top viewport boundary.
-- **Speech Tail**: Renders an animated triangular comic pointer tail targeting the speaker's exact horizontal position.
-- **Viewport Boundary Clamping**: Prevents bubbles from clipping off screen edges regardless of camera scrolling, player movement, or mobile aspect ratio.
-- **Multi-Line Tanglish Support**: Responsive card width with clean line-wrapping and speaker badge color coding.
+1. **Stage 01: Bengaluru College Street**: Campus perimeter and avenue. Dennis knocks through 3 college blockers (Ajay, Vijay, Sanjay) and outruns the trio to the BMTC Bus Stop.
+2. **Stage 02: Thatha Tea, Kalyan Nagar**: Tea shop frontage opposite Dr. Rajkumar Park. Dennis knocks past blockers Vikram & Kiran and dashes to the Kammanahalli crossroad.
+3. **Stage 03: MG Road / Brigade Road**: Downtown retail hub and elevated Namma Metro tracks. Features the Annual Day drama rehearsal mix-up reveal, blocker fight with Raghu, and a sprint to the metro train.
+4. **Stage 04: Dr. Rajkumar Park**: Parkland jogging track with ornamental railings and tree canopies. Dennis breaks through park blockers and sprints to the Park Main Gate.
+5. **Stage 05: Cubbon Park Grand Finale**: Climax along red-dirt paths, bamboo groves, and Gulmohar canopies, culminating at the historic 1868 Bandstand with grand victory fanfare and developer branding.
 
----
-
-## Level 3 Special Story Encounter State Machine
-
-In Level 3 (MG Road / Brigade Road), Dennis encounters the Annual Day drama rehearsal group:
-1. `CHASE_ACTIVE`: Normal chase with Sathish, Manish, and Rahul pursuing Dennis.
-2. `ENCOUNTER_TRIGGERED`: At `x = 920`, Dennis enters the drama encounter trigger zone.
-3. `DIALOGUE_ACTIVE`:
-   - Chasers cleanly freeze in place at their saved positions (no teleportation or resets).
-   - Dennis is frozen to prevent skipping dialogue.
-   - Character-anchored Tanglish dialogue sequence plays revealing the drama rehearsal mix-up.
-4. `ATTACK_INTERACTION`:
-   - Dennis unfreezes to confront the rehearsal blocker Raghu (`2 HP`) at `x = 980`.
-   - Chasers remain held while Dennis fights Raghu.
-5. `CHASE_RESUMED`:
-   - Upon defeating Raghu, chasers immediately resume full continuous pursuit from their saved positions.
-   - Dennis sprints to the Namma Metro Station exit (`x = 2500`).
+*Story Boundary*: The Kristu Jayanti University (KJU) epilogue and future Manisha storyline remain reserved for future expansions.
 
 ---
 
-## Level Progression, Exit Gating & Retry Reliability
+## 5. Controls
 
-### 1. Exit Gating & Completion Conditions
-- **State-Driven Exit Goal**: The exit goal visual dynamically reflects the stage objective:
-  - `[LOCKED]`: If any required blocking enemies remain undefeated, the exit gate remains locked with amber warning indicators, and Dennis is constrained from exiting prematurely.
-  - `[OPEN]`: Defeating all stage blockers automatically unlocks the exit portal with a glowing emerald banner and pulsing beacon. Dennis crossing the exit line completes the stage.
-- **Idempotent Transitions**: `isLevelCompleting` guard ensures level completion transitions and dialogue triggers execute exactly once, even with rapid frame loops or multiple trigger touches.
-- **3-Button Stage Complete Modal**:
-  - `PLAY NEXT STAGE →`: Advances sequentially along the 5-stage Bangalore route (L1 $\to$ L2 $\to$ L3 $\to$ L4 $\to$ L5).
-  - `REPLAY STAGE`: Fully resets and replays the current stage.
-  - `LEVEL SELECT`: Returns to the level selection menu (`#/levels`).
-- **Debounced Interaction**: Modals implement a 180ms input debounce and exact bounding-box hit testing, preventing dialogue-advance taps from accidentally dismissing the overlay or triggering premature navigation.
-
-### 2. Comprehensive Retry & Reset Lifecycle
-When a stage is restarted (via Retry button, level switch, or catch recovery):
-- **Player Controller**: `playerController.reset()` resets Dennis's physics coordinates, zeroes horizontal and vertical velocity, resets grounded and facing state (`facing = 1`), clears attack cooldown timers, restores the `idle` animation, and resets the virtual input bridge.
-- **Blockers & Physics Colliders**: Completely clears old blocker containers and Arcade colliders from memory and freshly reinstantiates blocker entities with full configured HP and active collision bodies.
-- **Chasers**: Resets Sathish, Manish, and Rahul to their stage spawn coordinates, unfreezes pause flags, restores facing direction (`facing = 1`), and synchronizes pursuit speeds.
-- **Dialogue & Story State**: Fully disposes of active speech bubbles and sequence callbacks, resets `l3EncounterState = 'CHASE_ACTIVE'`, and resets interaction flags.
-- **URL Hash Synchronization**: URL hash updates automatically (e.g. `#/play?level=2`), synchronizing React stage navigation tabs and browser history without redundant reloads.
+- **Desktop Keyboard**:
+  - `A` / `D` or `←` / `→`: Run Left / Right
+  - `Space` or `↑`: Jump
+  - `J` or `X`: Attack blockers
+  - `ESC` or `P`: Toggle Pause Menu
+- **Mobile / Touch Screen**:
+  - On-screen D-pad buttons: Left (`◀`), Right (`▶`)
+  - Virtual action buttons: `ATTACK` (rose), `JUMP` (amber)
+  - HUD buttons: `⏸ PAUSE`, `🔊 BGM`, `⚙ SETTINGS`, `⛶ FULLSCREEN`
 
 ---
 
-## End-to-End Verification & Regression Testing
+## 6. Windows Desktop Launcher
 
-The 5-stage adventure was verified end-to-end through automated static checks and browser testing:
-- **Type Safety**: `npm run typecheck` passed with 0 errors (`tsc -b --noEmit`).
-- **Linter**: `npm run lint` passed with 0 warnings and 0 errors across all 32 project files.
-- **Production Bundle**: `npm run build` compiled cleanly in 1.94s (`dist/index.html`, `dist/assets/index-*.css`, `dist/assets/index-*.js`).
+DD Game Scratch includes a one-click desktop launcher for Windows:
+
+1. **Create Shortcut**:
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-desktop-shortcut.ps1
+   ```
+   Installs `DD Game Scratch.lnk` on your Windows Desktop with the custom application icon.
+2. **Launch Game**:
+   Double-click the shortcut to start the background Vite server and launch Google Chrome (or default browser) directly into the landscape game interface.
+
+---
+
+## 7. Development & Verification
+
+### Scripts
+- `npm run dev`: Start local development server with Vite HMR (`http://localhost:5173/`).
+- `npm run build`: Typecheck with `tsc -b` and produce optimized production bundle in `dist/`.
+- `npm run typecheck`: Run strict TypeScript checks without emit (`tsc -b --noEmit`).
+- `npm run lint`: Run high-speed static analysis via `oxlint`.
+- `npm run preview`: Serve the production build locally.
+
+### Verification Status
+- **Type Safety**: Passed with 0 errors (`tsc -b --noEmit`).
+- **Linter**: Passed with 0 errors and 0 warnings on 42 project files (`oxlint`).
+- **Production Build**: Passed in 4.83s (`dist/index.html`, `dist/assets/*.css`, `dist/assets/*.js`).
 - **Browser Playtesting**:
-  - **Stage 01 (College Gate)**: Intro overlay displays Tanglish text, combat against Ajay, Vijay, and Sanjay decrements health pips, exit gate transitions from `[LOCKED]` to `[OPEN]`, and completing the stage presents the 3-button modal.
-  - **Stage 02 (Thatha Tea)**: Clean progression to Kalyan Nagar environment with tea stall frontage, samovar, and Kammanahalli crossroad exit.
-  - **Stage 03 (MG Road)**: Encounter at $x=920$ freezes chasers, plays comic reveal dialogue above characters, defeating Raghu resumes pursuit, and Dennis escapes to Namma Metro.
-  - **Stage 04 (Dr. Rajkumar Park)**: Park environment, iron boundary railings, walking trails, and park blocker combat verified.
-  - **Stage 05 (Cubbon Park Finale)**: Sunset lighting, Bandstand exit, victory dialogue, and Grand Victory screen featuring **Developed by its2much Mv** and stage completion summary verified.
-  - **Audio & BGM**: Continuous loop across stage transitions, user-gesture startup, and responsive mute/unmute verified.
-
----
-
-## Important Project Notes & Limitations
-
-- **Physical Device Orientation Testing**: Mobile landscape behavior and orientation locking were validated via browser devtools emulation. Behavior on physical iOS Safari devices relies on graceful CSS landscape fallbacks, as Apple WebKit restricts programmatic `screen.orientation.lock`.
-- **Character Sprites**: Dennis, Manish, Sathish, and Rahul remain custom vector procedural entities matching the established anime-inspired art direction, ready for future sprite sheet integration.
-
+  - Unified landscape interface verified; zero website elements present.
+  - Main menu, Stages modal, Cast modal, Settings modal, Credits modal verified.
+  - Level 1 gameplay launch, in-game HUD, pause menu (`ESC`, `P`, button), and resume verified.
+  - Dual-channel volume and mute persistence verified.
+  - Original gameplay BGM `public/assets/audio/music/DD Game BGM.mp3` preserved.
+  - Note: Physical iOS/Android device testing recommended for hardware-specific orientation lock behavior.

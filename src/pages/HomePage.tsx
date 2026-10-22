@@ -5,45 +5,97 @@ import { audioManager } from '../game/systems/AudioManager'
 import type { PageId } from '../types/navigation'
 import SettingsModal from '../components/game-ui/SettingsModal'
 import CreditsModal from '../components/game-ui/CreditsModal'
+import StageSelectModal from '../components/game-ui/StageSelectModal'
+import CharacterSelectModal from '../components/game-ui/CharacterSelectModal'
+import RotateOverlay from '../components/game-ui/RotateOverlay'
 
 interface HomePageProps {
   onNavigate: (page: PageId) => void
+  initialModal?: 'stages' | 'characters' | 'settings' | 'credits'
 }
 
-export default function HomePage({ onNavigate }: HomePageProps) {
-  const [isMuted, setIsMuted] = useState(() => audioManager.isMuted())
-  const [showSettings, setShowSettings] = useState(false)
-  const [showCredits, setShowCredits] = useState(false)
+export default function HomePage({ onNavigate, initialModal }: HomePageProps) {
+  const [isMuted, setIsMuted] = useState(() => audioManager.isMusicMuted() && audioManager.isSfxMuted())
+  const [showSettings, setShowSettings] = useState(initialModal === 'settings')
+  const [showCredits, setShowCredits] = useState(initialModal === 'credits')
+  const [showStages, setShowStages] = useState(initialModal === 'stages')
+  const [showCharacters, setShowCharacters] = useState(initialModal === 'characters')
   const [isFullscreen, setIsFullscreen] = useState(false)
+  const [isPortrait, setIsPortrait] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerHeight > window.innerWidth && window.innerWidth < 850
+  })
+  const [dismissPortraitWarning, setDismissPortraitWarning] = useState(false)
 
+  // 1. Activate Main Menu BGM track on load
   useEffect(() => {
-    const unsubscribe = audioManager.subscribe((muted) => {
-      setIsMuted(muted)
+    audioManager.setMusicTrack('main-menu')
+    const unsubscribe = audioManager.subscribe(() => {
+      setIsMuted(audioManager.isMusicMuted() && audioManager.isSfxMuted())
     })
 
     const checkFs = () => setIsFullscreen(Boolean(document.fullscreenElement))
     document.addEventListener('fullscreenchange', checkFs)
 
+    // Gesture listener to trigger audio if blocked
+    const handleGesture = () => {
+      void audioManager.play().catch(() => {})
+    }
+    window.addEventListener('pointerdown', handleGesture, { once: true })
+    window.addEventListener('keydown', handleGesture, { once: true })
+
     return () => {
       unsubscribe()
       document.removeEventListener('fullscreenchange', checkFs)
+      window.removeEventListener('pointerdown', handleGesture)
+      window.removeEventListener('keydown', handleGesture)
+    }
+  }, [])
+
+  // 2. Synchronize modals with URL hash routing (external system)
+  useEffect(() => {
+    const syncWithHash = () => {
+      const hash = window.location.hash.toLowerCase()
+      if (hash.includes('levels')) {
+        setShowStages(true)
+      } else if (hash.includes('characters')) {
+        setShowCharacters(true)
+      }
+    }
+    window.addEventListener('hashchange', syncWithHash)
+    return () => window.removeEventListener('hashchange', syncWithHash)
+  }, [])
+
+  // 3. Orientation change listener
+  useEffect(() => {
+    const checkOrientation = () => {
+      const portrait = window.innerHeight > window.innerWidth && window.innerWidth < 850
+      setIsPortrait(portrait)
+      if (!portrait) setDismissPortraitWarning(false)
+    }
+    window.addEventListener('resize', checkOrientation)
+    window.addEventListener('orientationchange', checkOrientation)
+    return () => {
+      window.removeEventListener('resize', checkOrientation)
+      window.removeEventListener('orientationchange', checkOrientation)
     }
   }, [])
 
   const handlePlayGame = () => {
-    // Deliberate user gesture starts background music
+    audioManager.playSfx('confirm')
     void audioManager.play().catch(() => {})
-    // Navigate directly into Level 1 launch flow
     window.location.hash = '#/play?level=1'
     onNavigate('play')
   }
 
   const handleAudioToggle = () => {
+    audioManager.playSfx('click')
     const newState = audioManager.toggleMute()
     setIsMuted(newState)
   }
 
   const handleFullscreenToggle = async () => {
+    audioManager.playSfx('click')
     try {
       if (!document.fullscreenElement) {
         if (document.documentElement.requestFullscreen) {
@@ -59,23 +111,34 @@ export default function HomePage({ onNavigate }: HomePageProps) {
     }
   }
 
+  const handleCloseModal = (modalName: string) => {
+    audioManager.playSfx('cancel')
+    audioManager.setMusicTrack('main-menu')
+    if (modalName === 'stages') setShowStages(false)
+    if (modalName === 'characters') setShowCharacters(false)
+    if (modalName === 'settings') setShowSettings(false)
+    if (modalName === 'credits') setShowCredits(false)
+    if (window.location.hash !== '#/' && window.location.hash !== '') {
+      window.location.hash = '#/'
+    }
+  }
+
   return (
-    <div className="relative w-full h-full min-h-[500px] flex-1 flex flex-col justify-between overflow-hidden select-none">
+    <div className="relative w-screen h-screen overflow-hidden select-none flex flex-col justify-between bg-slate-950">
       {/* Live Phaser Scene Background: Thatha Tea, Kalyan Nagar */}
       <div className="absolute inset-0 z-0">
         <GameCanvas scenes={[MainMenuScene]} className="w-full h-full" />
       </div>
 
       {/* Top HUD: Title branding and quick audio/fullscreen toggles */}
-      <header className="relative z-20 w-full p-4 sm:p-6 flex items-start justify-between pointer-events-none">
+      <header className="relative z-20 w-full p-3 sm:p-5 flex items-start justify-between pointer-events-none">
         {/* Game Title & Branding */}
-        <div className="pointer-events-auto flex items-center gap-3.5 bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-3 sm:px-4 shadow-xl">
+        <div className="pointer-events-auto flex items-center gap-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/90 rounded-2xl p-2.5 sm:px-4 shadow-xl">
           <img
             src="/assets/branding/dd-game-icon.png"
             alt="DD Game Icon"
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-xl object-cover border border-amber-500/40 shadow-md"
+            className="w-10 h-10 sm:w-11 sm:h-11 rounded-xl object-cover border border-amber-500/40 shadow-md"
             onError={(e) => {
-              // Hide image cleanly if unavailable
               e.currentTarget.style.display = 'none'
             }}
           />
@@ -88,14 +151,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
                 ARCADE
               </span>
             </div>
-            <p className="text-xs sm:text-sm font-semibold gta-subtitle text-amber-400 tracking-wide drop-shadow-sm">
+            <p className="text-xs font-semibold gta-subtitle text-amber-400 tracking-wide drop-shadow-sm">
               Darling Dennis Game &bull; A 2D Comedy Chase Adventure
             </p>
           </div>
         </div>
 
         {/* Top-Right Quick HUD Controls */}
-        <div className="pointer-events-auto flex items-center gap-2 bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-2xl p-2 shadow-xl">
+        <div className="pointer-events-auto flex items-center gap-2 bg-slate-950/85 backdrop-blur-md border border-slate-800/90 rounded-2xl p-1.5 sm:p-2 shadow-xl">
           {/* Audio Mute/Unmute Control */}
           <button
             type="button"
@@ -121,14 +184,17 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
             aria-label="Toggle Fullscreen"
           >
-            {isFullscreen ? '⛶' : '⛶'}
+            ⛶
           </button>
 
           {/* Settings Trigger */}
           <button
             type="button"
             id="btn-main-settings"
-            onClick={() => setShowSettings(true)}
+            onClick={() => {
+              audioManager.playSfx('click')
+              setShowSettings(true)
+            }}
             className="p-2 rounded-xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors"
             title="Game Settings"
             aria-label="Settings"
@@ -138,20 +204,20 @@ export default function HomePage({ onNavigate }: HomePageProps) {
         </div>
       </header>
 
-      {/* Center / Right Floating Arcade Menu Panel */}
-      <div className="relative z-20 w-full px-4 sm:px-8 py-4 flex flex-col md:flex-row items-end md:items-center justify-end pointer-events-none mt-auto mb-auto">
-        <div className="pointer-events-auto w-full sm:w-80 md:w-88 flex flex-col gap-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-2xl">
+      {/* Floating Arcade Menu Panel */}
+      <div className="relative z-20 w-full px-4 sm:px-8 py-2 flex flex-col items-end justify-center pointer-events-none mt-auto mb-auto">
+        <div className="pointer-events-auto w-full sm:w-80 md:w-88 flex flex-col gap-3 bg-slate-950/90 backdrop-blur-md border-2 border-amber-500/30 rounded-2xl p-4 sm:p-5 shadow-2xl">
           <div className="text-xs font-gta-heading uppercase tracking-widest text-slate-400 text-center pb-1 border-b border-slate-800/80 flex items-center justify-between">
             <span className="text-amber-400 font-bold">&bull; THATHA TEA &bull;</span>
             <span>MAIN MENU</span>
           </div>
 
-          {/* Large Primary PLAY GAME Button */}
+          {/* Primary PLAY GAME Button */}
           <button
             type="button"
             id="btn-home-play"
             onClick={handlePlayGame}
-            className="gta-btn group relative w-full py-4 px-6 rounded-xl font-bold text-xl sm:text-2xl tracking-wider uppercase bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 active:scale-[0.98] text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-3"
+            className="gta-btn group relative w-full py-3.5 px-6 rounded-xl font-bold text-xl sm:text-2xl tracking-wider uppercase bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 active:scale-[0.98] text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-3"
           >
             <span className="text-xl group-hover:scale-110 transition-transform">▶</span>
             <span>Play Game</span>
@@ -162,7 +228,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <button
               type="button"
               id="btn-home-levels"
-              onClick={() => onNavigate('levels')}
+              onClick={() => {
+                audioManager.playSfx('click')
+                setShowStages(true)
+              }}
               className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>🗺</span>
@@ -172,7 +241,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <button
               type="button"
               id="btn-home-characters"
-              onClick={() => onNavigate('characters')}
+              onClick={() => {
+                audioManager.playSfx('click')
+                setShowCharacters(true)
+              }}
               className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>👥</span>
@@ -182,7 +254,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <button
               type="button"
               id="btn-menu-settings"
-              onClick={() => setShowSettings(true)}
+              onClick={() => {
+                audioManager.playSfx('click')
+                setShowSettings(true)
+              }}
               className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>⚙</span>
@@ -192,7 +267,10 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             <button
               type="button"
               id="btn-menu-credits"
-              onClick={() => setShowCredits(true)}
+              onClick={() => {
+                audioManager.playSfx('click')
+                setShowCredits(true)
+              }}
               className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>★</span>
@@ -200,34 +278,62 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             </button>
           </div>
 
-          <div className="text-xs text-center text-slate-400 font-gta-body pt-1">
+          <div className="text-[11px] text-center text-slate-400 font-gta-body pt-1">
             Opposite Dr. Rajkumar Park &bull; Kalyan Nagar
           </div>
         </div>
       </div>
 
       {/* Bottom Status & Developer Credit Bar */}
-      <footer className="relative z-20 w-full p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none">
-        <div className="pointer-events-auto bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl px-3.5 py-1.5 text-sm font-gta-heading tracking-wider font-semibold text-amber-400 shadow-lg">
+      <footer className="relative z-20 w-full p-3 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none">
+        <div className="pointer-events-auto bg-slate-950/85 backdrop-blur-md border border-slate-800/90 rounded-xl px-3.5 py-1.5 text-xs font-gta-heading tracking-wider font-semibold text-amber-400 shadow-lg">
           Developed by its2much Mv
         </div>
 
-        <div className="pointer-events-auto hidden md:flex items-center gap-2 bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl px-3.5 py-1.5 text-xs font-gta-heading tracking-wider text-slate-300 shadow-lg">
+        <div className="pointer-events-auto hidden sm:flex items-center gap-2 bg-slate-950/85 backdrop-blur-md border border-slate-800/90 rounded-xl px-3.5 py-1.5 text-xs font-gta-heading tracking-wider text-slate-300 shadow-lg">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>STAGES 01–05 PLAYABLE &bull; CUBBON PARK FINALE READY</span>
         </div>
       </footer>
 
+      {/* Stage Selection Landscape Modal */}
+      <StageSelectModal
+        isOpen={showStages}
+        onClose={() => handleCloseModal('stages')}
+        onLaunchStage={(stageNum) => {
+          setShowStages(false)
+          window.location.hash = `#/play?level=${stageNum}`
+          onNavigate('play')
+        }}
+      />
+
+      {/* Character Selection Landscape Modal */}
+      <CharacterSelectModal
+        isOpen={showCharacters}
+        onClose={() => handleCloseModal('characters')}
+        onPlayDennis={() => {
+          setShowCharacters(false)
+          window.location.hash = '#/play?level=1'
+          onNavigate('play')
+        }}
+      />
+
       {/* Settings Modal */}
       <SettingsModal
         isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
+        onClose={() => handleCloseModal('settings')}
       />
 
       {/* Credits Modal */}
       <CreditsModal
         isOpen={showCredits}
-        onClose={() => setShowCredits(false)}
+        onClose={() => handleCloseModal('credits')}
+      />
+
+      {/* Rotate Device To Landscape Overlay */}
+      <RotateOverlay
+        isPortrait={isPortrait && !dismissPortraitWarning}
+        onDismiss={() => setDismissPortraitWarning(true)}
       />
     </div>
   )

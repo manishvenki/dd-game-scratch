@@ -7,6 +7,20 @@
   --font-gta-body: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
+html, body, #root {
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  position: fixed;
+  inset: 0;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  background-color: #020617;
+}
+
 /* GTA-Inspired Typography Classes */
 .font-gta-display {
   font-family: var(--font-gta-display);

@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { type DialogueSequence, type DialogueLine } from '../dialogue/dialogueTypes'
 import { GAME_FONTS } from '../config/typography'
+import { audioManager } from './AudioManager'
 
 export type SpeakerPositionResolver = (
   speakerId: string
@@ -286,6 +287,9 @@ export class DialogueSystem {
     if (this.lineText) {
       this.lineText.setText(line.text)
     }
+
+    // Play subtle dialogue blip SFX
+    audioManager.playSfx('dialogue')
 
     // Pop-in scale bounce animation on new line
     this.container.setScale(0.96)

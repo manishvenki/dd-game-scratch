@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { Dennis } from '../entities/Dennis'
 import { virtualInputBridge } from './virtualInputBridge'
+import { audioManager } from './AudioManager'
 
 export interface PlayerControllerConfig {
   readonly scene: Phaser.Scene
@@ -124,7 +125,13 @@ export class PlayerController {
     const body = this.physicsBody.body
 
     // 1. Ground detection
+    const wasGrounded = this.grounded
     this.grounded = body.blocked.down || body.touching.down
+
+    // Landing sound feedback
+    if (!wasGrounded && this.grounded && !this.frozen) {
+      audioManager.playSfx('land')
+    }
 
     if (this.frozen) {
       body.setVelocityX(0)
@@ -163,6 +170,7 @@ export class PlayerController {
     if (attackRequested && now - this.lastAttackTime >= this.attackCooldownMs) {
       this.lastAttackTime = now
       this.dennis.triggerAttackAnimation()
+      audioManager.playSfx('attack')
       this.onAttack?.({ x: this.physicsBody.x, y: this.physicsBody.y, facing: this.facing })
     }
 
@@ -184,6 +192,7 @@ export class PlayerController {
     if (jumpRequested && this.grounded) {
       body.setVelocityY(-this.jumpSpeed)
       this.grounded = false
+      audioManager.playSfx('jump')
     }
 
     // 6. Synchronize visual Dennis entity
