@@ -113,27 +113,29 @@ The environment is decoupled into an independent module with 6 visual depth laye
   - Continuous Chase: Manish, Sathish, and Rahul begin pursuing Dennis from the opening moments.
   - Confrontation: 3 blocking boys (Ajay, Vijay, Sanjay). Dennis must punch through or outmaneuver blockers while the trio closes in.
   - Dennis must reach the BMTC Bus Stop exit (`x = 2320`) without being caught.
-- **Level 2 (Commercial Lane Confrontation)**:
-  - Setting: Roadside market street corridor (2200px stage, `theme: 'market'`).
-  - Confrontation: 2 independent blocking boys (Vikram, Kiran) with independent health and physics bodies.
-  - Dennis must neutralize both blockers and sprint to the Avenue Crossroad exit (`x = 2120`).
+- **Level 2 (Thatha Tea Encounter)**:
+  - Setting: Iconic Bengaluru tea stall opposite Dr. Rajkumar Park in Kalyan Nagar / Kammanahalli (2200px stage, `theme: 'thatha-tea'`).
+  - Confrontation: 2 blocking boys (Vikram, Kiran) with independent health and physics bodies.
+  - Continuous Chase: Sathish, Manish, and Rahul pursue Dennis through the neighborhood street corridor.
+  - Dennis must neutralize both blockers and sprint to the Kammanahalli Crossroad exit (`x = 2120`).
 - **Level 3 (MG Road / Brigade Road Reveal)**:
-  - Setting: Central commercial street with elevated Namma Metro viaduct, neon store signs, and drama rehearsal stage (2600px stage, `theme: 'commercial-mg'`).
-  - Story Encounter: Dennis spots a stylish group at `x = 920` (Drama club boys Raghu & Preetham in costume), triggering a comic Tanglish misunderstanding before the trio arrives shouting from behind.
-  - Exit: Namma Metro Station entrance (`x = 2500`).
-- **Level 4 (Koramangala Café Date)**:
-  - Setting: Cozy red-brick café with outdoor patio seating, festoon fairy lights, and umbrella tables (2600px stage, `theme: 'cafe-koramangala'`).
-  - Story Encounter: Dennis meets his date Ananya at the patio table (`x = 860`) for filter kaapi and bun maska until the trio crashes the date.
-  - Exit: Koramangala 80ft Road Junction (`x = 2500`).
+  - Setting: Central commercial street with elevated Namma Metro viaduct, neon store signs, and drama rehearsal plaza (2600px stage, `theme: 'commercial-mg'`).
+  - Story Encounter State Machine: Dennis encounters the Annual Day drama rehearsal group at `x = 920`. Chasers cleanly freeze in place; comic reveal dialogue plays above character heads; Dennis unfreezes to defeat rehearsal blocker Raghu (`2 HP`); chasers resume continuous pursuit as Dennis sprints to the Namma Metro Station exit (`x = 2500`).
+- **Level 4 (Dr. Rajkumar Park Encounter)**:
+  - Setting: Dr. Rajkumar Park boundary with ornamental iron gates, walking trails, benches & neighborhood avenue (2600px stage, `theme: 'park-rajkumar'`).
+  - Confrontation: Park blockers Chethan and Suresh. Dennis breaks through and outruns the trio to the Park Main Gate exit (`x = 2500`).
+- **Level 5 (Cubbon Park Grand Finale)**:
+  - Setting: Historic Cubbon Park red-dirt trails, bamboo canopy, park benches, and the historic 1868 Bandstand (2600px stage, `theme: 'park-cubbon'`).
+  - Climax: Dennis defeats park blockers Arun & Deepak, outruns the trio to the Bandstand, and celebrates the full 5-stage grand victory.
 
 ### 2. Continuous Pursuit & Critical Gameplay Rules
-- **Chasers Never Wait for Blockers**: In Level 1 (and throughout Levels 1, 3, and 4), pursuit begins right from the start. Chasers do not pause or wait during Dennis's attacks, jumps, or blocker fights.
+- **Chasers Never Wait for Blockers**: In normal gameplay, pursuit is relentless. Chasers do not pause or wait during Dennis's attacks, jumps, or blocker fights.
 - **Urgency & Hesitation**: Every second Dennis spends stationary attacking blockers allows the pursuers to close the gap.
-- **Controlled Story Beats**: During scripted dialogues (Levels 3 and 4), chasers visibly advance to a dramatic proximity (`~75px`) shouting in the background, pausing catch triggers until dialogue concludes and full chase resumes.
+- **Controlled Story Beats**: During the Level 3 drama group encounter, chasers cleanly pause in place without instance recreation, preserving their exact positions until the reveal and required combat interaction conclude, then resume full pursuit.
 
 ### 3. Reusable Tanglish Dialogue System (`src/game/systems/DialogueSystem.ts`)
-- **Speech Bubble Design**: Screen-anchored comic cards with speaker badge pills, speech tail pointer, and high contrast typography.
-- **Original Tanglish Script**: Character lines in authentic colloquial Bengaluru Tanglish for Manish, Sathish, Rahul, Dennis, Ananya, Raghu, and Preetham.
+- **Character-Anchored Speech Bubbles**: Bubbles dynamically track the active speaking character's world position each frame, rendered above their head with camera scrolling support, comic speech tails, and viewport boundary clamping.
+- **Original Tanglish Script**: Authentic colloquial Bengaluru Tanglish lines for Manish, Sathish, Rahul, Dennis, Raghu, and Chethan.
 - **Cross-Platform Input**: Advances on `Space`, `Enter`, click, or touch tap on mobile.
 - **Catch Sequence**: Getting caught freezes gameplay and launches a comic conversation exchange with the chaser who caught Dennis, followed by a visible "RETRY LEVEL" button.
 - **Clean Reset**: Selecting Retry completely resets player position, enemy bodies, chaser coordinates, and dialogue state cleanly without memory leaks or duplicate listeners.

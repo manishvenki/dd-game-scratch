@@ -171,7 +171,7 @@ export default function PlayPage() {
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
             }`}
           >
-            L2: Market Corridor
+            L2: Thatha Tea
           </button>
           <button
             type="button"
@@ -195,7 +195,7 @@ export default function PlayPage() {
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
             }`}
           >
-            L4: Koramangala Café
+            L4: Rajkumar Park
           </button>
           <button
             type="button"

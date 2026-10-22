@@ -115,96 +115,84 @@ export const LEVEL_3_REVEAL_DIALOGUE: DialogueSequence = {
       id: 'l3_1',
       speakerId: 'dennis',
       speakerName: 'DENNIS',
-      text: 'Hey stylish Bengaluru girls! Dennis here... Sema stylish vibe-ah irukkeenga!',
+      text: 'Adei! Neenga inga enna panreenga? Sema stylish vibe-ah irukkeenga...',
       badgeColorHex: 0x0284c7,
     },
     {
       id: 'l3_2',
       speakerId: 'drama_raghu',
       speakerName: 'RAGHU',
-      text: 'Dei bro! We are boys da! College drama club rehearsal mudinjadhu, costume maathala!',
+      text: 'Dei bro, naanga girls illa da! Annual Day drama play rehearsal pannitu irukkom!',
       badgeColorHex: 0x0d9488, // Teal
     },
     {
       id: 'l3_3',
-      speakerId: 'drama_preetham',
-      speakerName: 'PREETHAM',
-      text: 'Aama da bro! Annual Day historical drama play! Neenga enna shock-la paakura?',
-      badgeColorHex: 0x059669, // Emerald
-    },
-    {
-      id: 'l3_4',
       speakerId: 'dennis',
       speakerName: 'DENNIS',
-      text: 'Aiyoyyo! Bro-va?! Mind voice: Sema bulb vaangittom da Dennis! But wait...',
+      text: 'Aiyayo! Naan vera nenachitten da! Mind voice: Sema bulb vaangittom da Dennis!',
       badgeColorHex: 0x0284c7,
     },
     {
-      id: 'l3_5',
+      id: 'l3_4',
       speakerId: 'manish',
       speakerName: 'MANISH',
       text: 'DENNIS!! Anga enna kadala podra?! Nillu da! Machas, kitta vandhuttom!',
       badgeColorHex: 0xdc2626,
     },
     {
-      id: 'l3_6',
+      id: 'l3_5',
       speakerId: 'dennis',
       speakerName: 'DENNIS',
-      text: 'Oh no! The trio is right behind me! Thambi boys, naan escape aaguren, bye!',
+      text: 'Oh no! The trio is right behind me! Raghu, vazhiya vidu da, knock panni escape aaguren!',
       badgeColorHex: 0x0284c7,
     },
   ],
 }
 
-// 3. Level 4 Koramangala Café Date Dialogue
-export const LEVEL_4_CAFE_DIALOGUE: DialogueSequence = {
-  id: 'level-4-cafe',
-  title: 'KORAMANGALA CAFÉ DATE',
+// 3. Level 4 Dr. Rajkumar Park Encounter Dialogue
+export const LEVEL_4_PARK_DIALOGUE: DialogueSequence = {
+  id: 'level-4-park',
+  title: 'DR. RAJKUMAR PARK ENCOUNTER',
   lines: [
     {
       id: 'l4_1',
       speakerId: 'dennis',
       speakerName: 'DENNIS',
-      text: 'Hey Ananya! Finally on time... You look super pretty today!',
+      text: 'Aha! Dr. Rajkumar Park greenery & walking trails... Sema fresh-ah irukku!',
       badgeColorHex: 0x0284c7,
     },
     {
       id: 'l4_2',
-      speakerId: 'date_ananya',
-      speakerName: 'ANANYA',
-      text: 'Thanks Dennis! Order pannalaama? Cold brew or warm Bun Maska?',
-      badgeColorHex: 0xdb2777, // Pink/Fuchsia
+      speakerId: 'blocker_chethan',
+      speakerName: 'CHETHAN',
+      text: 'Dei thambi! Idhu park walking track da, ivlo speed-ah odina safety complaint aagidum!',
+      badgeColorHex: 0x16a34a, // Green
     },
     {
       id: 'l4_3',
       speakerId: 'dennis',
       speakerName: 'DENNIS',
-      text: 'Bun Maska double butter please! Bengaluru weather-la café date sema peaceful-ah irukku—',
+      text: 'Bro, pinnadi en college gang chase panraanga! Konjam side kudunga please!',
       badgeColorHex: 0x0284c7,
     },
     {
       id: 'l4_4',
       speakerId: 'sathish',
       speakerName: 'SATHISH',
-      text: 'DENNIS!! Anga enna café date-aa?! Macha Manish, Rahul, vaLachipudinga da!',
+      text: 'DENNIS!! Rajkumar Park gate-kulla maattikitta da! Machas, valachi pudinga da!',
       badgeColorHex: 0x16a34a,
     },
     {
       id: 'l4_5',
       speakerId: 'dennis',
       speakerName: 'DENNIS',
-      text: 'Oh God! Enga vandhaalum chase panraangale! Ananya, bill pay pannidu, I gotta RUN!',
+      text: 'Park Main Gate cross panni escape aaga poren! Leave me alone!',
       badgeColorHex: 0x0284c7,
-    },
-    {
-      id: 'l4_6',
-      speakerId: 'date_ananya',
-      speakerName: 'ANANYA',
-      text: 'Ennadhu?! Bill naanaa?! Dennis wait da... Yaaru da avanga?!',
-      badgeColorHex: 0xdb2777,
     },
   ],
 }
+
+export const LEVEL_4_CAFE_DIALOGUE = LEVEL_4_PARK_DIALOGUE
 
 // 4. Level 5 Cubbon Park Grand Victory Sequence Dialogue
 export const LEVEL_5_VICTORY_DIALOGUE: DialogueSequence = {

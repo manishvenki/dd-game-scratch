@@ -49,8 +49,8 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
           <p className="text-sm sm:text-base text-slate-300 leading-relaxed max-w-2xl">
             Step into the energetic streets of Bengaluru in an authentic 2D side-scrolling browser game.
-            Play as Dennis sprinting through bustling college gates, crowded roadside corridors, neon MG Road avenues,
-            cozy Koramangala cafés, and the lush green Bandstand of Cubbon Park &mdash; staying one step ahead of the trio!
+            Play as Dennis sprinting through bustling college gates, the Thatha Tea stall in Kalyan Nagar, neon MG Road avenues,
+            the walking trails of Dr. Rajkumar Park, and the lush green Bandstand of Cubbon Park &mdash; staying one step ahead of the trio!
           </p>
 
           {/* Call to Actions */}
@@ -86,7 +86,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             Adventure Complete &mdash; Stages 01 to 05 Live and Playable
           </p>
           <p className="text-slate-400 leading-normal">
-            Conquer the College Street encounter, Market Corridor, MG Road Reveal, Koramangala Café Date, and the brand-new Cubbon Park Grand Finale. Featuring continuous trio pursuit, comic Tanglish catch dialogues, and official soundtrack BGM.
+            Conquer the College Street encounter, Thatha Tea, MG Road Reveal, Dr. Rajkumar Park, and the brand-new Cubbon Park Grand Finale. Featuring continuous trio pursuit, comic Tanglish catch dialogues, and official soundtrack BGM.
           </p>
         </div>
       </section>

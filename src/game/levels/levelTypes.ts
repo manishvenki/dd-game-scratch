@@ -1,6 +1,13 @@
 export type LevelId = 'level-1' | 'level-2' | 'level-3' | 'level-4' | 'level-5'
 
-export type EnvironmentTheme = 'college' | 'market' | 'commercial-mg' | 'cafe-koramangala' | 'park-cubbon'
+export type EnvironmentTheme =
+  | 'college'
+  | 'thatha-tea'
+  | 'commercial-mg'
+  | 'park-rajkumar'
+  | 'park-cubbon'
+  | 'market'
+  | 'cafe-koramangala'
 
 export type EnemyState = 'idle' | 'blocking' | 'hit' | 'defeated'
 

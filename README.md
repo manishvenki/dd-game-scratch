@@ -132,9 +132,9 @@ Official game branding is prominently and tastefully integrated into:
 DD Game Scratch features a 5-level comedy chase adventure inspired by prominent Bengaluru landmarks:
 
 1. **Stage 01: Bengaluru College Street**: Dennis must knock through 3 blocking boys (Ajay, Vijay, Sanjay) and outrun the trio (Manish, Sathish, Rahul) to the BMTC Bus Stop.
-2. **Stage 02: Roadside Market Corridor**: A tight street bottleneck where Dennis neutralizes two blocking boys (Vikram and Kiran) before reaching the avenue crossroad.
-3. **Stage 03: MG Road / Brigade Road**: Downtown retail hub featuring elevated Namma Metro tracks, a hilarious drama club rehearsal mix-up dialogue, and a frantic sprint to the metro station.
-4. **Stage 04: Koramangala Café Date**: Dennis meets his date Ananya for Bun Maska at an outdoor patio before the chasers crash the date, forcing an escape to the 80ft Road junction.
+2. **Stage 02: Thatha Tea, Kalyan Nagar**: An iconic Bengaluru tea stall opposite Dr. Rajkumar Park in the Kalyan Nagar / Kammanahalli area. Dennis knocks past blockers Vikram & Kiran and sprints to the Kammanahalli crossroad.
+3. **Stage 03: MG Road / Brigade Road**: Downtown retail hub featuring elevated Namma Metro tracks, a hilarious Annual Day drama club rehearsal reveal encounter, a blocker fight with Raghu, and a frantic sprint to the metro station.
+4. **Stage 04: Dr. Rajkumar Park**: Lush neighborhood park with ornamental cast-iron gates, tree canopies, walking paths, and park benches. Dennis breaks through park blockers and sprints to the Park Main Gate exit.
 5. **Stage 05: Cubbon Park Grand Finale**: The adventure's climax! Dennis dashes along winding red-dirt trails, bamboo groves, flowering Gulmohar canopies, and park benches under warm late-afternoon sunset lighting to reach the historic 1868 Cubbon Park Bandstand.
 
 ---
@@ -171,6 +171,49 @@ When Dennis clears the required objectives in Level 5 and reaches the Cubbon Par
 - **Portrait Advisory Overlay**: On mobile devices in portrait mode, a clear rotation advisory overlay prompts the player to rotate their phone sideways for optimal widescreen controls, with a graceful dismiss option.
 - **Responsive Controls**: Ergonomic virtual touch buttons (Left, Right, Jump, Attack) are docked at the screen corners to prevent overlapping the HUD, dialogue bubbles, or protagonist.
 - **Desktop Keyboard Support**: Movement (`A`/`D` or `←`/`→`), Jump (`Space` or `↑`), and Directional Attack (`J` or `X`).
+
+---
+
+## Combat System & Cross-Level Blocker Health
+
+- **Input & Triggers**: Attack is triggered via `J` or `X` keys on desktop, or the dedicated virtual attack button on mobile touch devices.
+- **Unified Combat Architecture**: Handled centrally through [`src/game/systems/CombatSystem.ts`](src/game/systems/CombatSystem.ts) across all 5 levels.
+- **Attack Geometry & Range**:
+  - Horizontal range: `dx <= 75px` in Dennis's current facing direction (`facing = 1` or `-1`).
+  - Contact tolerance: Allows up to `16px` overlap behind origin to eliminate deadzones at point-blank collision range.
+  - Vertical tolerance: `60px` vertical alignment or vertical span overlap, allowing grounded Dennis and slight airborne hops to strike blockers while preventing hits on targets far above or below.
+- **Damage & Defeat Lifecycle**:
+  - Each valid hit applies `1` damage point and triggers white flash recoil, floating `★ POW!` arcade indicator, and health pip reduction (`♥ ♥`).
+  - At `0` HP, blocker enters `defeated` state, displays `★ DOWN!` and slumped graphics, completely disables Arcade physics collision, and stops receiving further damage.
+  - Defeated blockers no longer obstruct exits or trigger collision callbacks.
+
+---
+
+## Character-Anchored Dialogue System
+
+- **World-to-Screen Tracking**: Dialogue bubbles in [`src/game/systems/DialogueSystem.ts`](src/game/systems/DialogueSystem.ts) dynamically calculate world coordinates for any speaking entity (Dennis, Manish, Sathish, Rahul, blockers, or story NPCs) and convert them to camera screen coordinates each frame.
+- **Positioning & Head Offset**: Anchors above the speaker's head with a `16px` vertical offset, automatically flipping below the character if near the top viewport boundary.
+- **Speech Tail**: Renders an animated triangular comic pointer tail targeting the speaker's exact horizontal position.
+- **Viewport Boundary Clamping**: Prevents bubbles from clipping off screen edges regardless of camera scrolling, player movement, or mobile aspect ratio.
+- **Multi-Line Tanglish Support**: Responsive card width with clean line-wrapping and speaker badge color coding.
+
+---
+
+## Level 3 Special Story Encounter State Machine
+
+In Level 3 (MG Road / Brigade Road), Dennis encounters the Annual Day drama rehearsal group:
+1. `CHASE_ACTIVE`: Normal chase with Sathish, Manish, and Rahul pursuing Dennis.
+2. `ENCOUNTER_TRIGGERED`: At `x = 920`, Dennis enters the drama encounter trigger zone.
+3. `DIALOGUE_ACTIVE`:
+   - Chasers cleanly freeze in place at their saved positions (no teleportation or resets).
+   - Dennis is frozen to prevent skipping dialogue.
+   - Character-anchored Tanglish dialogue sequence plays revealing the drama rehearsal mix-up.
+4. `ATTACK_INTERACTION`:
+   - Dennis unfreezes to confront the rehearsal blocker Raghu (`2 HP`) at `x = 980`.
+   - Chasers remain held while Dennis fights Raghu.
+5. `CHASE_RESUMED`:
+   - Upon defeating Raghu, chasers immediately resume full continuous pursuit from their saved positions.
+   - Dennis sprints to the Namma Metro Station exit (`x = 2500`).
 
 ---
 

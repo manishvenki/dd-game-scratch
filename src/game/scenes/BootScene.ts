@@ -15,7 +15,7 @@ import {
   CATCH_DIALOGUE_SATHISH,
   CATCH_DIALOGUE_RAHUL,
   LEVEL_3_REVEAL_DIALOGUE,
-  LEVEL_4_CAFE_DIALOGUE,
+  LEVEL_4_PARK_DIALOGUE,
   LEVEL_5_VICTORY_DIALOGUE,
 } from '../dialogue/dialogueData'
 
@@ -25,6 +25,16 @@ export class BootScene extends Phaser.Scene {
   private levelConfig!: LevelConfig
   private encounterState: 'intro' | 'active' | 'dialogue' | 'caught' | 'cleared' = 'intro'
   private interactionTriggered = false
+
+  // Level 3 Special Encounter State Machine
+  private level3EncounterState:
+    | 'CHASE_ACTIVE'
+    | 'ENCOUNTER_TRIGGERED'
+    | 'DIALOGUE_ACTIVE'
+    | 'REVEAL_COMPLETE'
+    | 'ATTACK_INTERACTION'
+    | 'CHASE_RESUMED' = 'CHASE_ACTIVE'
+  private chasersPaused = false
 
   // Dialogue System
   private dialogueSystem?: DialogueSystem
@@ -103,8 +113,11 @@ export class BootScene extends Phaser.Scene {
     // 4. Setup Level Entities (Dennis, Blockers, Chasers, Exit Goal)
     this.setupLevelEntities(groundY)
 
-    // 5. Setup Dialogue System
-    this.dialogueSystem = new DialogueSystem({ scene: this })
+    // 5. Setup Dialogue System with character position resolver
+    this.dialogueSystem = new DialogueSystem({
+      scene: this,
+      getSpeakerPosition: (speakerId) => this.resolveSpeakerPosition(speakerId),
+    })
 
     // 6. Setup Screen-Anchored HUD
     this.setupScreenHud()
@@ -145,6 +158,8 @@ export class BootScene extends Phaser.Scene {
     this.levelConfig = getLevelConfig(levelId)
     this.encounterState = 'intro'
     this.interactionTriggered = false
+    this.level3EncounterState = 'CHASE_ACTIVE'
+    this.chasersPaused = false
 
     const width = this.scale.width
     const height = this.scale.height
@@ -154,10 +169,13 @@ export class BootScene extends Phaser.Scene {
     // Clear old blockers and colliders
     this.clearEncounterEntities()
 
-    // Clear active dialogue
+    // Clear active dialogue with character position resolver
     if (this.dialogueSystem) {
       this.dialogueSystem.destroy()
-      this.dialogueSystem = new DialogueSystem({ scene: this })
+      this.dialogueSystem = new DialogueSystem({
+        scene: this,
+        getSpeakerPosition: (speakerId) => this.resolveSpeakerPosition(speakerId),
+      })
     }
 
     // Clear overlays
@@ -424,7 +442,7 @@ export class BootScene extends Phaser.Scene {
 
   /**
    * Handles player attack execution against blocking enemies.
-   * Chasers do NOT pause or freeze while Dennis attacks.
+   * Chasers do NOT pause or freeze while Dennis attacks, except during the scripted Level 3 encounter.
    */
   private handlePlayerAttack(attackData: { x: number; y: number; facing: 1 | -1 }): void {
     if (this.encounterState === 'caught' || this.encounterState === 'cleared') return
@@ -437,6 +455,16 @@ export class BootScene extends Phaser.Scene {
     )
 
     if (result.hit) {
+      // Level 3 Special Encounter State Machine:
+      // When Dennis defeats the drama lead blocker Raghu, resume chasers!
+      if (this.currentLevelId === 'level-3') {
+        if (result.enemy && result.enemy.enemyId === 'drama-raghu' && result.defeated) {
+          this.level3EncounterState = 'CHASE_RESUMED'
+          this.chasersPaused = false
+          this.triggerObjectiveUpdated('RAGHU DEFEATED! TRIO RESUMED PURSUIT — SPRINT TO METRO!')
+        }
+      }
+
       const allDefeated = CombatSystem.areAllEnemiesDefeated(this.blockingEnemies)
 
       if (allDefeated) {
@@ -470,6 +498,11 @@ export class BootScene extends Phaser.Scene {
     if (this.playerController) {
       this.playerController.update()
       this.updatePlayerStatusFeedback()
+    }
+
+    // Keep character-anchored speech bubbles locked above the active speaker
+    if (this.dialogueSystem) {
+      this.dialogueSystem.update()
     }
 
     // 1. Chaser continuous pursuit during active gameplay or controlled approach in dialogue
@@ -508,7 +541,7 @@ export class BootScene extends Phaser.Scene {
    * Frame-rate independent with delta time.
    */
   private updateChaserPursuit(isDuringDialogue = false): void {
-    if (!this.playerController) return
+    if (!this.playerController || this.chasersPaused) return
     const playerPos = this.playerController.getPosition()
 
     const chaserConfigs = new Map(this.levelConfig.chasers?.map((c) => [c.chaserId, c]) ?? [])
@@ -592,18 +625,32 @@ export class BootScene extends Phaser.Scene {
     })
   }
 
+  public getLevel3EncounterState(): string {
+    return this.level3EncounterState
+  }
+
+  public areChasersPaused(): boolean {
+    return this.chasersPaused
+  }
+
   /**
-   * Triggers story interaction dialogue (Level 3 Reveal or Level 4 Café Date).
+   * Triggers story interaction dialogue (Level 3 Reveal or Level 4 Dr. Rajkumar Park).
    */
-  private triggerStoryInteraction(interaction: LevelInteractionConfig): void {
+  private triggerStoryInteraction(_interaction: LevelInteractionConfig): void {
     if (this.interactionTriggered) return
     this.interactionTriggered = true
     this.encounterState = 'dialogue'
     this.playerController?.setFrozen(true)
 
+    // Cleanly pause chasers so their exact positions and states are preserved
+    this.chasersPaused = true
+
     let sequence = LEVEL_3_REVEAL_DIALOGUE
-    if (interaction.dialogueSequenceId === 'level-4-cafe') {
-      sequence = LEVEL_4_CAFE_DIALOGUE
+    if (this.currentLevelId === 'level-3') {
+      this.level3EncounterState = 'DIALOGUE_ACTIVE'
+      sequence = LEVEL_3_REVEAL_DIALOGUE
+    } else if (this.currentLevelId === 'level-4') {
+      sequence = LEVEL_4_PARK_DIALOGUE
     }
 
     this.dialogueSystem?.startSequence(sequence, () => {
@@ -611,11 +658,78 @@ export class BootScene extends Phaser.Scene {
       this.playerController?.setFrozen(false)
 
       if (this.currentLevelId === 'level-3') {
-        this.triggerObjectiveUpdated('REVEAL OVER! OUTRUN THE TRIO TO NAMMA METRO ENTRANCE!')
+        this.level3EncounterState = 'ATTACK_INTERACTION'
+        // Keep chasers paused during the required attack interaction against Raghu
+        this.chasersPaused = true
+        this.triggerObjectiveUpdated('REVEAL OVER! KNOCK PAST RAGHU & SPRINT TO THE METRO!')
       } else if (this.currentLevelId === 'level-4') {
-        this.triggerObjectiveUpdated('DATE INTERRUPTED! SPRINT TO 80FT ROAD JUNCTION!')
+        this.chasersPaused = false
+        this.triggerObjectiveUpdated('WALKING TRACK INTERRUPTED! SPRINT TO PARK MAIN GATE!')
+      } else {
+        this.chasersPaused = false
       }
     })
+  }
+
+  /**
+   * Resolves the world position of characters for character-anchored speech bubbles.
+   */
+  private resolveSpeakerPosition(speakerId: string): { x: number; y: number; height?: number } | undefined {
+    const groundY = this.getGroundY(this.scale.height)
+
+    if (speakerId === 'dennis') {
+      if (this.dennis) {
+        return { x: this.dennis.x, y: this.dennis.y, height: 80 }
+      }
+      return this.playerController?.getPosition()
+    }
+
+    if (speakerId === 'manish') {
+      if (this.manish && this.manish.visible) {
+        return { x: this.manish.x, y: this.manish.y, height: 80 }
+      }
+    }
+
+    if (speakerId === 'sathish') {
+      if (this.sathish && this.sathish.visible) {
+        return { x: this.sathish.x, y: this.sathish.y, height: 80 }
+      }
+    }
+
+    if (speakerId === 'rahul') {
+      if (this.rahul && this.rahul.visible) {
+        return { x: this.rahul.x, y: this.rahul.y, height: 80 }
+      }
+    }
+
+    if (speakerId === 'drama_raghu' || speakerId === 'drama-raghu') {
+      const raghu = this.blockingEnemies.find((e) => e.enemyId === 'drama-raghu')
+      if (raghu) {
+        return { x: raghu.x, y: raghu.y, height: 80 }
+      }
+      return { x: 980, y: groundY, height: 80 }
+    }
+
+    if (speakerId === 'blocker_chethan') {
+      const chethan = this.blockingEnemies.find((e) => e.enemyId === 'blocker-4-1')
+      if (chethan) {
+        return { x: chethan.x, y: chethan.y, height: 80 }
+      }
+      return { x: 960, y: groundY, height: 80 }
+    }
+
+    const enemy = this.blockingEnemies.find(
+      (e) => e.enemyId === speakerId || e.config.name.toLowerCase() === speakerId.toLowerCase()
+    )
+    if (enemy) {
+      return { x: enemy.x, y: enemy.y, height: 80 }
+    }
+
+    if (this.levelConfig.interaction) {
+      return { x: this.levelConfig.interaction.triggerX, y: groundY, height: 80 }
+    }
+
+    return undefined
   }
 
   /**
@@ -644,7 +758,7 @@ export class BootScene extends Phaser.Scene {
     } else if (this.currentLevelId === 'level-2') {
       this.showModalOverlay({
         title: 'LEVEL 2 COMPLETE!',
-        subtitle: 'Dennis neutralized both street blockers and reached the avenue crossroad!',
+        subtitle: 'Dennis successfully knocked past Vikram & Kiran at Thatha Tea and sprinted to the Kammanahalli crossroad!',
         accentColor: 0x10b981,
         buttons: [
           {
@@ -660,7 +774,7 @@ export class BootScene extends Phaser.Scene {
     } else if (this.currentLevelId === 'level-3') {
       this.showModalOverlay({
         title: 'LEVEL 3 COMPLETE!',
-        subtitle: 'Dennis survived the dramatic Brigade Road mix-up and caught the Namma Metro train!',
+        subtitle: 'Dennis uncovered the Brigade Road drama rehearsal, cleared the blocker, and reached the Namma Metro train!',
         accentColor: 0x10b981,
         buttons: [
           {
@@ -676,7 +790,7 @@ export class BootScene extends Phaser.Scene {
     } else if (this.currentLevelId === 'level-4') {
       this.showModalOverlay({
         title: 'LEVEL 4 COMPLETE!',
-        subtitle: 'Dennis escaped the Koramangala café date scramble and reached the 80ft Road junction!',
+        subtitle: 'Dennis outran the trio through Dr. Rajkumar Park and sprinted through the Park Main Gate exit!',
         accentColor: 0x10b981,
         buttons: [
           {
@@ -929,7 +1043,7 @@ export class BootScene extends Phaser.Scene {
     summaryBg.fillRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 6)
     summaryBg.strokeRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 6)
 
-    const stage123 = this.add.text(0, stageSummaryY + 6, '✓ STAGE 01: College Gate   ✓ STAGE 02: Market Corridor   ✓ STAGE 03: MG Road', {
+    const stage123 = this.add.text(0, stageSummaryY + 6, '✓ STAGE 01: College Gate   ✓ STAGE 02: Thatha Tea   ✓ STAGE 03: MG Road', {
       fontFamily: 'ui-monospace, Menlo, monospace',
       fontSize: '7.5px',
       fontStyle: 'bold',
@@ -937,7 +1051,7 @@ export class BootScene extends Phaser.Scene {
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
-    const stage45 = this.add.text(0, stageSummaryY + 28, '✓ STAGE 04: Koramangala Café   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
+    const stage45 = this.add.text(0, stageSummaryY + 28, '✓ STAGE 04: Dr. Rajkumar Park   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
       fontFamily: 'ui-monospace, Menlo, monospace',
       fontSize: '7.5px',
       fontStyle: 'bold',

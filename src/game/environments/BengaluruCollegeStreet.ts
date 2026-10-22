@@ -419,10 +419,10 @@ export class BengaluruCollegeStreet {
 
     if (this.theme === 'commercial-mg') {
       this.drawCommercialMgStreetScenery(g, groundY)
-    } else if (this.theme === 'cafe-koramangala') {
-      this.drawCafeKoramangalaStreetScenery(g, groundY)
-    } else if (this.theme === 'market') {
-      this.drawMarketStreetScenery(g, groundY)
+    } else if (this.theme === 'park-rajkumar' || this.theme === 'cafe-koramangala') {
+      this.drawRajkumarParkStreetScenery(g, groundY)
+    } else if (this.theme === 'thatha-tea' || this.theme === 'market') {
+      this.drawThathaTeaStreetScenery(g, groundY)
     } else if (this.theme === 'park-cubbon') {
       this.drawParkCubbonStreetScenery(g, groundY)
     } else {
@@ -573,156 +573,268 @@ export class BengaluruCollegeStreet {
   }
 
   /**
-   * Theme: Koramangala Café Date (Level 4)
+   * Theme: Dr. Rajkumar Park, Bengaluru (Level 4)
+   * Inspired by Dr. Rajkumar Park in Bengaluru, featuring ornamental iron boundary railings,
+   * entrance gate pillars, lush tree canopies, walking trails, park benches and neighborhood avenues.
    */
-  private drawCafeKoramangalaStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
-    // A. Boutique Bookstore & Florist (x: 40 to 420)
-    g.fillStyle(0x1e293b, 0.95)
-    g.fillRect(40, groundY - 120, 380, 120)
-    g.lineStyle(2, 0x38bdf8, 0.7)
-    g.strokeRect(40, groundY - 120, 380, 120)
-
-    // B. "CHAI & CHAT CAFÉ — KORAMANGALA" (x: 460 to 1120)
-    g.fillStyle(0x7f1d1d, 0.98)
-    g.fillRect(460, groundY - 145, 660, 145)
-    g.lineStyle(2, 0xf59e0b, 0.8)
-    g.strokeRect(460, groundY - 145, 660, 145)
-    g.fillStyle(0xfef08a, 0.85)
-    for (let wx = 500; wx < 1080; wx += 90) {
-      g.fillRoundedRect(wx, groundY - 110, 42, 48, 14)
-      g.lineStyle(1.5, 0x78350f, 1)
-      g.strokeRoundedRect(wx, groundY - 110, 42, 48, 14)
+  private drawRajkumarParkStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
+    // 1. Ornate Cast-Iron Park Boundary Fence spanning the entire stage
+    // Stone foundation plinth
+    g.fillStyle(0x334155, 1)
+    g.fillRect(0, groundY - 48, this.stageWidth, 16)
+    // Decorative railing
+    g.lineStyle(2, 0x14532d, 0.9)
+    g.lineBetween(0, groundY - 78, this.stageWidth, groundY - 78)
+    for (let rx = 15; rx < this.stageWidth; rx += 18) {
+      g.lineBetween(rx, groundY - 48, rx, groundY - 78)
+      // Gold spearheads on railings
+      g.fillStyle(0xf59e0b, 1)
+      g.fillTriangle(rx - 2.5, groundY - 78, rx + 2.5, groundY - 78, rx, groundY - 84)
     }
 
-    // Striped Patio Awning
-    const awningY = groundY - 82
-    const awningH = 26
-    for (let ax = 680; ax < 1040; ax += 20) {
-      const isGreen = Math.floor((ax - 680) / 20) % 2 === 0
-      g.fillStyle(isGreen ? 0x065f46 : 0xfef3c7, 1)
-      g.fillRect(ax, awningY, 20, awningH)
+    // 2. Grand Entrance Gate to Dr. Rajkumar Park (x: 360 to 600)
+    // Left stone pillar
+    g.fillStyle(0x475569, 1)
+    g.fillRect(360, groundY - 150, 42, 150)
+    g.fillStyle(0x64748b, 1)
+    g.fillRect(355, groundY - 156, 52, 8)
+    g.fillCircle(381, groundY - 162, 9)
+
+    // Right stone pillar
+    g.fillStyle(0x475569, 1)
+    g.fillRect(558, groundY - 150, 42, 150)
+    g.fillStyle(0x64748b, 1)
+    g.fillRect(553, groundY - 156, 52, 8)
+    g.fillCircle(579, groundY - 162, 9)
+
+    // Grand Arch Beam spanning pillars
+    g.fillStyle(0x1e293b, 0.98)
+    g.fillRoundedRect(375, groundY - 146, 210, 32, 6)
+    g.lineStyle(2, 0xf59e0b, 1)
+    g.strokeRoundedRect(375, groundY - 146, 210, 32, 6)
+
+    // 3. Park Benches (wooden slats with cast-iron frame at x: 780, 1220, 1820)
+    const benchPositions = [780, 1220, 1820]
+    for (const bx of benchPositions) {
+      // Bench slats
+      g.fillStyle(0x78350f, 1)
+      g.fillRoundedRect(bx - 36, groundY - 32, 72, 7, 2)
+      g.fillRoundedRect(bx - 36, groundY - 22, 72, 6, 2)
+      // Iron legs and back support
+      g.fillStyle(0x1e293b, 1)
+      g.fillRect(bx - 30, groundY - 38, 5, 38)
+      g.fillRect(bx + 25, groundY - 38, 5, 38)
+      g.fillRect(bx - 32, groundY - 16, 64, 4)
     }
 
-    // Hanging string festoon lights
-    g.lineStyle(1.5, 0x0f172a, 0.8)
-    for (let lx = 690; lx < 1030; lx += 45) {
-      g.lineBetween(lx, awningY + awningH, lx + 45, awningY + awningH)
+    // 4. Jogging Track Red Gravel Border
+    g.fillStyle(0xb45309, 0.8)
+    g.fillRect(0, groundY - 8, this.stageWidth, 8)
+
+    // 5. Flowerbeds with Bougainvillea & Marigolds (x: 200, 920, 1500, 2100)
+    const flowerBedX = [200, 920, 1500, 2100]
+    for (const fx of flowerBedX) {
+      g.fillStyle(0x15803d, 1) // Shrub bush
+      g.fillCircle(fx, groundY - 24, 22)
+      g.fillCircle(fx + 20, groundY - 28, 18)
+      g.fillCircle(fx - 18, groundY - 22, 16)
+      // Flowers (Magenta & Gold)
+      g.fillStyle(0xec4899, 1)
+      g.fillCircle(fx - 8, groundY - 28, 4)
+      g.fillCircle(fx + 12, groundY - 32, 4)
       g.fillStyle(0xfbbf24, 1)
-      g.fillCircle(lx + 22, awningY + awningH + 6, 4)
-      g.fillStyle(0xfef08a, 0.4)
-      g.fillCircle(lx + 22, awningY + awningH + 6, 8)
+      g.fillCircle(fx + 6, groundY - 20, 4)
+      g.fillCircle(fx + 24, groundY - 26, 3.5)
     }
 
-    // Outdoor Café Tables & Chairs
-    this.drawCafeTableAndChairs(g, 740, groundY, false)
-    this.drawCafeTableAndChairs(g, 860, groundY, true) // Ananya seated
-    this.drawCafeTableAndChairs(g, 980, groundY, false)
+    // 6. Lush Park Trees: Rain Trees, Gulmohar Trees, and Canopy
+    this.drawRainTree(g, 220, groundY, 1.15)
+    this.drawGulmoharTree(g, 850, groundY, 1.2)
+    this.drawRainTree(g, 1420, groundY, 1.25)
+    this.drawGulmoharTree(g, 2050, groundY, 1.1)
 
-    // Chalkboard menu stand at x: 690
-    g.fillStyle(0x1e293b, 1)
-    g.fillRect(685, groundY - 45, 28, 45)
-    g.lineStyle(2, 0x78350f, 1)
-    g.strokeRect(685, groundY - 45, 28, 45)
-
-    // C. "KORAMANGALA ROASTERS & BAKERY" (x: 1160 to 1660)
-    g.fillStyle(0x451a03, 0.95)
-    g.fillRect(1160, groundY - 130, 500, 130)
-    g.lineStyle(2, 0xd97706, 0.8)
-    g.strokeRect(1160, groundY - 130, 500, 130)
-
-    // D. Tree-lined avenue with Gulmohar trees
-    this.drawGulmoharTree(g, 260, groundY, 1.05)
-    this.drawGulmoharTree(g, 1850, groundY, 1.1)
-    this.drawRainTree(g, 2250, groundY, 1.05)
-
-    // Streetlights
-    const lampPositions = [120, 440, 1140, 1720, 2150, 2480]
-    for (const lampX of lampPositions) {
-      this.drawStreetLamp(g, lampX, groundY)
+    // 7. Victorian Park Lamps with warm lantern glow
+    const parkLamps = [140, 640, 1060, 1660, 2260, 2480]
+    for (const lx of parkLamps) {
+      this.drawStreetLamp(g, lx, groundY)
     }
 
-    this.createCafeKoramangalaLabels(groundY)
+    this.createRajkumarParkLabels(groundY)
+  }
+
+  private createRajkumarParkLabels(groundY: number): void {
+    if (!this.streetSceneryContainer) return
+    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
+      const t = this.scene.add
+        .text(x, y, text, {
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize,
+          fontStyle: 'bold',
+          color,
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5)
+      this.streetSceneryContainer?.add(t)
+    }
+
+    addLabel(480, groundY - 130, 'DR. RAJKUMAR PARK • WELCOME\n• BENGALURU GREEN PRESERVE •', '#fef08a', '9px')
+    addLabel(920, groundY - 78, 'FITNESS & JOGGING TRACK\n• PLEASE KEEP PARK CLEAN •', '#86efac', '7.5px')
+    addLabel(1500, groundY - 78, 'NEIGHBORHOOD WALKING CORRIDOR\nKAMMANAHALLI GATE →', '#93c5fd', '7.5px')
+    addLabel(2420, groundY - 120, 'PARK MAIN GATE & EXIT\n← TO AVENUE JUNCTION', '#cbd5e1', '8.5px')
   }
 
   /**
-   * Theme: Roadside Market (Level 2)
+   * Theme: Thatha Tea, Kalyan Nagar (Level 2)
+   * Inspired by the beloved tea-stall near Dr. Rajkumar Park in the Kalyan Nagar / Kammanahalli area.
    */
-  private drawMarketStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
-    // A. "SRI KRISHNA FRUITS & JUICE" (x: 240 to 580)
-    g.fillStyle(0x7c2d12, 0.95)
-    g.fillRect(240, groundY - 110, 340, 110)
-    for (let ax = 240; ax < 580; ax += 20) {
-      const isOrange = Math.floor((ax - 240) / 20) % 2 === 0
-      g.fillStyle(isOrange ? 0xea580c : 0xfef08a, 1)
-      g.fillRect(ax, groundY - 90, 20, 24)
+  private drawThathaTeaStreetScenery(g: Phaser.GameObjects.Graphics, groundY: number): void {
+    // 1. Across-the-street Dr. Rajkumar Park Boundary & Fencing (in mid-street background, x: 0 to 2200)
+    g.fillStyle(0x334155, 0.9)
+    g.fillRect(0, groundY - 50, 2200, 16)
+    g.lineStyle(1.5, 0x166534, 0.75)
+    g.lineBetween(0, groundY - 76, 2200, groundY - 76)
+    for (let rx = 10; rx < 2200; rx += 16) {
+      g.lineBetween(rx, groundY - 50, rx, groundY - 76)
+      g.fillStyle(0xd97706, 0.8)
+      g.fillTriangle(rx - 2, groundY - 76, rx + 2, groundY - 76, rx, groundY - 80)
     }
+
+    // A. "SRI GANESH PROVISION & CONDIMENTS" (x: 80 to 420)
+    g.fillStyle(0x1e293b, 0.95)
+    g.fillRect(80, groundY - 120, 340, 120)
+    g.lineStyle(2, 0x38bdf8, 0.7)
+    g.strokeRect(80, groundY - 120, 340, 120)
+    for (let ax = 80; ax < 420; ax += 20) {
+      const isTeal = Math.floor((ax - 80) / 20) % 2 === 0
+      g.fillStyle(isTeal ? 0x0f766e : 0xfef08a, 1)
+      g.fillRect(ax, groundY - 95, 20, 22)
+    }
+
+    // B. "THATHA TEA • KALYAN NAGAR" — The iconic tea shop frontage (x: 460 to 1180)
+    g.fillStyle(0x78350f, 0.98) // Warm baked terracotta brick wall
+    g.fillRect(460, groundY - 148, 720, 148)
+    g.lineStyle(2.5, 0xf59e0b, 0.9)
+    g.strokeRect(460, groundY - 148, 720, 148)
+
+    // Vibrant Yellow & Dark Green Striped Tea Shop Awning
+    const awningY = groundY - 88
+    const awningH = 28
+    for (let ax = 460; ax < 1180; ax += 22) {
+      const isGold = Math.floor((ax - 460) / 22) % 2 === 0
+      g.fillStyle(isGold ? 0xf59e0b : 0x064e3b, 1)
+      g.fillRect(ax, awningY, 22, awningH)
+    }
+
+    // Tea Shop Main Open Counter (x: 640 to 880)
+    g.fillStyle(0x64748b, 1)
+    g.fillRect(640, groundY - 42, 240, 42)
+    g.fillStyle(0x94a3b8, 1)
+    g.fillRect(636, groundY - 45, 248, 5)
+    g.lineStyle(1.5, 0x334155, 1)
+    g.strokeRect(640, groundY - 42, 240, 42)
+
+    // Brass Tea Samovar / Boiler
+    g.fillStyle(0xd97706, 1)
+    g.fillRoundedRect(655, groundY - 74, 32, 30, 4)
     g.fillStyle(0xb45309, 1)
-    g.fillRect(260, groundY - 24, 70, 24)
-    g.fillRect(350, groundY - 24, 70, 24)
+    g.fillRect(653, groundY - 78, 36, 5)
+    // Steaming tea vapor puffs
+    g.fillStyle(0xffffff, 0.5)
+    g.fillCircle(671, groundY - 86, 6)
+    g.fillCircle(673, groundY - 96, 8)
+    g.fillCircle(670, groundY - 108, 11)
 
-    // B. "MALLESHWARAM FRESH FLOWERS" (x: 820 to 1180)
-    g.fillStyle(0x064e3b, 0.95)
-    g.fillRect(820, groundY - 110, 360, 110)
-    for (let ax = 820; ax < 1180; ax += 20) {
-      const isGreen = Math.floor((ax - 820) / 20) % 2 === 0
-      g.fillStyle(isGreen ? 0x16a34a : 0xfef3c7, 1)
-      g.fillRect(ax, groundY - 90, 20, 24)
+    // Tea glasses in stainless steel caddy rack (x: 700 to 760)
+    g.fillStyle(0x475569, 1)
+    g.fillRect(702, groundY - 55, 54, 12)
+    for (let gx = 706; gx <= 748; gx += 10) {
+      g.fillStyle(0x38bdf8, 0.6)
+      g.fillRect(gx, groundY - 67, 8, 14)
+      g.fillStyle(0xd97706, 0.9)
+      g.fillRect(gx + 1, groundY - 60, 6, 7)
     }
 
-    // C. "BENGALURU SPICES & CONDIMENTS" (x: 1420 to 1780)
-    g.fillStyle(0x7f1d1d, 0.95)
-    g.fillRect(1420, groundY - 110, 360, 110)
-    for (let ax = 1420; ax < 1780; ax += 20) {
-      const isRed = Math.floor((ax - 1420) / 20) % 2 === 0
-      g.fillStyle(isRed ? 0xdc2626 : 0xfef08a, 1)
-      g.fillRect(ax, groundY - 90, 20, 24)
+    // Glass display jar with Bun Maska (x: 775 to 815)
+    g.fillStyle(0x38bdf8, 0.4)
+    g.fillRoundedRect(778, groundY - 68, 28, 24, 6)
+    g.lineStyle(1, 0x94a3b8, 0.8)
+    g.strokeRoundedRect(778, groundY - 68, 28, 24, 6)
+    g.fillStyle(0xd97706, 1)
+    g.fillCircle(788, groundY - 58, 5)
+    g.fillCircle(796, groundY - 56, 5)
+
+    // Round tea stools in front of shop (x: 890, 935, 980)
+    const stoolPositions = [890, 935, 980]
+    for (const sx of stoolPositions) {
+      g.fillStyle(0xd97706, 1)
+      g.fillEllipse(sx, groundY - 26, 22, 7)
+      g.fillStyle(0x334155, 1)
+      g.fillRect(sx - 7, groundY - 24, 3, 24)
+      g.fillRect(sx + 4, groundY - 24, 3, 24)
     }
 
-    this.drawGulmoharTree(g, 140, groundY, 1.05)
-    this.drawRainTree(g, 700, groundY, 1.0)
-    this.drawGulmoharTree(g, 1300, groundY, 1.1)
-    this.drawRainTree(g, 1920, groundY, 1.05)
+    // Wooden tea stall bench at x: 1040 to 1130
+    g.fillStyle(0x92400e, 1)
+    g.fillRect(1030, groundY - 24, 100, 6)
+    g.fillRect(1035, groundY - 18, 5, 18)
+    g.fillRect(1120, groundY - 18, 5, 18)
 
-    const lampPositions = [180, 680, 1280, 1850, 2120]
+    // Chalkboard menu board on stand at x: 605
+    g.fillStyle(0x1e293b, 1)
+    g.fillRect(595, groundY - 48, 30, 48)
+    g.lineStyle(2, 0x78350f, 1)
+    g.strokeRect(595, groundY - 48, 30, 48)
+
+    // C. "KAMMANAHALLI HOT BAKERY & SWEETS" (x: 1240 to 1720)
+    g.fillStyle(0x831843, 0.95)
+    g.fillRect(1240, groundY - 125, 480, 125)
+    g.lineStyle(2, 0xf472b6, 0.8)
+    g.strokeRect(1240, groundY - 125, 480, 125)
+    for (let ax = 1240; ax < 1720; ax += 20) {
+      const isPink = Math.floor((ax - 1240) / 20) % 2 === 0
+      g.fillStyle(isPink ? 0xbe185d : 0xfef08a, 1)
+      g.fillRect(ax, groundY - 98, 20, 22)
+    }
+
+    // D. Trees along the street
+    this.drawGulmoharTree(g, 260, groundY, 1.05)
+    this.drawRainTree(g, 720, groundY, 1.0)
+    this.drawGulmoharTree(g, 1340, groundY, 1.1)
+    this.drawRainTree(g, 1940, groundY, 1.05)
+
+    // Streetlamps
+    const lampPositions = [140, 440, 1200, 1760, 2080]
     for (const lampX of lampPositions) {
       this.drawStreetLamp(g, lampX, groundY)
     }
 
-    this.createMarketLabels(groundY)
+    this.createThathaTeaLabels(groundY)
   }
 
-  private drawCafeTableAndChairs(g: Phaser.GameObjects.Graphics, x: number, groundY: number, hasDate: boolean): void {
-    const tableTopY = groundY - 32
-    g.fillStyle(0x78350f, 1)
-    g.fillEllipse(x, tableTopY, 44, 14)
-    g.fillStyle(0x334155, 1)
-    g.fillRect(x - 3, tableTopY, 6, 32)
-    g.fillEllipse(x, groundY - 2, 24, 6)
-
-    // Chairs
-    g.fillStyle(0x92400e, 1)
-    g.fillRect(x - 30, groundY - 36, 6, 36)
-    g.fillRect(x - 30, groundY - 20, 16, 4)
-    g.fillRect(x + 24, groundY - 36, 6, 36)
-    g.fillRect(x + 14, groundY - 20, 16, 4)
-
-    // Coffee mug
-    g.fillStyle(0xffffff, 1)
-    g.fillRect(x - 6, tableTopY - 10, 10, 8)
-    g.fillStyle(0x78350f, 1)
-    g.fillRect(x - 5, tableTopY - 9, 8, 3)
-
-    if (hasDate) {
-      // Ananya seated
-      g.fillStyle(0xdb2777, 1)
-      g.fillRoundedRect(x + 15, groundY - 52, 16, 34, 4)
-      g.fillStyle(0xfed7aa, 1)
-      g.fillCircle(x + 23, groundY - 58, 6.5)
-      g.fillStyle(0x1e1b4b, 1)
-      g.fillCircle(x + 23, groundY - 60, 8)
-      g.fillRect(x + 25, groundY - 60, 6, 20)
+  private createThathaTeaLabels(groundY: number): void {
+    if (!this.streetSceneryContainer) return
+    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
+      const t = this.scene.add
+        .text(x, y, text, {
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontSize,
+          fontStyle: 'bold',
+          color,
+          align: 'center',
+        })
+        .setOrigin(0.5, 0.5)
+      this.streetSceneryContainer?.add(t)
     }
+
+    addLabel(250, groundY - 105, 'SRI GANESH PROVISION STORE\n• KALYAN NAGAR •', '#93c5fd', '8px')
+    addLabel(820, groundY - 128, 'THATHA TEA • KALYAN NAGAR\n• SPECIAL MASALA CHAI & BUN MASKA •', '#fef08a', '9.5px')
+    addLabel(820, groundY - 98, 'OPPOSITE RAJKUMAR PARK • KAMMANAHALLI', '#fde047', '8px')
+    addLabel(610, groundY - 32, 'CHAI ₹15\nBUN ₹25', '#ffffff', '5px')
+    addLabel(1480, groundY - 110, 'KAMMANAHALLI HOT BAKERY & SWEETS\n• FRESH PUFFS, CAKES & DILPASAND •', '#f9a8d4', '8.5px')
+    addLabel(2020, groundY - 115, 'KAMMANAHALLI CROSSROAD\n← KALYAN NAGAR BUS STOP', '#cbd5e1', '8.5px')
   }
+
+
 
   private drawModernStreetLamp(g: Phaser.GameObjects.Graphics, x: number, groundY: number): void {
     const poleH = 120
@@ -760,48 +872,7 @@ export class BengaluruCollegeStreet {
     addLabel(2320, groundY - 128, 'NAMMA METRO • MG ROAD STATION\nENTRANCE TO PURPLE LINE →', '#34d399', '9px')
   }
 
-  private createCafeKoramangalaLabels(groundY: number): void {
-    if (!this.streetSceneryContainer) return
-    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
-      const t = this.scene.add
-        .text(x, y, text, {
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          fontSize,
-          fontStyle: 'bold',
-          color,
-          align: 'center',
-        })
-        .setOrigin(0.5, 0.5)
-      this.streetSceneryContainer?.add(t)
-    }
 
-    addLabel(230, groundY - 105, 'ATTICUS BOOKS & GIFTS\n• NOVELS & PRINTS •', '#93c5fd', '8px')
-    addLabel(860, groundY - 128, 'CHAI & CHAT CAFÉ • KORAMANGALA\n• ARTISANAL COFFEE & BUN MASKA •', '#fef08a', '9.5px')
-    addLabel(699, groundY - 32, 'KAAPI ₹30\nBUN ₹40', '#ffffff', '5px')
-    addLabel(860, groundY - 70, 'ANANYA’S TABLE ♥', '#f472b6', '7.5px')
-    addLabel(1410, groundY - 112, 'KORAMANGALA ROASTERS BAKERY\n• SOURDOUGH & PASTRIES •', '#fdba74', '8px')
-    addLabel(2380, groundY - 115, '80FT ROAD JUNCTION\n← SONY WORLD SIGNAL', '#cbd5e1', '8.5px')
-  }
-
-  private createMarketLabels(groundY: number): void {
-    if (!this.streetSceneryContainer) return
-    const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
-      const t = this.scene.add
-        .text(x, y, text, {
-          fontFamily: 'system-ui, -apple-system, sans-serif',
-          fontSize,
-          fontStyle: 'bold',
-          color,
-          align: 'center',
-        })
-        .setOrigin(0.5, 0.5)
-      this.streetSceneryContainer?.add(t)
-    }
-
-    addLabel(410, groundY - 95, 'SRI KRISHNA FRUITS & FRESH JUICE\n• MOSAMBI & MANGO •', '#fef08a', '8.5px')
-    addLabel(1000, groundY - 95, 'MALLESHWARAM FRESH FLOWERS\n• JASMINE & MARIGOLD •', '#86efac', '8.5px')
-    addLabel(1600, groundY - 95, 'BENGALURU SPICES & CONDIMENTS\n• BYADGI CHILLI & CARDAMOM •', '#fca5a5', '8.5px')
-  }
 
   /**
    * Theme: Cubbon Park (Level 5) - Distant Skyline

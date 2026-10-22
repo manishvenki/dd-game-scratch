@@ -6,6 +6,8 @@ export type SpeakerId =
   | 'drama_raghu'
   | 'drama_preetham'
   | 'date_ananya'
+  | 'blocker_chethan'
+  | (string & {})
 
 export interface DialogueLine {
   readonly id: string

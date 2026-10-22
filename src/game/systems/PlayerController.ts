@@ -163,7 +163,7 @@ export class PlayerController {
     if (attackRequested && now - this.lastAttackTime >= this.attackCooldownMs) {
       this.lastAttackTime = now
       this.dennis.triggerAttackAnimation()
-      this.onAttack?.({ x: body.x, y: body.y, facing: this.facing })
+      this.onAttack?.({ x: this.physicsBody.x, y: this.physicsBody.y, facing: this.facing })
     }
 
     // 4. Horizontal movement

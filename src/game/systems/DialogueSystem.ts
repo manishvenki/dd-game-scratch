@@ -1,26 +1,35 @@
 import Phaser from 'phaser'
 import { type DialogueSequence, type DialogueLine } from '../dialogue/dialogueTypes'
 
+export type SpeakerPositionResolver = (
+  speakerId: string
+) => { x: number; y: number; height?: number } | undefined
+
 export interface DialogueSystemConfig {
   readonly scene: Phaser.Scene
+  readonly getSpeakerPosition?: SpeakerPositionResolver
   readonly onSequenceComplete?: (sequenceId: string) => void
 }
 
 /**
  * DialogueSystem handles presentation and user interaction for comic speech bubbles.
  * Features:
- * - Stylish comic card with speaker badge and speech-tail indicator
- * - Automatic word wrapping and viewport safety
- * - Subtle pop-in scale tween on line advance
+ * - Character-anchored world-to-screen tracking above the active speaker's head
+ * - Dynamic speech tail pointing toward the speaking character
+ * - Screen viewport boundary clamping to prevent off-screen clipping
+ * - Smooth camera scrolling tracking in update loop
+ * - Automatic word wrapping and multi-line Tanglish dialogue support
  * - Desktop (Space / Enter / Click) & Mobile (Touch) advance support
  * - Clean event listener management and disposal
  */
 export class DialogueSystem {
   private scene: Phaser.Scene
+  private getSpeakerPosition?: SpeakerPositionResolver
+  private onSequenceComplete?: (sequenceId: string) => void
+
   private container?: Phaser.GameObjects.Container
   private currentSequence?: DialogueSequence
   private currentLineIndex = 0
-  private onSequenceComplete?: (sequenceId: string) => void
   private isAdvancing = false
 
   // Visual sub-elements
@@ -31,6 +40,14 @@ export class DialogueSystem {
   private hintText?: Phaser.GameObjects.Text
   private progressText?: Phaser.GameObjects.Text
 
+  // Cached layout state to minimize redraws
+  private cardWidth = 340
+  private cardHeight = 88
+  private lastTailX = 0
+  private lastIsAbove = true
+  private lastClampedX = -999
+  private lastClampedY = -999
+
   // Input listeners
   private spaceKey?: Phaser.Input.Keyboard.Key
   private enterKey?: Phaser.Input.Keyboard.Key
@@ -38,6 +55,7 @@ export class DialogueSystem {
 
   constructor(config: DialogueSystemConfig) {
     this.scene = config.scene
+    this.getSpeakerPosition = config.getSpeakerPosition
     this.onSequenceComplete = config.onSequenceComplete
 
     this.setupInput()
@@ -68,10 +86,25 @@ export class DialogueSystem {
   }
 
   /**
+   * Sets or updates the speaker position resolver callback.
+   */
+  public setSpeakerResolver(resolver: SpeakerPositionResolver): void {
+    this.getSpeakerPosition = resolver
+  }
+
+  /**
    * Starts displaying a dialogue sequence.
    */
-  public startSequence(sequence: DialogueSequence, onComplete?: () => void): void {
+  public startSequence(
+    sequence: DialogueSequence,
+    onComplete?: () => void,
+    resolver?: SpeakerPositionResolver
+  ): void {
     this.destroyContainer()
+
+    if (resolver) {
+      this.getSpeakerPosition = resolver
+    }
 
     this.currentSequence = sequence
     this.currentLineIndex = 0
@@ -86,20 +119,18 @@ export class DialogueSystem {
 
     this.buildDialogueContainer()
     this.displayCurrentLine()
+    this.updatePosition()
   }
 
   private buildDialogueContainer(): void {
     const width = this.scene.scale.width
-    const height = this.scene.scale.height
-
-    // Container positioned at bottom-center above HUD
-    const containerX = width / 2
     const isNarrow = width < 560
-    const cardW = Math.min(width - 32, 460)
-    const cardH = isNarrow ? 120 : 108
-    const containerY = Math.max(cardH / 2 + 10, height - cardH / 2 - 24)
 
-    this.container = this.scene.add.container(containerX, containerY)
+    this.cardWidth = Math.min(width - 24, isNarrow ? 300 : 350)
+    this.cardHeight = isNarrow ? 96 : 88
+
+    // Screen-space container for sharp font rendering with camera tracking
+    this.container = this.scene.add.container(width / 2, 120)
     this.container.setScrollFactor(0)
     this.container.setDepth(300)
 
@@ -110,9 +141,9 @@ export class DialogueSystem {
     // Speaker Badge Background & Text
     this.speakerBadgeBg = this.scene.add.graphics()
     this.speakerNameText = this.scene.add
-      .text(-cardW / 2 + 16, -cardH / 2 + 14, '', {
+      .text(-this.cardWidth / 2 + 14, -this.cardHeight / 2 + 13, '', {
         fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '10px',
+        fontSize: '9.5px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
@@ -122,65 +153,108 @@ export class DialogueSystem {
 
     // Progress counter (e.g. 1 / 4)
     this.progressText = this.scene.add
-      .text(cardW / 2 - 16, -cardH / 2 + 14, '', {
+      .text(this.cardWidth / 2 - 14, -this.cardHeight / 2 + 13, '', {
         fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '9px',
+        fontSize: '8.5px',
         fontStyle: 'bold',
         color: '#94a3b8',
       })
       .setOrigin(1, 0.5)
     this.container.add(this.progressText)
 
-    // Dialogue Body Text
+    // Dialogue Body Text (Multi-line Tanglish with comfortable line height)
     this.lineText = this.scene.add
-      .text(-cardW / 2 + 16, -cardH / 2 + 32, '', {
+      .text(-this.cardWidth / 2 + 14, -this.cardHeight / 2 + 28, '', {
         fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: isNarrow ? '12px' : '13px',
+        fontSize: isNarrow ? '11px' : '11.5px',
         fontStyle: 'normal',
         color: '#f8fafc',
-        lineSpacing: 4,
-        wordWrap: { width: cardW - 32 },
+        lineSpacing: 3,
+        wordWrap: { width: this.cardWidth - 28 },
       })
       .setOrigin(0, 0)
     this.container.add(this.lineText)
 
     // Continue action hint
     this.hintText = this.scene.add
-      .text(cardW / 2 - 16, cardH / 2 - 12, 'TAP / SPACE TO CONTINUE →', {
+      .text(this.cardWidth / 2 - 14, this.cardHeight / 2 - 10, 'TAP / SPACE →', {
         fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '8.5px',
+        fontSize: '8px',
         fontStyle: 'bold',
         color: '#fbbf24', // amber-400
       })
       .setOrigin(1, 0.5)
     this.container.add(this.hintText)
 
-    // Render base bubble card
-    this.redrawBubbleBackground(cardW, cardH)
+    // Initial background draw
+    this.redrawBubbleBackground(this.cardWidth, this.cardHeight, 0, true)
   }
 
-  private redrawBubbleBackground(cardW: number, cardH: number): void {
+  /**
+   * Redraws the dialogue card with dynamic pointer tail directed toward the speaker.
+   */
+  private redrawBubbleBackground(
+    cardW: number,
+    cardH: number,
+    tailX: number,
+    isAboveSpeaker: boolean
+  ): void {
     if (!this.bubbleBg) return
     this.bubbleBg.clear()
 
-    // Shadow
-    this.bubbleBg.fillStyle(0x000000, 0.5)
-    this.bubbleBg.fillRoundedRect(-cardW / 2 + 2, -cardH / 2 + 3, cardW, cardH, 10)
+    this.lastTailX = tailX
+    this.lastIsAbove = isAboveSpeaker
 
-    // Main Card
+    // Outer drop shadow
+    this.bubbleBg.fillStyle(0x000000, 0.55)
+    this.bubbleBg.fillRoundedRect(-cardW / 2 + 2, -cardH / 2 + 3, cardW, cardH, 8)
+
+    // Main Bubble Body
     this.bubbleBg.fillStyle(0x0b1120, 0.96)
-    this.bubbleBg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 10)
+    this.bubbleBg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
 
-    // Border
-    this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.8)
-    this.bubbleBg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 10)
+    // Vibrant comic border
+    this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.85) // sky-400
+    this.bubbleBg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
 
-    // Comic pointer triangle at top
+    // Tail pointer directed toward speaker
+    const clampedTailX = Phaser.Math.Clamp(tailX, -cardW / 2 + 18, cardW / 2 - 18)
+    const tailW = 10
+    const tailH = 11
+
     this.bubbleBg.fillStyle(0x0b1120, 1)
-    this.bubbleBg.fillTriangle(-12, -cardH / 2, 12, -cardH / 2, 0, -cardH / 2 - 10)
-    this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.8)
-    this.bubbleBg.lineBetween(-12, -cardH / 2, 0, -cardH / 2 - 10)
-    this.bubbleBg.lineBetween(0, -cardH / 2 - 10, 12, -cardH / 2)
+
+    if (isAboveSpeaker) {
+      // Bubble is above speaker: tail points DOWN toward speaker head
+      const baseY = cardH / 2
+      const tipY = baseY + tailH
+      this.bubbleBg.fillTriangle(
+        clampedTailX - tailW,
+        baseY,
+        clampedTailX + tailW,
+        baseY,
+        clampedTailX,
+        tipY
+      )
+      this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.85)
+      this.bubbleBg.lineBetween(clampedTailX - tailW, baseY, clampedTailX, tipY)
+      this.bubbleBg.lineBetween(clampedTailX, tipY, clampedTailX + tailW, baseY)
+    } else {
+      // Bubble is below speaker: tail points UP toward speaker
+      const baseY = -cardH / 2
+      const tipY = baseY - tailH
+      this.bubbleBg.fillTriangle(
+        clampedTailX - tailW,
+        baseY,
+        clampedTailX + tailW,
+        baseY,
+        clampedTailX,
+        tipY
+      )
+      this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.85)
+      this.bubbleBg.lineBetween(clampedTailX - tailW, baseY, clampedTailX, tipY)
+      this.bubbleBg.lineBetween(clampedTailX, tipY, clampedTailX + tailW, baseY)
+    }
   }
 
   private displayCurrentLine(): void {
@@ -188,7 +262,7 @@ export class DialogueSystem {
     const line: DialogueLine = this.currentSequence.lines[this.currentLineIndex]
     if (!line) return
 
-    // Update Speaker Name
+    // Update Speaker Name and Badge Color
     if (this.speakerNameText) {
       this.speakerNameText.setText(line.speakerName)
       const bounds = this.speakerNameText.getBounds()
@@ -197,16 +271,16 @@ export class DialogueSystem {
         this.speakerBadgeBg.clear()
         this.speakerBadgeBg.fillStyle(line.badgeColorHex, 0.95)
         this.speakerBadgeBg.fillRoundedRect(
-          this.speakerNameText.x - 6,
-          this.speakerNameText.y - 7,
-          bounds.width + 12,
-          15,
-          4
+          this.speakerNameText.x - 5,
+          this.speakerNameText.y - 6,
+          bounds.width + 10,
+          14,
+          3
         )
       }
     }
 
-    // Update Progress
+    // Update Progress (e.g. 1 / 4)
     if (this.progressText) {
       const current = this.currentLineIndex + 1
       const total = this.currentSequence.lines.length
@@ -218,15 +292,96 @@ export class DialogueSystem {
       this.lineText.setText(line.text)
     }
 
-    // Pop-in micro animation
-    this.container.setScale(0.97)
+    // Pop-in scale bounce animation on new line
+    this.container.setScale(0.96)
     this.scene.tweens.add({
       targets: this.container,
       scaleX: 1,
       scaleY: 1,
-      duration: 120,
+      duration: 110,
       ease: 'Back.easeOut',
     })
+
+    this.updatePosition(true)
+  }
+
+  /**
+   * Per-frame camera tracking update to lock speech bubbles above the active speaker.
+   */
+  public update(): void {
+    if (this.isActive()) {
+      this.updatePosition(false)
+    }
+  }
+
+  /**
+   * Recalculates and smoothly positions the speech bubble above the active speaker.
+   */
+  private updatePosition(forceRedraw = false): void {
+    if (!this.container || !this.currentSequence) return
+    const line = this.currentSequence.lines[this.currentLineIndex]
+    if (!line) return
+
+    const speakerPos = this.getSpeakerPosition?.(line.speakerId)
+    const cam = this.scene.cameras.main
+    const viewportW = this.scene.scale.width
+    const viewportH = this.scene.scale.height
+
+    const cardW = this.cardWidth
+    const cardH = this.cardHeight
+
+    let speakerScreenX = viewportW / 2
+    let speakerHeadScreenY = 180
+
+    if (speakerPos) {
+      speakerScreenX = speakerPos.x - cam.scrollX
+      const characterHeight = speakerPos.height ?? 80
+      speakerHeadScreenY = (speakerPos.y - characterHeight) - cam.scrollY
+    }
+
+    // Determine vertical placement: preferred above speaker's head
+    const verticalGap = 16
+    let targetY = speakerHeadScreenY - cardH / 2 - verticalGap
+    let isAbove = true
+
+    // Flip below speaker if character is near the top edge of screen
+    const topSafeMargin = cardH / 2 + 10
+    if (targetY < topSafeMargin) {
+      if (speakerPos) {
+        targetY = (speakerPos.y - cam.scrollY) + cardH / 2 + verticalGap
+        isAbove = false
+      }
+    }
+
+    // Viewport boundary clamping so bubble never leaves screen
+    const minX = cardW / 2 + 8
+    const maxX = viewportW - cardW / 2 - 8
+    const clampedX = Phaser.Math.Clamp(speakerScreenX, minX, maxX)
+
+    const minY = cardH / 2 + 8
+    const maxY = viewportH - cardH / 2 - 8
+    const clampedY = Phaser.Math.Clamp(targetY, minY, maxY)
+
+    // Tail pointer points toward the speaker's true horizontal screen position
+    const tailLocalX = speakerScreenX - clampedX
+
+    // Redraw tail if position shifted significantly
+    const tailShift = Math.abs(tailLocalX - this.lastTailX)
+    const isAboveChanged = isAbove !== this.lastIsAbove
+
+    if (forceRedraw || isAboveChanged || tailShift > 3) {
+      this.redrawBubbleBackground(cardW, cardH, tailLocalX, isAbove)
+    }
+
+    if (
+      forceRedraw ||
+      Math.abs(clampedX - this.lastClampedX) > 0.5 ||
+      Math.abs(clampedY - this.lastClampedY) > 0.5
+    ) {
+      this.container.setPosition(clampedX, clampedY)
+      this.lastClampedX = clampedX
+      this.lastClampedY = clampedY
+    }
   }
 
   /**
@@ -247,7 +402,7 @@ export class DialogueSystem {
     }
 
     this.displayCurrentLine()
-    this.scene.time.delayedCall(80, () => {
+    this.scene.time.delayedCall(70, () => {
       this.isAdvancing = false
     })
   }
@@ -261,6 +416,8 @@ export class DialogueSystem {
       this.container.destroy()
       this.container = undefined
     }
+    this.lastClampedX = -999
+    this.lastClampedY = -999
   }
 
   public destroy(): void {

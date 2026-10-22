@@ -55,15 +55,15 @@ export const LEVEL_1_CONFIG: LevelConfig = {
 export const LEVEL_2_CONFIG: LevelConfig = {
   id: 'level-2',
   stageNumber: 'STAGE 02',
-  title: 'Commercial Lane Confrontation',
-  subtitle: 'Two-Boy Street Bottleneck',
-  setting: 'Avenue corridor near the roadside market',
-  objectiveText: 'Neutralize the two blocking boys blocking the corridor, then reach the avenue crossroad!',
+  title: 'Thatha Tea Encounter',
+  subtitle: 'Opposite Rajkumar Park • Kalyan Nagar',
+  setting: 'Iconic tea stall opposite Rajkumar Park in the Kalyan Nagar / Kammanahalli area',
+  objectiveText: 'The trio is closing in! Knock through Vikram & Kiran at Thatha Tea and sprint to the Kammanahalli crossroad!',
   stageWidth: 2200,
   playerSpawnX: 280,
   exitGoalX: 2120,
-  exitGoalLabel: 'AVENUE CROSSROAD',
-  theme: 'market',
+  exitGoalLabel: 'KAMMANAHALLI CROSSROAD',
+  theme: 'thatha-tea',
   blockers: [
     {
       id: 'blocker-2-1',
@@ -86,8 +86,12 @@ export const LEVEL_2_CONFIG: LevelConfig = {
       badgeLabel: 'KIRAN [BLOCKER]',
     },
   ],
-  chasers: [],
-  hasChaseSequence: false,
+  chasers: [
+    { chaserId: 'sathish', spawnX: 140, speed: 175 },
+    { chaserId: 'manish', spawnX: 80, speed: 165 },
+    { chaserId: 'rahul', spawnX: 20, speed: 155 },
+  ],
+  hasChaseSequence: true,
 }
 
 export const LEVEL_3_CONFIG: LevelConfig = {
@@ -96,13 +100,24 @@ export const LEVEL_3_CONFIG: LevelConfig = {
   title: 'MG Road / Brigade Road',
   subtitle: 'Downtown Neon Corridor',
   setting: 'Central city retail & nightlife hub with Namma Metro viaduct',
-  objectiveText: 'Run through MG Road, uncover the mystery group, and reach the Metro Station before the trio catches you!',
+  objectiveText: 'Run through MG Road, uncover the drama group, defeat the rehearsal blocker, and reach the Metro Station!',
   stageWidth: 2600,
   playerSpawnX: 380,
   exitGoalX: 2500,
   exitGoalLabel: 'NAMMA METRO STATION',
   theme: 'commercial-mg',
-  blockers: [],
+  blockers: [
+    {
+      id: 'drama-raghu',
+      name: 'Raghu',
+      initialX: 980,
+      maxHp: 2,
+      shirtColorHex: 0x0d9488, // Teal
+      pantsColorHex: 0x1e293b,
+      hairstyle: 'spiky',
+      badgeLabel: 'RAGHU [DRAMA LEAD]',
+    },
+  ],
   chasers: [
     { chaserId: 'sathish', spawnX: 140, speed: 185 },
     { chaserId: 'manish', spawnX: 80, speed: 175 },
@@ -121,16 +136,37 @@ export const LEVEL_3_CONFIG: LevelConfig = {
 export const LEVEL_4_CONFIG: LevelConfig = {
   id: 'level-4',
   stageNumber: 'STAGE 04',
-  title: 'Koramangala Café Date',
-  subtitle: 'Outdoor Patio & 80ft Road',
-  setting: 'Lively café patio with warm brick facade, string lanterns & wooden tables',
-  objectiveText: 'Meet your date at the café patio, then outrun Manish, Sathish & Rahul to the 80ft Road crossroad!',
+  title: 'Dr. Rajkumar Park, Bengaluru',
+  subtitle: 'Green Canopy & Walking Trails',
+  setting: 'Lush park boundary with ornate gates, walking trails, benches & neighborhood avenue',
+  objectiveText: 'Outrun the trio through Dr. Rajkumar Park! Break through the park blockers and sprint to the Park Main Gate!',
   stageWidth: 2600,
   playerSpawnX: 360,
   exitGoalX: 2500,
-  exitGoalLabel: '80FT ROAD JUNCTION',
-  theme: 'cafe-koramangala',
-  blockers: [],
+  exitGoalLabel: 'PARK MAIN GATE',
+  theme: 'park-rajkumar',
+  blockers: [
+    {
+      id: 'blocker-4-1',
+      name: 'Chethan',
+      initialX: 960,
+      maxHp: 3,
+      shirtColorHex: 0x0284c7, // Sky blue
+      pantsColorHex: 0x1e293b,
+      hairstyle: 'crew',
+      badgeLabel: 'CHETHAN [BLOCKER]',
+    },
+    {
+      id: 'blocker-4-2',
+      name: 'Suresh',
+      initialX: 1520,
+      maxHp: 3,
+      shirtColorHex: 0xd97706, // Amber
+      pantsColorHex: 0x334155,
+      hairstyle: 'spiky',
+      badgeLabel: 'SURESH [BLOCKER]',
+    },
+  ],
   chasers: [
     { chaserId: 'sathish', spawnX: 130, speed: 190 },
     { chaserId: 'manish', spawnX: 70, speed: 180 },
@@ -138,11 +174,11 @@ export const LEVEL_4_CONFIG: LevelConfig = {
   ],
   hasChaseSequence: true,
   interaction: {
-    id: 'cafe-date',
+    id: 'park-encounter',
     triggerX: 860,
     triggerRadius: 65,
-    label: 'CHAI & CHAT CAFÉ PATIO',
-    dialogueSequenceId: 'level-4-cafe',
+    label: 'PARK WALKING CORRIDOR',
+    dialogueSequenceId: 'level-4-park',
   },
 }
 

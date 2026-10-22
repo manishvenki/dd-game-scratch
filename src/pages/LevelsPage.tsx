@@ -22,13 +22,13 @@ const PLANNED_LEVELS: readonly PlannedLevel[] = [
     playHref: '#/play?level=1',
   },
   {
-    id: 'street-confrontation',
+    id: 'thatha-tea',
     stageNumber: 'STAGE 02',
-    title: 'Commercial Lane Encounter',
-    setting: 'Avenue corridor near the market',
+    title: 'Thatha Tea, Kalyan Nagar',
+    setting: 'Opposite Rajkumar Park in Kalyan Nagar / Kammanahalli',
     description:
-      'Dennis is cornered by two blocking boys along a narrow street bottleneck. Neutralize both blockers and sprint to the avenue crossroad.',
-    environmentType: 'Market Corridor',
+      'Dennis encounters Vikram and Kiran blocking the tea shop frontage outside Thatha Tea. Knock past the blockers and outrun the trio to the Kammanahalli crossroad.',
+    environmentType: 'Bengaluru Tea Stall & Avenue',
     status: 'Playable',
     playHref: '#/play?level=2',
   },
@@ -44,13 +44,13 @@ const PLANNED_LEVELS: readonly PlannedLevel[] = [
     playHref: '#/play?level=3',
   },
   {
-    id: 'koramangala-cafe',
+    id: 'rajkumar-park',
     stageNumber: 'STAGE 04',
-    title: 'Koramangala Café',
-    setting: 'Lively café indoor & patio area',
+    title: 'Dr. Rajkumar Park',
+    setting: 'Bengaluru park walking paths & avenue boundary',
     description:
-      'Dennis meets his date Ananya at a cozy Koramangala café patio until the chasers crash the date, triggering a frantic dash toward 80ft Road.',
-    environmentType: 'Café & Patio',
+      'Dennis dashes through Dr. Rajkumar Park, breaking past park blockers along the jogging track and sprinting toward the Park Main Gate exit.',
+    environmentType: 'Park Parkland & Green Canopy',
     status: 'Playable',
     playHref: '#/play?level=4',
   },
@@ -93,7 +93,7 @@ export default function LevelsPage() {
             Adventure Complete: All 5 Stages Are Now Fully Playable!
           </p>
           <p className="text-slate-400 leading-normal">
-            Play through all 5 levels: Stage 01 College Gate, Stage 02 Market Corridor, Stage 03 MG Road Reveal, Stage 04 Koramangala Café Date, and Stage 05 Cubbon Park Grand Finale with continuous trio pursuit, comic Tanglish catch dialogues, and victory celebration.
+            Play through all 5 levels: Stage 01 College Gate, Stage 02 Thatha Tea, Stage 03 MG Road Reveal, Stage 04 Dr. Rajkumar Park, and Stage 05 Cubbon Park Grand Finale with continuous trio pursuit, comic Tanglish catch dialogues, and victory celebration.
           </p>
         </div>
       </section>
