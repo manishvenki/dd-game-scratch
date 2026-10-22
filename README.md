@@ -36,7 +36,26 @@ Install all project dependencies:
 npm install
 ```
 
-### 2. Development Server
+### 2. Windows Desktop Launcher & Shortcut (One-Click Launch)
+
+DD Game Scratch includes a dedicated Windows desktop launcher and custom anime game icon:
+
+1. **One-Time Desktop Shortcut Setup**:
+   Run the PowerShell shortcut installer script:
+   ```powershell
+   powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-desktop-shortcut.ps1
+   ```
+   This automatically detects your Windows Desktop (including OneDrive-redirected desktops) and installs **`DD Game Scratch.lnk`** with the custom application icon.
+
+2. **Double-Click Play**:
+   Double-click the **`DD Game Scratch`** shortcut on your Windows desktop. The launcher script (`scripts\launch-dd-game.bat`):
+   - Resolves the project directory automatically.
+   - Checks for Node.js and npm availability.
+   - Verifies project dependencies and runs `npm install` if missing.
+   - Checks if the game server is already active on port `5173`.
+   - Starts Vite if not running and automatically opens `http://localhost:5173/` in your default browser.
+
+### 3. Development Server
 
 Start the local Vite development server with Hot Module Replacement (HMR):
 
@@ -44,7 +63,7 @@ Start the local Vite development server with Hot Module Replacement (HMR):
 npm run dev
 ```
 
-### 3. Production Build
+### 4. Production Build
 
 Compile TypeScript and generate the optimized production bundle in `dist/`:
 
@@ -58,7 +77,7 @@ Preview the production build locally:
 npm run preview
 ```
 
-### 4. Code Quality & Type Checking
+### 5. Code Quality & Type Checking
 
 Run static linting checks:
 

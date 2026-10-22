@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import GameCanvas from '../components/GameCanvas'
 import { virtualInputBridge } from '../game/systems/virtualInputBridge'
 import { audioManager } from '../game/systems/AudioManager'
+import SettingsModal from '../components/game-ui/SettingsModal'
 
 export default function PlayPage() {
   const [activeLevel, setActiveLevel] = useState<string>(() => {
@@ -14,6 +15,7 @@ export default function PlayPage() {
   })
 
   const [isMuted, setIsMuted] = useState(() => audioManager.isMuted())
+  const [showSettings, setShowSettings] = useState(false)
   const [isFullscreen, setIsFullscreen] = useState(false)
   const [isPortrait, setIsPortrait] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -231,6 +233,14 @@ export default function PlayPage() {
           {/* Top HUD Controls Overlay (Mute Button, Fullscreen Toggle, Branding) */}
           <div className="absolute top-0 inset-x-0 p-3 sm:p-4 z-30 pointer-events-none flex items-center justify-between">
             <div className="pointer-events-auto flex items-center gap-2">
+              <a
+                href="#/"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700 text-xs font-mono font-bold text-slate-200 hover:bg-slate-800 transition-colors shadow-lg flex items-center gap-1.5"
+                title="Return to Main Menu"
+              >
+                <span>&larr;</span>
+                <span>MENU</span>
+              </a>
               {isFullscreen && (
                 <button
                   type="button"
@@ -244,6 +254,18 @@ export default function PlayPage() {
             </div>
 
             <div className="pointer-events-auto flex items-center gap-2">
+              {/* Settings Button */}
+              <button
+                type="button"
+                id="btn-play-settings"
+                onClick={() => setShowSettings(true)}
+                title="Settings"
+                aria-label="Settings"
+                className="p-2 rounded-xl bg-slate-900/85 backdrop-blur-md border border-slate-700/80 text-xs font-mono text-slate-300 hover:text-white hover:bg-slate-800 cursor-pointer transition-all shadow-lg"
+              >
+                ⚙
+              </button>
+
               {/* Audio BGM Mute/Unmute Toggle Button */}
               <button
                 type="button"
@@ -479,6 +501,15 @@ export default function PlayPage() {
           </p>
         </div>
       </section>
+
+      {/* In-Game Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+        onReturnHome={() => {
+          window.location.hash = '#/'
+        }}
+      />
     </div>
   )
 }

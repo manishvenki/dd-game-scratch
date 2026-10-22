@@ -10,6 +10,7 @@
  */
 
 const STORAGE_KEY_MUTED = 'dd_game_bgm_muted'
+const STORAGE_KEY_VOLUME = 'dd_game_bgm_volume'
 const BGM_PATH = `${import.meta.env.BASE_URL || '/'}assets/audio/music/DD Game BGM.mp3`
 const DEFAULT_VOLUME = 0.45
 
@@ -17,6 +18,7 @@ export class AudioManager {
   private static instance: AudioManager | null = null
   private audio: HTMLAudioElement | null = null
   private isMutedState = false
+  private volumeState = DEFAULT_VOLUME
   private isPlayingState = false
   private hasUserInitiated = false
   private listeners: Set<(muted: boolean) => void> = new Set()
@@ -27,6 +29,13 @@ export class AudioManager {
         const stored = localStorage.getItem(STORAGE_KEY_MUTED)
         if (stored !== null) {
           this.isMutedState = stored === 'true'
+        }
+        const storedVol = localStorage.getItem(STORAGE_KEY_VOLUME)
+        if (storedVol !== null) {
+          const parsed = parseFloat(storedVol)
+          if (!isNaN(parsed) && parsed >= 0 && parsed <= 1) {
+            this.volumeState = parsed
+          }
         }
       } catch {
         // LocalStorage might be restricted; fallback gracefully
@@ -48,7 +57,7 @@ export class AudioManager {
     try {
       const audio = new Audio(BGM_PATH)
       audio.loop = true
-      audio.volume = this.isMutedState ? 0 : DEFAULT_VOLUME
+      audio.volume = this.isMutedState ? 0 : this.volumeState
       audio.muted = this.isMutedState
 
       audio.addEventListener('play', () => {
@@ -80,7 +89,7 @@ export class AudioManager {
 
     // Apply mute state
     audio.muted = this.isMutedState
-    audio.volume = this.isMutedState ? 0 : DEFAULT_VOLUME
+    audio.volume = this.isMutedState ? 0 : this.volumeState
 
     if (!audio.paused && this.isPlayingState) {
       return true
@@ -122,7 +131,7 @@ export class AudioManager {
 
     if (this.audio) {
       this.audio.muted = muted
-      this.audio.volume = muted ? 0 : DEFAULT_VOLUME
+      this.audio.volume = muted ? 0 : this.volumeState
     }
 
     try {
@@ -137,6 +146,26 @@ export class AudioManager {
     }
 
     return this.isMutedState
+  }
+
+  /**
+   * Sets BGM playback volume (0.0 to 1.0) and persists preference.
+   */
+  public setVolume(vol: number): void {
+    const clamped = Math.max(0, Math.min(1, vol))
+    this.volumeState = clamped
+    if (this.audio && !this.isMutedState) {
+      this.audio.volume = clamped
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY_VOLUME, String(clamped))
+    } catch {
+      // Ignore localStorage exceptions
+    }
+  }
+
+  public getVolume(): number {
+    return this.volumeState
   }
 
   public isMuted(): boolean {

@@ -1,89 +1,204 @@
+import { useState, useEffect } from 'react'
 import { getAllCharacters } from '../game/data/characterRegistry'
-
-const characters = getAllCharacters()
+import { audioManager } from '../game/systems/AudioManager'
+import SettingsModal from '../components/game-ui/SettingsModal'
 
 export default function CharactersPage() {
+  const characters = getAllCharacters()
+  const [selectedId, setSelectedId] = useState<string>('dennis')
+  const [isMuted, setIsMuted] = useState(() => audioManager.isMuted())
+  const [showSettings, setShowSettings] = useState(false)
+
+  useEffect(() => {
+    const unsubscribe = audioManager.subscribe((muted) => {
+      setIsMuted(muted)
+    })
+    return () => unsubscribe()
+  }, [])
+
+  const handleAudioToggle = () => {
+    const newState = audioManager.toggleMute()
+    setIsMuted(newState)
+  }
+
+  const selectedChar = characters.find((c) => c.id === selectedId) ?? characters[0]
+
   return (
-    <div className="flex flex-col gap-8">
-      {/* Page Header */}
-      <div className="space-y-1">
-        <div className="text-xs font-mono uppercase tracking-wider text-amber-400">
-          CAST ROSTER &bull; CONFIRMED CHARACTER PROFILES
-        </div>
-        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
-          Characters
-        </h1>
-        <p className="text-sm text-slate-400">
-          The central protagonist and pursuers of DD Game Scratch.
-        </p>
-      </div>
-
-      {/* Notice Banner */}
-      <section aria-label="Character visual integration notice" className="rounded-xl bg-slate-900/60 border border-slate-800 p-4 sm:p-5 flex items-start gap-3">
-        <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 flex-shrink-0 flex items-center justify-center text-amber-400 text-xs font-mono font-bold">
-          !
-        </div>
-        <div className="space-y-1 text-xs sm:text-sm">
-          <p className="font-semibold text-slate-200">
-            Awaiting Reference Artwork &mdash; No Fabricated Images
-          </p>
-          <p className="text-slate-400 leading-normal">
-            Final character spritesheets and portraits will be created and integrated when original reference photos are supplied in later stages. The cards below preserve the confirmed character mapping and visual descriptions.
-          </p>
-        </div>
-      </section>
-
-      {/* Character Grid */}
-      <section aria-label="Character roster cards" className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {characters.map((char) => (
-          <article
-            key={char.id}
-            className="flex flex-col sm:flex-row gap-5 rounded-xl bg-slate-900/70 border border-slate-800 p-6 transition-colors motion-reduce:transition-none hover:border-slate-700 shadow-sm"
+    <div className="relative w-full h-full min-h-[500px] flex-1 flex flex-col justify-between p-4 sm:p-6 bg-slate-950 select-none overflow-y-auto">
+      {/* Top Game Bar */}
+      <header className="flex items-center justify-between border-b border-slate-800 pb-3 gap-3">
+        <div className="flex items-center gap-3">
+          <a
+            href="#/"
+            className="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 text-xs font-mono font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            {/* Typographic Avatar Placeholder (No fake portraits) */}
-            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-lg bg-slate-950 border border-slate-800 flex-shrink-0 flex flex-col items-center justify-center text-center p-2 shadow-inner">
-              <span className="text-2xl font-black text-amber-400/80 font-mono tracking-wider">
-                {char.initials}
-              </span>
-              <span className="text-[10px] text-slate-500 uppercase tracking-widest mt-1">
-                Ref Pending
-              </span>
-            </div>
+            <span>&larr;</span>
+            <span>MENU</span>
+          </a>
+          <div>
+            <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
+              Character Roster
+            </h1>
+            <p className="text-[11px] font-mono text-amber-400">
+              CAST PROFILES &bull; PROTAGONIST & PURSUERS
+            </p>
+          </div>
+        </div>
 
-            {/* Character Info */}
-            <div className="flex-1 space-y-3">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <h2 className="text-xl font-bold text-white tracking-tight">
-                  {char.displayName}
-                </h2>
-                <span className={`px-2.5 py-0.5 rounded text-xs font-mono font-medium border ${char.badgeColorClasses}`}>
-                  {char.uiRoleLabel}
-                </span>
-              </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            id="btn-chars-audio"
+            onClick={handleAudioToggle}
+            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+              isMuted
+                ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
+                : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
+            }`}
+          >
+            <span>{isMuted ? '🔇' : '🔊'}</span>
+            <span className="hidden sm:inline">{isMuted ? 'MUTED' : 'BGM ON'}</span>
+          </button>
 
-              <div className="space-y-1 text-xs">
-                <div className="text-slate-400">
-                  <span className="font-semibold text-slate-300">Visual Profile:</span>{' '}
+          <button
+            type="button"
+            onClick={() => setShowSettings(true)}
+            className="p-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors"
+            title="Settings"
+            aria-label="Settings"
+          >
+            ⚙
+          </button>
+        </div>
+      </header>
+
+      {/* Main Roster Grid */}
+      <div className="my-auto py-4 flex flex-col lg:flex-row gap-6 items-stretch max-w-6xl mx-auto w-full">
+        {/* Left: Character Cards */}
+        <div className="flex-1 grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {characters.map((char) => {
+            const isSelected = selectedId === char.id
+            const isDennis = char.id === 'dennis'
+            return (
+              <div
+                key={char.id}
+                onClick={() => setSelectedId(char.id)}
+                className={`p-4 rounded-xl border transition-all cursor-pointer flex flex-col justify-between gap-3 ${
+                  isSelected
+                    ? 'bg-slate-900 border-amber-400 shadow-lg shadow-amber-500/10'
+                    : 'bg-slate-900/60 border-slate-800 hover:bg-slate-900 hover:border-slate-700'
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-lg bg-slate-950 border border-slate-800 flex items-center justify-center font-mono font-black text-amber-400 text-lg shadow-inner">
+                      {char.initials}
+                    </div>
+                    <div>
+                      <h3 className="font-bold text-base text-white">
+                        {char.displayName}
+                      </h3>
+                      <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${char.badgeColorClasses}`}>
+                        {char.uiRoleLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {isDennis && (
+                    <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      ACTIVE HERO
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-xs text-slate-400 line-clamp-2">
                   {char.visualProfileSummary}
-                </div>
-                <div className="text-slate-400">
-                  <span className="font-semibold text-slate-300">Gameplay Role:</span>{' '}
-                  {char.mechanicsRole}
+                </p>
+
+                <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
+                  <span>{char.mechanicsRole}</span>
+                  <span className="text-amber-400/80">{isSelected ? '● INSPECTED' : 'CLICK TO VIEW'}</span>
                 </div>
               </div>
+            )
+          })}
+        </div>
 
-              <div className="pt-2 border-t border-slate-800/80 text-[11px] text-slate-500 font-mono">
-                Asset: Original Photo Reference Required
+        {/* Right: Character Detailed Profile Card */}
+        <div className="w-full lg:w-96 bg-slate-900 border border-slate-700/80 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+              <span className={`px-2.5 py-1 rounded text-xs font-mono font-bold border ${selectedChar.badgeColorClasses}`}>
+                {selectedChar.uiRoleLabel}
+              </span>
+              <span className="text-xs font-mono text-slate-400">
+                ROSTER #{selectedChar.id.toUpperCase()}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-xl bg-slate-950 border border-slate-800 flex items-center justify-center font-mono font-black text-2xl text-amber-400 shadow-inner">
+                {selectedChar.initials}
+              </div>
+              <div>
+                <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+                  {selectedChar.displayName}
+                </h2>
+                <div className="text-xs text-amber-400 font-mono mt-0.5">
+                  {selectedChar.role === 'protagonist' ? '★ Playable Lead Hero' : '⚡ Pursuer (The Trio)'}
+                </div>
               </div>
             </div>
-          </article>
-        ))}
-      </section>
 
-      {/* Footer Scope Note */}
-      <div className="rounded-lg bg-slate-950/60 border border-slate-800/80 p-4 text-center text-xs text-slate-500">
-        Character upload, customization interfaces, and sprite generation are reserved for future prompts.
+            <div className="space-y-2 bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5 text-xs">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                VISUAL ATTRIBUTES
+              </div>
+              <p className="text-slate-200 leading-relaxed">
+                {selectedChar.visualProfileSummary}
+              </p>
+            </div>
+
+            <div className="space-y-2 bg-slate-950/40 border border-slate-800/60 rounded-xl p-3.5 text-xs">
+              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+                GAMEPLAY MECHANICS
+              </div>
+              <p className="text-slate-400 leading-relaxed">
+                {selectedChar.mechanicsRole}
+              </p>
+            </div>
+
+            {/* Notice regarding character switching */}
+            <div className="rounded-xl bg-amber-500/10 border border-amber-500/20 p-3 text-[11px] text-amber-300/90 leading-normal">
+              <strong>Notice:</strong> Dennis is the active playable character for all 5 Bengaluru story encounters. Character-switching modes will be introduced in future updates.
+            </div>
+          </div>
+
+          <div className="pt-4 border-t border-slate-800">
+            <a
+              href="#/play?level=1"
+              className="w-full py-3.5 px-4 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-2"
+            >
+              <span>PLAY WITH DENNIS</span>
+              <span>&rarr;</span>
+            </a>
+          </div>
+        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="flex flex-col sm:flex-row items-center justify-between gap-2 border-t border-slate-800/80 pt-3 text-xs font-mono text-slate-400">
+        <div>Developed by its2much Mv</div>
+        <div className="text-[11px] text-slate-500">
+          Dennis &bull; Manish &bull; Sathish &bull; Rahul &mdash; The Bengaluru Quartet
+        </div>
+      </footer>
+
+      {/* Settings Modal */}
+      <SettingsModal
+        isOpen={showSettings}
+        onClose={() => setShowSettings(false)}
+      />
     </div>
   )
 }
