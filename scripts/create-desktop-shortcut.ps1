@@ -13,6 +13,7 @@ $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $projectDir = (Resolve-Path (Join-Path $scriptDir "..")).Path
 $launcherBat = Join-Path $scriptDir "launch-dd-game.bat"
 $iconFile = Join-Path $scriptDir "dd-game-icon.ico"
+$cmdExe = Join-Path $env:SystemRoot "System32\cmd.exe"
 
 if (-not (Test-Path $launcherBat)) {
     Write-Error "Launcher script not found at: $launcherBat"
@@ -46,7 +47,9 @@ foreach ($desktop in $desktopPaths) {
     $shortcutPath = Join-Path $desktop "DD Game Scratch.lnk"
     try {
         $shortcut = $wshShell.CreateShortcut($shortcutPath)
-        $shortcut.TargetPath = $launcherBat
+        # Using cmd.exe /c ensures the launcher always executes in Command Prompt, never PowerShell
+        $shortcut.TargetPath = $cmdExe
+        $shortcut.Arguments = "/c `"$launcherBat`""
         $shortcut.WorkingDirectory = $projectDir
         $shortcut.WindowStyle = 1
         $shortcut.Description = "DD Game Scratch (Darling Dennis Game) - Developed by its2much Mv"
@@ -66,7 +69,8 @@ Write-Host ""
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host "  INSTALLATION COMPLETE!" -ForegroundColor Green
 Write-Host "  Shortcut Name: DD Game Scratch.lnk" -ForegroundColor White
-Write-Host "  Target: $launcherBat" -ForegroundColor White
+Write-Host "  Target: $cmdExe /c `"$launcherBat`"" -ForegroundColor White
+Write-Host "  Working Directory: $projectDir" -ForegroundColor White
 Write-Host "  Icon: $iconFile" -ForegroundColor White
 Write-Host "============================================================" -ForegroundColor Cyan
 Write-Host ""

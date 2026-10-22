@@ -4,6 +4,7 @@ import {
   DENNIS_ANIM_KEYS,
   canPlayAnimation,
 } from '../systems/characterAnimations'
+import { GAME_FONTS } from '../config/typography'
 
 export interface DennisConfig {
   readonly x: number
@@ -155,8 +156,8 @@ export class Dennis extends Phaser.GameObjects.Container {
     badgeBg.strokeRoundedRect(-badgeW / 2, 8, badgeW, badgeH, 3)
 
     const badgeText = this.scene.add.text(0, 16, 'DENNIS [PROTAG]', {
-      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, monospace',
-      fontSize: '8px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '9.5px',
       fontStyle: 'bold',
       color: '#60a5fa',
       align: 'center',

@@ -42,12 +42,12 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
           >
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 bg-amber-500 rounded-sm transform rotate-45 group-hover:scale-110 transition-transform motion-reduce:transition-none" />
-              <span className="text-lg font-bold tracking-tight text-white group-hover:text-amber-400 transition-colors motion-reduce:transition-none">
+              <span className="gta-title text-xl font-bold tracking-wide text-white group-hover:text-amber-400 transition-colors motion-reduce:transition-none">
                 DD Game Scratch
               </span>
             </div>
-            <span className="text-[11px] font-medium tracking-wide text-slate-400 uppercase">
-              Darling Dennis Game &bull; <span className="text-amber-400/90 font-semibold normal-case">by its2much Mv</span>
+            <span className="text-xs font-gta-heading tracking-wider text-slate-400 uppercase">
+              Darling Dennis Game &bull; <span className="text-amber-400 font-bold">by its2much Mv</span>
             </span>
           </a>
 
@@ -64,9 +64,9 @@ export default function Header({ currentPage, onNavigate }: HeaderProps) {
                     handleNavClick(item.id)
                   }}
                   aria-current={isActive ? 'page' : undefined}
-                  className={`px-3.5 py-1.5 text-sm font-medium rounded-md transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 cursor-pointer ${
+                  className={`px-3.5 py-1.5 text-sm font-gta-heading tracking-wider uppercase font-bold rounded-md transition-colors motion-reduce:transition-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 cursor-pointer ${
                     isActive
-                      ? 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                      ? 'bg-amber-500/15 text-amber-300 border border-amber-500/40'
                       : 'text-slate-300 hover:text-white hover:bg-slate-900 border border-transparent'
                   }`}
                 >

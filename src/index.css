@@ -2,4 +2,61 @@
 
 :root {
   color-scheme: dark;
+  --font-gta-display: 'Teko', 'Impact', 'Arial Black', sans-serif;
+  --font-gta-heading: 'Barlow Condensed', 'Arial Narrow', 'Franklin Gothic Medium', sans-serif;
+  --font-gta-body: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* GTA-Inspired Typography Classes */
+.font-gta-display {
+  font-family: var(--font-gta-display);
+}
+
+.font-gta-heading {
+  font-family: var(--font-gta-heading);
+}
+
+.font-gta-body {
+  font-family: var(--font-gta-body);
+}
+
+/* GTA Urban Headline */
+.gta-title {
+  font-family: var(--font-gta-display);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  line-height: 0.92;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
+}
+
+/* GTA Subheading & Stage Labels */
+.gta-subtitle {
+  font-family: var(--font-gta-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-weight: 700;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.7);
+}
+
+/* GTA Action Button */
+.gta-btn {
+  font-family: var(--font-gta-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 800;
+}
+
+/* GTA Mission Badge / HUD Tag */
+.gta-badge {
+  font-family: var(--font-gta-heading);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+}
+
+/* GTA Comic Tanglish Dialogue */
+.gta-dialogue {
+  font-family: var(--font-gta-body);
+  font-weight: 600;
+  line-height: 1.35;
 }

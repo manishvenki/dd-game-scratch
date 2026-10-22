@@ -135,18 +135,18 @@ export default function PlayPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <div className="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-xs font-gta-heading font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               STAGES 1–5 ACTIVE &bull; CUBBON FINALE READY
             </div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-amber-500/10 text-amber-300 border border-amber-500/30">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-gta-heading font-medium bg-amber-500/10 text-amber-300 border border-amber-500/30">
               Developed by its2much Mv
             </div>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white">
+          <h1 className="gta-title text-2xl sm:text-3xl font-black uppercase tracking-wide text-white">
             Playable Encounters
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm font-gta-body text-slate-400">
             Interactive combat, continuous trio pursuit, comic Tanglish story encounters, and background music across Bengaluru.
           </p>
         </div>
@@ -157,7 +157,7 @@ export default function PlayPage() {
             type="button"
             id="btn-select-level-1"
             onClick={() => switchLevel('level-1', 1)}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-gta-heading tracking-wide font-bold transition-colors cursor-pointer border ${
               activeLevel === 'level-1'
                 ? 'bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-sm'
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
@@ -169,7 +169,7 @@ export default function PlayPage() {
             type="button"
             id="btn-select-level-2"
             onClick={() => switchLevel('level-2', 2)}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-gta-heading tracking-wide font-bold transition-colors cursor-pointer border ${
               activeLevel === 'level-2'
                 ? 'bg-amber-500/25 text-amber-300 border-amber-500/50 shadow-sm'
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
@@ -181,7 +181,7 @@ export default function PlayPage() {
             type="button"
             id="btn-select-level-3"
             onClick={() => switchLevel('level-3', 3)}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-gta-heading tracking-wide font-bold transition-colors cursor-pointer border ${
               activeLevel === 'level-3'
                 ? 'bg-cyan-500/25 text-cyan-300 border-cyan-500/50 shadow-sm'
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
@@ -193,7 +193,7 @@ export default function PlayPage() {
             type="button"
             id="btn-select-level-4"
             onClick={() => switchLevel('level-4', 4)}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-gta-heading tracking-wide font-bold transition-colors cursor-pointer border ${
               activeLevel === 'level-4'
                 ? 'bg-pink-500/25 text-pink-300 border-pink-500/50 shadow-sm'
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'
@@ -205,7 +205,7 @@ export default function PlayPage() {
             type="button"
             id="btn-select-level-5"
             onClick={() => switchLevel('level-5', 5)}
-            className={`px-2.5 py-1.5 rounded-lg text-xs font-mono font-semibold transition-colors cursor-pointer border ${
+            className={`px-2.5 py-1.5 rounded-lg text-xs font-gta-heading tracking-wide font-bold transition-colors cursor-pointer border ${
               activeLevel === 'level-5'
                 ? 'bg-emerald-500/25 text-emerald-300 border-emerald-500/50 shadow-sm'
                 : 'bg-slate-800 text-slate-400 border-slate-700 hover:bg-slate-700/80'

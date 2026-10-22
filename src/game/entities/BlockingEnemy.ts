@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { type BlockingEnemyConfig, type EnemyState } from '../levels/levelTypes'
+import { GAME_FONTS } from '../config/typography'
 
 export class BlockingEnemy extends Phaser.GameObjects.Container {
   public readonly enemyId: string
@@ -135,16 +136,16 @@ export class BlockingEnemy extends Phaser.GameObjects.Container {
     badgeBg.strokeRoundedRect(-badgeW / 2, 8, badgeW, badgeH, 3)
 
     this.badgeText = this.scene.add.text(0, 15.5, this.config.badgeLabel, {
-      fontFamily: 'ui-monospace, Menlo, monospace',
-      fontSize: '7.5px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '9px',
       fontStyle: 'bold',
       color: '#f87171',
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
     this.hpText = this.scene.add.text(0, -82, this.getHpIndicator(), {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '10px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '11px',
       fontStyle: 'bold',
       color: '#ef4444',
       align: 'center',
@@ -194,8 +195,8 @@ export class BlockingEnemy extends Phaser.GameObjects.Container {
 
     // Floating arcade hit text (e.g. "*POW!*")
     const sparkText = this.scene.add.text(this.x, this.y - 45, this.currentHp <= 0 ? '★ DOWN!' : '★ POW!', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '11px',
+      fontFamily: GAME_FONTS.display,
+      fontSize: '15px',
       fontStyle: 'bold',
       color: this.currentHp <= 0 ? '#fbbf24' : '#ef4444',
     }).setOrigin(0.5, 0.5)

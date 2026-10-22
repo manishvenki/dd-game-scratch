@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { type DialogueSequence, type DialogueLine } from '../dialogue/dialogueTypes'
+import { GAME_FONTS } from '../config/typography'
 
 export type SpeakerPositionResolver = (
   speakerId: string
@@ -136,8 +137,8 @@ export class DialogueSystem {
     this.speakerBadgeBg = this.scene.add.graphics()
     this.speakerNameText = this.scene.add
       .text(-this.cardWidth / 2 + 14, -this.cardHeight / 2 + 13, '', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '9.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '11px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
@@ -148,8 +149,8 @@ export class DialogueSystem {
     // Progress counter (e.g. 1 / 4)
     this.progressText = this.scene.add
       .text(this.cardWidth / 2 - 14, -this.cardHeight / 2 + 13, '', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '8.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '10px',
         fontStyle: 'bold',
         color: '#94a3b8',
       })
@@ -159,8 +160,8 @@ export class DialogueSystem {
     // Dialogue Body Text (Multi-line Tanglish with comfortable line height)
     this.lineText = this.scene.add
       .text(-this.cardWidth / 2 + 14, -this.cardHeight / 2 + 28, '', {
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: isNarrow ? '11px' : '11.5px',
+        fontFamily: GAME_FONTS.body,
+        fontSize: isNarrow ? '12px' : '13px',
         fontStyle: 'normal',
         color: '#f8fafc',
         lineSpacing: 3,
@@ -172,8 +173,8 @@ export class DialogueSystem {
     // Continue action hint
     this.hintText = this.scene.add
       .text(this.cardWidth / 2 - 14, this.cardHeight / 2 - 10, 'TAP / SPACE →', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '8px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '10px',
         fontStyle: 'bold',
         color: '#fbbf24', // amber-400
       })

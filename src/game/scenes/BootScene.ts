@@ -18,6 +18,7 @@ import {
   LEVEL_4_PARK_DIALOGUE,
   LEVEL_5_VICTORY_DIALOGUE,
 } from '../dialogue/dialogueData'
+import { GAME_FONTS, ensureGameFontsLoaded } from '../config/typography'
 
 export class BootScene extends Phaser.Scene {
   // Level State
@@ -85,6 +86,7 @@ export class BootScene extends Phaser.Scene {
   }
 
   create(): void {
+    void ensureGameFontsLoaded()
     // Read initial level from URL hash query if present (e.g. #/play?level=3)
     this.currentLevelId = this.detectInitialLevel()
     this.levelConfig = getLevelConfig(this.currentLevelId)
@@ -439,10 +441,12 @@ export class BootScene extends Phaser.Scene {
     // Title
     this.titleText = this.add
       .text(0, 0, this.levelConfig.title.toUpperCase(), {
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '22px',
+        fontFamily: GAME_FONTS.display,
+        fontSize: '28px',
         fontStyle: 'bold',
         color: '#ffffff',
+        stroke: '#090d16',
+        strokeThickness: 4,
         align: 'center',
       })
       .setOrigin(0.5, 0.5)
@@ -451,10 +455,10 @@ export class BootScene extends Phaser.Scene {
 
     // Subtitle
     this.subtitleText = this.add
-      .text(0, 0, `${this.levelConfig.stageNumber} • ${this.levelConfig.subtitle}`, {
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '12px',
-        fontStyle: 'normal',
+      .text(0, 0, `${this.levelConfig.stageNumber} • ${this.levelConfig.subtitle}`.toUpperCase(), {
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '13px',
+        fontStyle: 'bold',
         color: '#fbbf24', // amber-400
         align: 'center',
       })
@@ -466,8 +470,8 @@ export class BootScene extends Phaser.Scene {
     this.statusBg = this.add.graphics()
     this.statusText = this.add
       .text(0, 0, 'PHASER 3.90 • PURSUIT & COMIC DIALOGUE ACTIVE', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '9px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '11px',
         fontStyle: 'bold',
         color: '#34d399', // emerald-400
         align: 'center',
@@ -483,8 +487,8 @@ export class BootScene extends Phaser.Scene {
     this.objectiveBg = this.add.graphics().setScrollFactor(0).setDepth(100)
     this.objectiveText = this.add
       .text(0, 0, '', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '9.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '11.5px',
         fontStyle: 'bold',
         color: '#fef08a',
         align: 'center',
@@ -496,8 +500,8 @@ export class BootScene extends Phaser.Scene {
     // Control Guide
     this.controlGuideText = this.add
       .text(0, 0, '[A/D or ←/→] MOVE  •  [SPACE or ↑] JUMP  •  [J or X] ATTACK', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '8.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '11px',
         fontStyle: 'bold',
         color: '#cbd5e1',
         align: 'center',
@@ -510,8 +514,8 @@ export class BootScene extends Phaser.Scene {
     this.playerStatusBg = this.add.graphics().setScrollFactor(0).setDepth(100)
     this.playerStatusText = this.add
       .text(0, 0, 'STATE: GROUNDED [IDLE]', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '9px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '11px',
         fontStyle: 'bold',
         color: '#38bdf8',
         align: 'center',
@@ -972,9 +976,9 @@ export class BootScene extends Phaser.Scene {
     bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
 
     const stageNum = this.add
-      .text(0, -cardH / 2 + 22, cfg.stageNumber, {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '11px',
+      .text(0, -cardH / 2 + 20, cfg.stageNumber.toUpperCase(), {
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '13px',
         fontStyle: 'bold',
         color: '#f59e0b',
       })
@@ -982,18 +986,20 @@ export class BootScene extends Phaser.Scene {
 
     const title = this.add
       .text(0, -cardH / 2 + 45, cfg.title.toUpperCase(), {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '17px',
+        fontFamily: GAME_FONTS.display,
+        fontSize: '26px',
         fontStyle: 'bold',
         color: '#ffffff',
+        stroke: '#090d16',
+        strokeThickness: 3,
       })
       .setOrigin(0.5, 0.5)
 
     const introText = cfg.tanglishIntro ?? cfg.objectiveText
     const obj = this.add
       .text(0, -cardH / 2 + 84, introText, {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '11px',
+        fontFamily: GAME_FONTS.body,
+        fontSize: '12px',
         color: '#cbd5e1',
         align: 'center',
         wordWrap: { width: cardW - 36 },
@@ -1006,8 +1012,8 @@ export class BootScene extends Phaser.Scene {
 
     const startBtnTxt = this.add
       .text(0, 56, 'START ENCOUNTER [TAP OR ANY KEY TO SPRINT]', {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '10.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '14px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
@@ -1085,18 +1091,20 @@ export class BootScene extends Phaser.Scene {
     bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
 
     const title = this.add
-      .text(0, -cardH / 2 + 28, config.title, {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '17px',
+      .text(0, -cardH / 2 + 28, config.title.toUpperCase(), {
+        fontFamily: GAME_FONTS.display,
+        fontSize: '26px',
         fontStyle: 'bold',
         color: '#ffffff',
+        stroke: '#090d16',
+        strokeThickness: 3,
       })
       .setOrigin(0.5, 0.5)
 
     const sub = this.add
       .text(0, -cardH / 2 + 65, config.subtitle, {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '11px',
+        fontFamily: GAME_FONTS.body,
+        fontSize: '12px',
         color: '#cbd5e1',
         align: 'center',
         wordWrap: { width: cardW - 32 },
@@ -1131,9 +1139,9 @@ export class BootScene extends Phaser.Scene {
       bBg.fillRoundedRect(bx - btnW / 2, btnY - btnH / 2, btnW, btnH, 6)
 
       const bTxt = this.add
-        .text(bx, btnY, btnCfg.label, {
-          fontFamily: 'system-ui, sans-serif',
-          fontSize: btnCount > 2 ? '8.5px' : '9.5px',
+        .text(bx, btnY, btnCfg.label.toUpperCase(), {
+          fontFamily: GAME_FONTS.heading,
+          fontSize: btnCount > 2 ? '11px' : '13px',
           fontStyle: 'bold',
           color: '#ffffff',
           align: 'center',
@@ -1207,15 +1215,15 @@ export class BootScene extends Phaser.Scene {
     // Celebration Ribbon Banner
     const ribbonY = -cardH / 2 + 22
     const trophyText = this.add.text(0, ribbonY, '★ GRAND VICTORY — ADVENTURE COMPLETED! ★', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '13.5px',
+      fontFamily: GAME_FONTS.display,
+      fontSize: '18px',
       fontStyle: 'bold',
       color: '#f59e0b',
     }).setOrigin(0.5, 0.5)
 
-    const subtitleText = this.add.text(0, ribbonY + 20, 'Dennis survived all 5 Bengaluru chases from College Gate to Cubbon Park!', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '10px',
+    const subtitleText = this.add.text(0, ribbonY + 22, 'Dennis survived all 5 Bengaluru chases from College Gate to Cubbon Park!', {
+      fontFamily: GAME_FONTS.body,
+      fontSize: '10.5px',
       color: '#cbd5e1',
       align: 'center',
       wordWrap: { width: cardW - 32 },
@@ -1232,16 +1240,16 @@ export class BootScene extends Phaser.Scene {
     summaryBg.strokeRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 6)
 
     const stage123 = this.add.text(0, stageSummaryY + 6, '✓ STAGE 01: College Gate   ✓ STAGE 02: Thatha Tea   ✓ STAGE 03: MG Road', {
-      fontFamily: 'ui-monospace, Menlo, monospace',
-      fontSize: '7.5px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '9.5px',
       fontStyle: 'bold',
       color: '#34d399', // Emerald
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
     const stage45 = this.add.text(0, stageSummaryY + 28, '✓ STAGE 04: Dr. Rajkumar Park   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
-      fontFamily: 'ui-monospace, Menlo, monospace',
-      fontSize: '7.5px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '9.5px',
       fontStyle: 'bold',
       color: '#fef08a', // Yellow
       align: 'center',
@@ -1250,16 +1258,16 @@ export class BootScene extends Phaser.Scene {
     // Developer Credit - Prominent & Tasteful
     const creditY = stageSummaryY + 64
     const devCreditText = this.add.text(0, creditY, 'Developed by its2much Mv', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '12px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '14px',
       fontStyle: 'bold',
       color: '#fbbf24', // Amber-400
     }).setOrigin(0.5, 0.5)
 
     // Optional subtle teaser
     const teaserText = this.add.text(0, creditY + 16, 'More of Dennis\'s story coming soon...', {
-      fontFamily: 'system-ui, sans-serif',
-      fontSize: '9px',
+      fontFamily: GAME_FONTS.body,
+      fontSize: '9.5px',
       fontStyle: 'italic',
       color: '#94a3b8',
     }).setOrigin(0.5, 0.5)
@@ -1301,8 +1309,8 @@ export class BootScene extends Phaser.Scene {
       btnBg.fillRoundedRect(bx - btnW / 2, btnY - 14, btnW, 28, 6)
 
       const btnTxt = this.add.text(bx, btnY, cfg.label, {
-        fontFamily: 'system-ui, sans-serif',
-        fontSize: '9px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '11px',
         fontStyle: 'bold',
         color: '#ffffff',
       }).setOrigin(0.5, 0.5)

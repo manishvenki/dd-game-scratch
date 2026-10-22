@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { type EnvironmentTheme } from '../levels/levelTypes'
+import { GAME_FONTS } from '../config/typography'
 
 export interface BengaluruCollegeStreetConfig {
   readonly scene: Phaser.Scene
@@ -668,7 +669,7 @@ export class BengaluruCollegeStreet {
     const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
       const t = this.scene.add
         .text(x, y, text, {
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: GAME_FONTS.heading,
           fontSize,
           fontStyle: 'bold',
           color,
@@ -817,7 +818,7 @@ export class BengaluruCollegeStreet {
     const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
       const t = this.scene.add
         .text(x, y, text, {
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: GAME_FONTS.heading,
           fontSize,
           fontStyle: 'bold',
           color,
@@ -855,7 +856,7 @@ export class BengaluruCollegeStreet {
     const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
       const t = this.scene.add
         .text(x, y, text, {
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: GAME_FONTS.heading,
           fontSize,
           fontStyle: 'bold',
           color,
@@ -1301,7 +1302,7 @@ export class BengaluruCollegeStreet {
     const addLabel = (x: number, y: number, text: string, color: string, fontSize: string) => {
       const t = this.scene.add
         .text(x, y, text, {
-          fontFamily: 'system-ui, -apple-system, sans-serif',
+          fontFamily: GAME_FONTS.heading,
           fontSize,
           fontStyle: 'bold',
           color,
@@ -1717,8 +1718,8 @@ export class BengaluruCollegeStreet {
     const gateCenterX = (520 + 1160) / 2
     const gateText = this.scene.add
       .text(gateCenterX, this.groundY - 148, 'BENGALURU CITY COLLEGE • ESTD 1948', {
-        fontFamily: 'system-ui, -apple-system, sans-serif',
-        fontSize: '9.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '11px',
         fontStyle: 'bold',
         color: '#fbbf24', // amber-400
         align: 'center',
@@ -1729,8 +1730,8 @@ export class BengaluruCollegeStreet {
     // 2. "SLV KAAPI & TIFFIN CORNER" Sign
     const kaapiText = this.scene.add
       .text(360, this.groundY - 94, 'SLV KAAPI & TIFFIN • FILTER COFFEE', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '8px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '9.5px',
         fontStyle: 'bold',
         color: '#fef3c7',
         align: 'center',
@@ -1741,8 +1742,8 @@ export class BengaluruCollegeStreet {
     // 3. "CAMPUS XEROX & STATIONERY" Sign
     const xeroxText = this.scene.add
       .text(1355, this.groundY - 90, 'CAMPUS XEROX • SPIRAL BINDING', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '7.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '9px',
         fontStyle: 'bold',
         color: '#fef08a',
         align: 'center',
@@ -1753,8 +1754,8 @@ export class BengaluruCollegeStreet {
     // 4. Direction Signboard Text
     const signText = this.scene.add
       .text(1180, this.groundY - 73, '← DEPT BLOCKS\nCANTEEN →', {
-        fontFamily: 'ui-monospace, Menlo, monospace',
-        fontSize: '6.5px',
+        fontFamily: GAME_FONTS.heading,
+        fontSize: '8px',
         fontStyle: 'bold',
         color: '#ffffff',
         align: 'center',

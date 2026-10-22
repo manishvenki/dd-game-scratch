@@ -121,10 +121,10 @@ export default function LevelsPage() {
             <span>MENU</span>
           </a>
           <div>
-            <h1 className="text-lg sm:text-xl font-black uppercase tracking-wider text-white">
+            <h1 className="gta-title text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
               Stage Selection
             </h1>
-            <p className="text-[11px] font-mono text-amber-400">
+            <p className="gta-subtitle text-xs text-amber-400 font-bold">
               5 PLAYABLE ENCOUNTERS &bull; BENGALURU ADVENTURE
             </p>
           </div>
@@ -135,7 +135,7 @@ export default function LevelsPage() {
             type="button"
             id="btn-levels-audio"
             onClick={handleAudioToggle}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-gta-heading tracking-wider font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
               isMuted
                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
                 : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
@@ -161,9 +161,9 @@ export default function LevelsPage() {
       <div className="my-auto py-4 flex flex-col lg:flex-row gap-6 items-stretch max-w-6xl mx-auto w-full">
         {/* Left: Stage Carousel / List */}
         <div className="flex-1 flex flex-col gap-2.5">
-          <div className="text-xs font-mono uppercase tracking-widest text-slate-400 flex items-center justify-between">
+          <div className="text-xs font-gta-heading uppercase tracking-widest text-slate-400 flex items-center justify-between">
             <span>SELECT MISSION</span>
-            <span className="text-amber-400">STAGE {selectedStage} OF 5</span>
+            <span className="text-amber-400 font-bold">STAGE {selectedStage} OF 5</span>
           </div>
 
           <div className="space-y-2.5">
@@ -181,7 +181,7 @@ export default function LevelsPage() {
                 >
                   <div className="flex items-center gap-3">
                     <div
-                      className={`w-9 h-9 rounded-lg flex items-center justify-center font-mono font-black text-sm border ${
+                      className={`w-9 h-9 rounded-lg flex items-center justify-center font-gta-heading font-black text-base border ${
                         isSelected
                           ? 'bg-amber-500 text-slate-950 border-amber-300'
                           : 'bg-slate-800 text-slate-400 border-slate-700'
@@ -191,21 +191,21 @@ export default function LevelsPage() {
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-bold text-white tracking-wide">
+                        <span className="text-base font-gta-heading font-bold text-white tracking-wide">
                           {stage.title}
                         </span>
-                        <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${stage.badgeColor}`}>
+                        <span className={`text-xs font-gta-heading px-2 py-0.5 rounded border ${stage.badgeColor}`}>
                           {stage.stageTag}
                         </span>
                       </div>
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p className="text-xs text-slate-400 font-gta-body mt-0.5">
                         {stage.location}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="hidden sm:inline-block text-[10px] font-mono font-semibold text-emerald-400">
+                    <span className="hidden sm:inline-block text-xs font-gta-heading font-semibold text-emerald-400">
                       ✓ READY
                     </span>
                     <button
@@ -214,7 +214,7 @@ export default function LevelsPage() {
                         e.stopPropagation()
                         handleLaunchStage(stage.levelNumber)
                       }}
-                      className="px-3 py-1.5 rounded-lg text-xs font-mono font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow"
+                      className="gta-btn px-3 py-1.5 rounded-lg text-xs font-gta-heading font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow"
                     >
                       PLAY &rarr;
                     </button>
@@ -229,37 +229,37 @@ export default function LevelsPage() {
         <div className="w-full lg:w-96 bg-slate-900 border border-slate-700/80 rounded-2xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
           <div className="space-y-4">
             <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <span className={`px-2.5 py-1 rounded text-xs font-mono font-bold border ${currentStage.badgeColor}`}>
+              <span className={`px-2.5 py-1 rounded text-xs font-gta-heading font-bold border ${currentStage.badgeColor}`}>
                 {currentStage.stageTag}
               </span>
-              <span className="text-xs font-mono text-emerald-400 font-semibold">
+              <span className="text-xs font-gta-heading text-emerald-400 font-semibold">
                 ● STATUS: PLAYABLE
               </span>
             </div>
 
             <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-tight">
+              <h2 className="text-2xl font-black font-gta-display text-white uppercase tracking-wide">
                 {currentStage.title}
               </h2>
-              <div className="text-xs text-amber-400 font-medium mt-1">
+              <div className="text-xs text-amber-400 font-gta-body font-medium mt-1">
                 📍 {currentStage.location}
               </div>
             </div>
 
             <div className="space-y-2 bg-slate-950/60 border border-slate-800/80 rounded-xl p-3.5">
-              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+              <div className="text-xs font-gta-heading uppercase tracking-wider text-slate-400">
                 MISSION OBJECTIVE
               </div>
-              <p className="text-xs text-slate-200 leading-relaxed">
+              <p className="text-xs text-slate-200 font-gta-body leading-relaxed">
                 {currentStage.objective}
               </p>
             </div>
 
             <div className="space-y-1.5 bg-slate-950/40 border border-slate-800/60 rounded-xl p-3">
-              <div className="text-[10px] font-mono uppercase tracking-wider text-slate-400">
+              <div className="text-xs font-gta-heading uppercase tracking-wider text-slate-400">
                 ENCOUNTER SPECIFICS
               </div>
-              <p className="text-xs text-slate-400">
+              <p className="text-xs text-slate-400 font-gta-body">
                 {currentStage.encounter}
               </p>
             </div>
@@ -270,12 +270,12 @@ export default function LevelsPage() {
               type="button"
               id="btn-levels-launch"
               onClick={() => handleLaunchStage(currentStage.levelNumber)}
-              className="w-full py-3.5 px-4 rounded-xl font-black text-sm uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-2"
+              className="gta-btn w-full py-3.5 px-4 rounded-xl font-bold text-lg uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-2"
             >
               <span>START {currentStage.stageTag}</span>
               <span>&rarr;</span>
             </button>
-            <div className="text-[10px] text-center font-mono text-slate-500">
+            <div className="text-xs text-center font-gta-heading text-slate-500">
               Developed by its2much Mv
             </div>
           </div>

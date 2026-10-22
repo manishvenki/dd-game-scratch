@@ -81,14 +81,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
           />
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase drop-shadow-md">
+              <h1 className="gta-title text-2xl sm:text-3xl text-white uppercase drop-shadow-md">
                 DD Game Scratch
               </h1>
-              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded text-xs gta-badge bg-amber-500/20 text-amber-300 border border-amber-500/40">
                 ARCADE
               </span>
             </div>
-            <p className="text-xs font-semibold text-amber-400 tracking-wide drop-shadow-sm">
+            <p className="text-xs sm:text-sm font-semibold gta-subtitle text-amber-400 tracking-wide drop-shadow-sm">
               Darling Dennis Game &bull; A 2D Comedy Chase Adventure
             </p>
           </div>
@@ -101,7 +101,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             type="button"
             id="btn-main-audio"
             onClick={handleAudioToggle}
-            className={`px-3 py-1.5 rounded-xl text-xs font-mono font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
+            className={`px-3 py-1.5 rounded-xl text-xs font-gta-heading tracking-wider font-bold flex items-center gap-1.5 transition-all cursor-pointer border ${
               isMuted
                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
                 : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
@@ -141,7 +141,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
       {/* Center / Right Floating Arcade Menu Panel */}
       <div className="relative z-20 w-full px-4 sm:px-8 py-4 flex flex-col md:flex-row items-end md:items-center justify-end pointer-events-none mt-auto mb-auto">
         <div className="pointer-events-auto w-full sm:w-80 md:w-88 flex flex-col gap-3 bg-slate-950/85 backdrop-blur-md border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-2xl">
-          <div className="text-[10px] font-mono uppercase tracking-widest text-slate-400 text-center pb-1 border-b border-slate-800/80 flex items-center justify-between">
+          <div className="text-xs font-gta-heading uppercase tracking-widest text-slate-400 text-center pb-1 border-b border-slate-800/80 flex items-center justify-between">
             <span className="text-amber-400 font-bold">&bull; THATHA TEA &bull;</span>
             <span>MAIN MENU</span>
           </div>
@@ -151,7 +151,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
             type="button"
             id="btn-home-play"
             onClick={handlePlayGame}
-            className="group relative w-full py-4 px-6 rounded-xl font-black text-base sm:text-lg tracking-wider uppercase bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 active:scale-[0.98] text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-3"
+            className="gta-btn group relative w-full py-4 px-6 rounded-xl font-bold text-xl sm:text-2xl tracking-wider uppercase bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 active:scale-[0.98] text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-3"
           >
             <span className="text-xl group-hover:scale-110 transition-transform">▶</span>
             <span>Play Game</span>
@@ -163,7 +163,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               type="button"
               id="btn-home-levels"
               onClick={() => onNavigate('levels')}
-              className="py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
+              className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>🗺</span>
               <span>Stages</span>
@@ -173,7 +173,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               type="button"
               id="btn-home-characters"
               onClick={() => onNavigate('characters')}
-              className="py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
+              className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>👥</span>
               <span>Cast</span>
@@ -183,7 +183,7 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               type="button"
               id="btn-menu-settings"
               onClick={() => setShowSettings(true)}
-              className="py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
+              className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>⚙</span>
               <span>Settings</span>
@@ -193,14 +193,14 @@ export default function HomePage({ onNavigate }: HomePageProps) {
               type="button"
               id="btn-menu-credits"
               onClick={() => setShowCredits(true)}
-              className="py-2.5 px-3 rounded-xl text-xs font-bold tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
+              className="py-2.5 px-3 rounded-xl text-sm font-gta-heading tracking-wide uppercase bg-slate-900/90 hover:bg-slate-800 active:bg-slate-950 text-slate-200 border border-slate-700 hover:border-amber-500/50 cursor-pointer transition-all flex items-center justify-center gap-1.5"
             >
               <span>★</span>
               <span>Credits</span>
             </button>
           </div>
 
-          <div className="text-[10px] text-center text-slate-400 font-mono pt-1">
+          <div className="text-xs text-center text-slate-400 font-gta-body pt-1">
             Opposite Dr. Rajkumar Park &bull; Kalyan Nagar
           </div>
         </div>
@@ -208,11 +208,11 @@ export default function HomePage({ onNavigate }: HomePageProps) {
 
       {/* Bottom Status & Developer Credit Bar */}
       <footer className="relative z-20 w-full p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-2 pointer-events-none">
-        <div className="pointer-events-auto bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl px-3.5 py-1.5 text-xs font-mono font-semibold text-amber-400 shadow-lg">
+        <div className="pointer-events-auto bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl px-3.5 py-1.5 text-sm font-gta-heading tracking-wider font-semibold text-amber-400 shadow-lg">
           Developed by its2much Mv
         </div>
 
-        <div className="pointer-events-auto hidden md:flex items-center gap-2 bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl px-3.5 py-1.5 text-[11px] font-mono text-slate-300 shadow-lg">
+        <div className="pointer-events-auto hidden md:flex items-center gap-2 bg-slate-950/80 backdrop-blur-md border border-slate-800/80 rounded-xl px-3.5 py-1.5 text-xs font-gta-heading tracking-wider text-slate-300 shadow-lg">
           <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           <span>STAGES 01–05 PLAYABLE &bull; CUBBON PARK FINALE READY</span>
         </div>

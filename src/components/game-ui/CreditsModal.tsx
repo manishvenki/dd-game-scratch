@@ -35,10 +35,10 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
               ★
             </div>
             <div>
-              <h2 id="credits-title" className="text-xl font-black uppercase tracking-wider text-white">
+              <h2 id="credits-title" className="gta-title text-2xl font-black uppercase tracking-wide text-white">
                 Game Credits
               </h2>
-              <p className="text-xs text-slate-400 font-mono">
+              <p className="gta-subtitle text-xs text-slate-400 font-bold">
                 DD GAME SCRATCH &bull; DARLING DENNIS GAME
               </p>
             </div>
@@ -58,26 +58,26 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
         <div className="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
           {/* Developer Section */}
           <div className="bg-slate-950/70 border border-amber-500/30 rounded-xl p-4 text-center space-y-1">
-            <div className="text-[10px] font-mono uppercase tracking-widest text-amber-400 font-semibold">
+            <div className="text-xs font-gta-heading uppercase tracking-widest text-amber-400 font-bold">
               ORIGINAL CREATOR & DEVELOPER
             </div>
-            <div className="text-xl font-black text-white tracking-wide">
+            <div className="text-2xl font-black font-gta-display text-white tracking-wide">
               Developed by its2much Mv
             </div>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs font-gta-body text-slate-400">
               Concept, Game Design, Direction & Sound Architecture
             </p>
           </div>
 
           {/* Setting & Story Inspiration */}
           <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-4 space-y-2">
-            <div className="text-xs font-mono uppercase text-emerald-400 font-semibold">
+            <div className="text-xs font-gta-heading uppercase text-emerald-400 font-bold">
               Setting & Story Inspiration
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed">
+            <p className="text-xs font-gta-body text-slate-300 leading-relaxed">
               Inspired by the real streets and vibrant culture of <span className="text-white font-medium">Bengaluru, Karnataka</span>:
             </p>
-            <ul className="text-xs text-slate-400 space-y-1 list-disc list-inside">
+            <ul className="text-xs font-gta-body text-slate-400 space-y-1 list-disc list-inside">
               <li>Stage 01 &mdash; College Street Gates & Avenue</li>
               <li>Stage 02 &mdash; Thatha Tea Stall, Kalyan Nagar / Kammanahalli</li>
               <li>Stage 03 &mdash; MG Road / Brigade Road & Namma Metro</li>
@@ -89,19 +89,19 @@ export default function CreditsModal({ isOpen, onClose }: CreditsModalProps) {
           {/* Engine & Soundtrack */}
           <div className="grid grid-cols-2 gap-3 text-xs">
             <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 space-y-1">
-              <div className="font-mono text-amber-400 font-semibold text-[11px]">SOUNDTRACK</div>
-              <div className="text-slate-300 font-medium">DD Game Original BGM</div>
-              <div className="text-slate-500 text-[10px]">Continuous Looping Audio</div>
+              <div className="font-gta-heading text-amber-400 font-bold text-xs tracking-wider">SOUNDTRACK</div>
+              <div className="text-slate-300 font-gta-body font-medium">DD Game Original BGM</div>
+              <div className="text-slate-500 font-gta-body text-[10px]">Continuous Looping Audio</div>
             </div>
             <div className="bg-slate-950/60 border border-slate-800 rounded-xl p-3 space-y-1">
-              <div className="font-mono text-cyan-400 font-semibold text-[11px]">ENGINE & TECH</div>
-              <div className="text-slate-300 font-medium">Phaser 3.90 & React 19</div>
-              <div className="text-slate-500 text-[10px]">TypeScript & Vite</div>
+              <div className="font-gta-heading text-cyan-400 font-bold text-xs tracking-wider">ENGINE & TECH</div>
+              <div className="text-slate-300 font-gta-body font-medium">Phaser 3.90 & React 19</div>
+              <div className="text-slate-500 font-gta-body text-[10px]">TypeScript & Vite</div>
             </div>
           </div>
 
           {/* Epilogue Notice */}
-          <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3 text-[11px] text-slate-400 leading-relaxed">
+          <div className="bg-slate-950/40 border border-slate-800/80 rounded-xl p-3 text-xs font-gta-body text-slate-400 leading-relaxed">
             <span className="font-semibold text-slate-300">Epilogue Chapter:</span> Kristu Jayanti University (KJU) is reserved as a post-Level 5 expansion for the future Manisha storyline.
           </div>
         </div>

@@ -1,5 +1,6 @@
 import Phaser from 'phaser'
 import { Chaser } from './Chaser'
+import { GAME_FONTS } from '../config/typography'
 
 export interface SathishConfig {
   readonly x: number
@@ -93,8 +94,8 @@ export class Sathish extends Chaser {
    */
   private createLenovoMarking(): void {
     this.lenovoText = this.scene.add.text(0, -51, 'Lenovo', {
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      fontSize: '6px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '7.5px',
       fontStyle: 'bold',
       color: '#ffffff',
       align: 'center',

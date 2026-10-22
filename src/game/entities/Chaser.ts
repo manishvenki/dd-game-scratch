@@ -7,6 +7,7 @@ import {
   getCharacterMetadata,
   type CharacterMetadata,
 } from '../data/characterRegistry'
+import { GAME_FONTS } from '../config/typography'
 
 export interface ChaserConfig {
   readonly x: number
@@ -116,8 +117,8 @@ export abstract class Chaser extends Phaser.GameObjects.Container {
     badgeBg.strokeRoundedRect(-badgeW / 2, 8, badgeW, badgeH, 3)
 
     const badgeText = this.scene.add.text(0, 16, this.metadata.badgeLabel, {
-      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, monospace',
-      fontSize: '8px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '9.5px',
       fontStyle: 'bold',
       color: '#e2e8f0',
       align: 'center',

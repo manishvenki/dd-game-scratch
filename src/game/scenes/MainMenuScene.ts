@@ -4,6 +4,7 @@ import { Manish } from '../entities/Manish'
 import { Sathish } from '../entities/Sathish'
 import { Rahul } from '../entities/Rahul'
 import { BengaluruCollegeStreet } from '../environments/BengaluruCollegeStreet'
+import { GAME_FONTS, ensureGameFontsLoaded } from '../config/typography'
 
 export interface MainMenuDialogue {
   readonly speaker: string
@@ -64,6 +65,7 @@ export class MainMenuScene extends Phaser.Scene {
   }
 
   create(): void {
+    void ensureGameFontsLoaded()
     const width = this.scale.width
     const height = this.scale.height
     this.groundY = Math.max(380, Math.floor(height * 0.78))
@@ -238,8 +240,8 @@ export class MainMenuScene extends Phaser.Scene {
     this.dialogueBubble.add(this.dialogueBubbleBg)
 
     this.dialogueSpeakerText = this.add.text(0, 0, '', {
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      fontSize: '11px',
+      fontFamily: GAME_FONTS.heading,
+      fontSize: '13px',
       fontStyle: 'bold',
       color: '#f59e0b',
     })
@@ -247,10 +249,10 @@ export class MainMenuScene extends Phaser.Scene {
     this.dialogueBubble.add(this.dialogueSpeakerText)
 
     this.dialogueContentText = this.add.text(0, 0, '', {
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      fontSize: '12px',
+      fontFamily: GAME_FONTS.body,
+      fontSize: '13px',
       color: '#0f172a',
-      fontStyle: '600',
+      fontStyle: 'bold',
       align: 'center',
       wordWrap: { width: 220 },
     })

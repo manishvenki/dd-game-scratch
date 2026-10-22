@@ -36,7 +36,7 @@ Install all project dependencies:
 npm install
 ```
 
-### 2. Windows Desktop Launcher & Shortcut (One-Click Launch)
+### 2. Windows Desktop Launcher & Shortcut (One-Click Chrome Launch)
 
 DD Game Scratch includes a dedicated Windows desktop launcher and custom anime game icon:
 
@@ -45,15 +45,27 @@ DD Game Scratch includes a dedicated Windows desktop launcher and custom anime g
    ```powershell
    powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-desktop-shortcut.ps1
    ```
-   This automatically detects your Windows Desktop (including OneDrive-redirected desktops) and installs **`DD Game Scratch.lnk`** with the custom application icon.
+   This automatically detects your Windows Desktop (including OneDrive-redirected desktops) and installs/updates **`DD Game Scratch.lnk`** pointing directly to:
+   `cmd.exe /c "C:\DD Game\dd-game-scratch\scripts\launch-dd-game.bat"`
+   with working directory set to the project root and custom application icon (`scripts\dd-game-icon.ico`).
 
 2. **Double-Click Play**:
    Double-click the **`DD Game Scratch`** shortcut on your Windows desktop. The launcher script (`scripts\launch-dd-game.bat`):
-   - Resolves the project directory automatically.
-   - Checks for Node.js and npm availability.
-   - Verifies project dependencies and runs `npm install` if missing.
-   - Checks if the game server is already active on port `5173`.
-   - Starts Vite if not running and automatically opens `http://localhost:5173/` in your default browser.
+   - Resolves the project directory automatically via `%~dp0..`, independent of the caller's working directory.
+   - Verifies Node.js (`v20.19+`) and npm availability.
+   - Verifies project dependencies and runs `npm install` safely only if `node_modules` is absent.
+   - Checks if port `5173` is already responding with DD Game Scratch before reusing or starting Vite, preventing collisions with unrelated services.
+   - Starts the local Vite server in the background without spawning duplicate servers on repeated clicks.
+   - Captures logs to `logs\launcher.log` for inspection.
+   - Polls `http://localhost:5173/` until genuinely responding.
+   - Detects Google Chrome automatically across standard 64-bit/32-bit Program Files, LocalAppData, and Windows App Paths registry, launching Chrome directly to `http://localhost:5173/`. If Chrome is unavailable, it gracefully falls back to the system default browser.
+
+3. **Launcher Troubleshooting**:
+   - **Inspect Launcher Log**: Check `logs\launcher.log` in the project root to review startup steps, port checks, and browser launch commands.
+   - **Chrome Not Opening**: Ensure Google Chrome is installed at `C:\Program Files\Google\Chrome\Application\chrome.exe` (or in `%LocalAppData%`). If Chrome is not installed, the launcher will fall back to `start http://localhost:5173/`.
+   - **Port Conflicts**: If port 5173 is occupied by an unrelated application that does not serve DD Game Scratch, the launcher warns you without killing unrelated processes. To free the port, close the conflicting process or change the port in `vite.config.ts`.
+   - **Node.js / npm Missing**: Ensure Node.js `v20.19+` is added to your Windows system `PATH`. Restart your command prompt or terminal after installing Node.js.
+   - **Repair Shortcut**: Re-run `powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\create-desktop-shortcut.ps1` at any time to refresh the desktop shortcut.
 
 ### 3. Development Server
 
@@ -143,6 +155,35 @@ Official game branding is prominently and tastefully integrated into:
 - Home page hero badge and main navigation.
 - Persistent site footer across all views.
 - Level 5 Grand Finale Victory screen celebrating all 5 completed stages.
+
+---
+
+## GTA-Inspired Game Typography System
+
+DD Game Scratch uses an action-game typography suite inspired by the bold, urban, and confident tone of classic open-world games:
+
+- **Typography Stack**:
+  - **Primary Display & Headings**: `Teko` (condensed uppercase display font; open-source via Google Fonts, SIL Open Font License).
+  - **Navigation, Subheadings & Badges**: `Barlow Condensed` (semi-condensed grotesque; open-source via Google Fonts, SIL Open Font License).
+  - **Dialogue & Body Text**: `Inter` (neutral, hyper-readable neo-grotesque; open-source via Google Fonts, SIL Open Font License).
+  - **Fallbacks**: `'Impact', 'Arial Narrow', 'Trebuchet MS', sans-serif`.
+
+- **Centralized Tokens & Utilities**:
+  - **Phaser 3 Canvas**: Centralized in [`src/game/config/typography.ts`](src/game/config/typography.ts) via `GAME_FONTS` and `ensureGameFontsLoaded()`.
+  - **React UI & Tailwind CSS**: Utility classes defined in [`src/index.css`](src/index.css):
+    - `.gta-title`: Bold condensed title font with letter spacing and subtle text shadow.
+    - `.gta-subtitle`: Condensed uppercase sub-heading font.
+    - `.gta-btn`: Punchy arcade action button font styling.
+    - `.gta-badge`: High-visibility status and tag font styling.
+    - `.font-gta-display`, `.font-gta-heading`, `.font-gta-body`.
+
+- **Unified Canvas & DOM Coverage**:
+  - Main menu title, buttons, and status indicators.
+  - In-game HUD (stage cards, blocker count, health indicators, sprint gauge).
+  - Stage signboards (Bengaluru City College, Thatha Tea, SLV Kaapi, Dr. Rajkumar Park, Cubbon Park).
+  - Dynamic character badges (`DENNIS [PROTAG]`, `MANISH [CHASER]`, `SATHISH [CHASER]`, `RAHUL [CHASER]`, `[BLOCKER]`).
+  - Character-anchored comic dialogue bubbles and Tanglish conversations.
+  - Stage-complete overlays, retry screens, and Grand Victory ceremony.
 
 ---
 
