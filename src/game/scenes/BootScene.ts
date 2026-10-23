@@ -820,6 +820,7 @@ export class BootScene extends Phaser.Scene {
 
     let sequence = LEVEL_3_REVEAL_DIALOGUE
     if (this.currentLevelId === 'level-3') {
+      this.level3EncounterState = 'ENCOUNTER_TRIGGERED'
       this.level3EncounterState = 'DIALOGUE_ACTIVE'
       sequence = LEVEL_3_REVEAL_DIALOGUE
     } else if (this.currentLevelId === 'level-4') {
@@ -831,6 +832,7 @@ export class BootScene extends Phaser.Scene {
       this.playerController?.setFrozen(false)
 
       if (this.currentLevelId === 'level-3') {
+        this.level3EncounterState = 'REVEAL_COMPLETE'
         this.level3EncounterState = 'ATTACK_INTERACTION'
         // Keep chasers paused during the required attack interaction against Raghu
         this.chasersPaused = true
