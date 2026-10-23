@@ -80,23 +80,34 @@ export default function CharacterSelectModal({
             {characters.map((char) => {
               const isSelected = selectedId === char.id
               const isDennis = char.id === 'dennis'
+              const charAccent = isDennis
+                ? 'border-blue-500/60 text-blue-400 bg-blue-950/30'
+                : char.id === 'manish'
+                  ? 'border-red-500/60 text-red-400 bg-red-950/20'
+                  : char.id === 'sathish'
+                    ? 'border-orange-500/60 text-orange-400 bg-orange-950/20'
+                    : 'border-teal-500/60 text-teal-400 bg-teal-950/20'
               return (
                 <div
                   key={char.id}
                   onClick={() => handleSelectChar(char.id)}
                   className={`p-4 sm:p-5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between gap-3 ${
                     isSelected
-                      ? 'bg-slate-800/95 border-amber-400 shadow-xl shadow-amber-500/15 ring-2 ring-amber-400/50 scale-[1.01]'
-                      : 'bg-slate-950/70 border-slate-800 hover:bg-slate-800/60 hover:border-slate-700'
+                      ? 'bg-slate-800/95 border-amber-400 shadow-xl shadow-amber-500/20 ring-2 ring-amber-400/50 scale-[1.01]'
+                      : 'bg-slate-950/75 border-slate-800 hover:bg-slate-800/60 hover:border-slate-700'
                   }`}
                 >
                   <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3.5">
-                      <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-950 border-2 border-slate-700 flex items-center justify-center font-gta-display font-black text-amber-400 text-2xl sm:text-3xl shadow-inner shrink-0">
-                        {char.initials}
+                    <div className="flex items-center gap-4">
+                      {/* Substantially Enlarged Portrait Box (~1.4x) */}
+                      <div className={`w-18 h-18 sm:w-20 sm:h-20 rounded-2xl border-2 flex flex-col items-center justify-center font-gta-display font-black text-3xl sm:text-4xl shadow-inner shrink-0 ${charAccent}`}>
+                        <span>{char.initials}</span>
+                        <span className="text-[10px] tracking-wider font-sans font-bold opacity-80 uppercase -mt-1">
+                          {isDennis ? 'HERO' : 'CHASER'}
+                        </span>
                       </div>
                       <div>
-                        <h3 className="font-black text-lg sm:text-2xl font-gta-heading text-white leading-tight">
+                        <h3 className="font-black text-xl sm:text-2xl font-gta-heading text-white leading-tight">
                           {char.displayName}
                         </h3>
                         <span className={`text-xs sm:text-sm font-gta-heading font-bold px-2.5 py-0.5 rounded-lg border inline-block mt-1 ${char.badgeColorClasses}`}>
@@ -106,7 +117,7 @@ export default function CharacterSelectModal({
                     </div>
 
                     {isDennis && (
-                      <span className="text-xs sm:text-sm font-gta-heading font-black px-2.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                      <span className="text-xs sm:text-sm font-gta-heading font-black px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 shrink-0">
                         ACTIVE HERO
                       </span>
                     )}
@@ -117,7 +128,7 @@ export default function CharacterSelectModal({
                   </p>
 
                   <div className="pt-2 border-t border-slate-800 flex items-center justify-between text-xs sm:text-sm font-gta-heading text-slate-400">
-                    <span className="truncate max-w-[160px] font-semibold">{char.mechanicsRole}</span>
+                    <span className="truncate max-w-[170px] font-semibold">{char.mechanicsRole}</span>
                     <span className="text-amber-400 font-black shrink-0">
                       {isSelected ? '● INSPECTED' : 'SELECT'}
                     </span>
@@ -128,9 +139,9 @@ export default function CharacterSelectModal({
           </div>
 
           {/* Right Column: Character Details Profile */}
-          <div className="w-full md:w-[420px] lg:w-[460px] bg-slate-950 border-2 border-slate-800 rounded-3xl p-4 sm:p-5 flex flex-col justify-between shadow-2xl">
-            <div className="space-y-2.5">
-              <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
+          <div className="w-full md:w-[420px] lg:w-[460px] bg-slate-950 border-2 border-slate-800 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
                 <span className={`px-2.5 py-0.5 rounded-lg text-xs sm:text-sm font-gta-heading font-bold border ${selectedChar.badgeColorClasses}`}>
                   {selectedChar.uiRoleLabel}
                 </span>
@@ -139,16 +150,17 @@ export default function CharacterSelectModal({
                 </span>
               </div>
 
-              <div className="flex items-center gap-3.5">
-                <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-2xl bg-slate-900 border-2 border-amber-500/50 flex items-center justify-center font-gta-display font-black text-3xl sm:text-4xl text-amber-400 shadow-inner shrink-0">
-                  {selectedChar.initials}
+              {/* Substantially Enlarged Inspected Character Header (~1.4x) */}
+              <div className="flex items-center gap-4">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-slate-900 border-2 border-amber-500/60 flex flex-col items-center justify-center font-gta-display font-black text-4xl sm:text-5xl text-amber-400 shadow-xl shadow-amber-500/10 shrink-0">
+                  <span>{selectedChar.initials}</span>
                 </div>
                 <div>
-                  <h3 className="text-2xl sm:text-3xl font-black font-gta-display text-white uppercase tracking-wide leading-tight">
+                  <h3 className="text-2xl sm:text-4xl font-black font-gta-display text-white uppercase tracking-wide leading-tight">
                     {selectedChar.displayName}
                   </h3>
-                  <div className="text-xs sm:text-sm text-amber-400 font-gta-heading font-bold mt-0.5">
-                    {selectedChar.role === 'protagonist' ? '★ Playable Lead Hero' : '⚡ Pursuer (The Trio)'}
+                  <div className="text-xs sm:text-sm text-amber-400 font-gta-heading font-bold mt-1">
+                    {selectedChar.role === 'protagonist' ? '★ Playable Lead Protagonist' : '⚡ Pursuer (The Trio)'}
                   </div>
                 </div>
               </div>

@@ -54,14 +54,14 @@ export class PlayerController {
     this.onAttack = config.onAttack
 
     // 1. Create invisible physics proxy body for collision & gravity
-    // Using a 38x80 physics proxy with origin at bottom-center (0.5, 1)
+    // Using a 48x110 physics proxy with origin at bottom-center (0.5, 1) to match Dennis's ~1.38x scale
     this.physicsBody = this.scene.physics.add.sprite(config.initialX, config.initialY, '__DEFAULT')
     this.physicsBody.setVisible(false)
     this.physicsBody.setAlpha(0)
-    this.physicsBody.setSize(38, 80)
+    this.physicsBody.setSize(48, 110)
     this.physicsBody.setOffset(
-      (this.physicsBody.width - 38) / 2,
-      this.physicsBody.height - 80
+      (this.physicsBody.width - 48) / 2,
+      this.physicsBody.height - 110
     )
     this.physicsBody.setCollideWorldBounds(true)
     this.physicsBody.setBounce(0)

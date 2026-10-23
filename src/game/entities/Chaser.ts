@@ -34,9 +34,9 @@ export abstract class Chaser extends Phaser.GameObjects.Container {
   protected badgeContainer?: Phaser.GameObjects.Container
   protected idleTween?: Phaser.Tweens.Tween
 
-  // Standard entity proportions matching Dennis
-  public readonly characterWidth = 44
-  public readonly characterHeight = 84
+  // Standard entity proportions matching chaser scale hierarchy (~1.32x)
+  public readonly characterWidth = 58
+  public readonly characterHeight = 110
 
   constructor(scene: Phaser.Scene, config: ChaserConfig) {
     super(scene, config.x, config.y)
@@ -65,6 +65,7 @@ export abstract class Chaser extends Phaser.GameObjects.Container {
     if (hasProductionTexture && textureKey) {
       this.productionSprite = this.scene.add.sprite(0, 0, textureKey)
       this.productionSprite.setOrigin(0.5, 1)
+      this.productionSprite.setScale(1.32)
       this.add(this.productionSprite)
     } else {
       this.createPlaceholderGraphics()
@@ -75,20 +76,20 @@ export abstract class Chaser extends Phaser.GameObjects.Container {
    * Common structure for placeholder rendering.
    */
   private createPlaceholderGraphics(): void {
-    // 1. Soft Ground Contact Shadow
+    // 1. Soft Ground Contact Shadow (enlarged for 58px width)
     this.shadowGraphics = this.scene.add.graphics()
     this.shadowGraphics.fillStyle(0x000000, 0.35)
-    this.shadowGraphics.fillEllipse(0, 2, 44, 12)
+    this.shadowGraphics.fillEllipse(0, 3, 58, 15)
     this.add(this.shadowGraphics)
 
     // 2. Character Body Graphics (Feet at y: 0)
     this.placeholderGraphics = this.scene.add.graphics()
     const g = this.placeholderGraphics
 
-    // A. Common Shoes (y: -6 to 0)
+    // A. Common Shoes (y: -8 to 0)
     g.fillStyle(0x0f172a, 1)
-    g.fillRoundedRect(-16, -6, 14, 6, 2)
-    g.fillRoundedRect(2, -6, 14, 6, 2)
+    g.fillRoundedRect(-21, -8, 18, 8, 3)
+    g.fillRoundedRect(3, -8, 18, 8, 3)
 
     // B. Call subclass to render character-specific clothing, features, and hair
     this.renderCharacterFeatures(g)
@@ -109,16 +110,16 @@ export abstract class Chaser extends Phaser.GameObjects.Container {
    */
   private createBadge(): void {
     const badgeBg = this.scene.add.graphics()
-    badgeBg.fillStyle(0x0f172a, 0.85)
-    badgeBg.lineStyle(1, this.metadata.accentColorHex, 0.6)
-    const badgeW = 76
-    const badgeH = 16
-    badgeBg.fillRoundedRect(-badgeW / 2, 8, badgeW, badgeH, 3)
-    badgeBg.strokeRoundedRect(-badgeW / 2, 8, badgeW, badgeH, 3)
+    badgeBg.fillStyle(0x0f172a, 0.9)
+    badgeBg.lineStyle(1.5, this.metadata.accentColorHex, 0.75)
+    const badgeW = 90
+    const badgeH = 20
+    badgeBg.fillRoundedRect(-badgeW / 2, 10, badgeW, badgeH, 4)
+    badgeBg.strokeRoundedRect(-badgeW / 2, 10, badgeW, badgeH, 4)
 
-    const badgeText = this.scene.add.text(0, 16, this.metadata.badgeLabel, {
+    const badgeText = this.scene.add.text(0, 20, this.metadata.badgeLabel, {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '9.5px',
+      fontSize: '11px',
       fontStyle: 'bold',
       color: '#e2e8f0',
       align: 'center',

@@ -29,66 +29,66 @@ export class Rahul extends Chaser {
   }
 
   protected renderCharacterFeatures(g: Phaser.GameObjects.Graphics): void {
-    // 1. Dark Slate Pants (y: -36 to -6)
+    // 1. Dark Slate Pants (y: -48 to -8)
     g.fillStyle(0x1e293b, 1) // Slate-800
-    g.fillRoundedRect(-14, -36, 12, 31, 2)
-    g.fillRoundedRect(2, -36, 12, 31, 2)
+    g.fillRoundedRect(-18, -48, 15, 41, 3)
+    g.fillRoundedRect(3, -48, 15, 41, 3)
     // Belt
     g.fillStyle(0x0f172a, 1)
-    g.fillRect(-15, -38, 30, 3)
+    g.fillRect(-19, -51, 38, 4)
 
-    // 2. Dark Teal Base Shirt (y: -62 to -38)
+    // 2. Dark Teal Base Shirt (y: -82 to -51)
     g.fillStyle(0x0f766e, 1) // Deep teal-700
-    g.fillRoundedRect(-15, -62, 30, 24, 3)
+    g.fillRoundedRect(-19, -82, 38, 31, 4)
 
     // 3. Multiple Visible Horizontal Stripes (Distinguishes clearly from Manish & Sathish)
     g.fillStyle(0x5eead4, 1) // Bright teal-300 horizontal stripes
     // Stripe 1 (Chest top)
-    g.fillRect(-15, -58, 30, 2.5)
+    g.fillRect(-19, -77, 38, 3.5)
     // Stripe 2 (Mid chest)
-    g.fillRect(-15, -52, 30, 2.5)
+    g.fillRect(-19, -69, 38, 3.5)
     // Stripe 3 (Lower chest)
-    g.fillRect(-15, -46, 30, 2.5)
+    g.fillRect(-19, -61, 38, 3.5)
     // Stripe 4 (Waist)
-    g.fillRect(-15, -40, 30, 2)
+    g.fillRect(-19, -53, 38, 3)
 
-    // 4. Sleeves & Hands (y: -60 to -40)
+    // 4. Sleeves & Hands (y: -80 to -53)
     g.fillStyle(0x0f766e, 1) // Dark teal sleeves
-    g.fillRoundedRect(-19, -60, 5, 18, 2)
-    g.fillRoundedRect(14, -60, 5, 18, 2)
+    g.fillRoundedRect(-25, -80, 7, 24, 3)
+    g.fillRoundedRect(18, -80, 7, 24, 3)
 
     // Sleeve Stripes
     g.fillStyle(0x5eead4, 1)
-    g.fillRect(-19, -56, 5, 2)
-    g.fillRect(14, -56, 5, 2)
-    g.fillRect(-19, -50, 5, 2)
-    g.fillRect(14, -50, 5, 2)
+    g.fillRect(-25, -75, 7, 3)
+    g.fillRect(18, -75, 7, 3)
+    g.fillRect(-25, -67, 7, 3)
+    g.fillRect(18, -67, 7, 3)
 
     // Hands
     g.fillStyle(0xfed7aa, 1)
-    g.fillCircle(-16.5, -40, 2.5)
-    g.fillCircle(16.5, -40, 2.5)
+    g.fillCircle(-21.5, -53, 3.5)
+    g.fillCircle(21.5, -53, 3.5)
 
-    // 5. Neck & Face (y: -78 to -62)
+    // 5. Neck & Face (y: -103 to -82)
     g.fillStyle(0xfed7aa, 1)
-    g.fillRect(-4, -64, 8, 4)
-    g.fillRoundedRect(-12, -78, 24, 16, 4)
+    g.fillRect(-5, -85, 10, 6)
+    g.fillRoundedRect(-15, -103, 30, 21, 5)
 
     // Expressive Eyes
     g.fillStyle(0x1e293b, 1)
-    g.fillRect(-7, -72, 3, 2.5)
-    g.fillRect(4, -72, 3, 2.5)
+    g.fillRect(-9, -95, 4, 3)
+    g.fillRect(5, -95, 4, 3)
 
-    // 6. Dark Tousled Hair (y: -85 to -72)
+    // 6. Dark Tousled Hair (y: -111 to -95)
     g.fillStyle(0x18181b, 1)
-    g.fillRoundedRect(-13, -84, 26, 11, 4)
+    g.fillRoundedRect(-17, -111, 34, 15, 5)
     // Tousled hair tufts
-    g.fillCircle(-8, -84, 4.5)
-    g.fillCircle(-2, -85, 5)
-    g.fillCircle(4, -84, 4.5)
-    g.fillCircle(9, -83, 4)
+    g.fillCircle(-10, -111, 6)
+    g.fillCircle(-2, -112, 6.5)
+    g.fillCircle(6, -111, 6)
+    g.fillCircle(12, -109, 5.5)
     // Fringe strands
-    g.fillRect(-13, -76, 3, 5)
-    g.fillRect(10, -76, 3, 5)
+    g.fillRect(-17, -100, 4, 7)
+    g.fillRect(13, -100, 4, 7)
   }
 }

@@ -301,14 +301,14 @@ export class BootScene extends Phaser.Scene {
         onAttack: (attackData) => this.handlePlayerAttack(attackData),
       })
 
-      // Camera Follows Dennis smoothly
+      // Camera Follows Dennis smoothly (calibrated vertical framing for enlarged character)
       this.cameras.main.startFollow(
         this.playerController.getPhysicsBody(),
         true,
         0.08,
         0.08,
         0,
-        30
+        22
       )
 
       // Player Ground Collision
@@ -674,8 +674,8 @@ export class BootScene extends Phaser.Scene {
 
     const chasers = [
       { chaser: this.sathish, speed: sathishSpeed, spacingOffset: 0 },
-      { chaser: this.manish, speed: manishSpeed, spacingOffset: 45 },
-      { chaser: this.rahul, speed: rahulSpeed, spacingOffset: 90 },
+      { chaser: this.manish, speed: manishSpeed, spacingOffset: 55 },
+      { chaser: this.rahul, speed: rahulSpeed, spacingOffset: 110 },
     ]
 
     const deltaSeconds = this.game.loop.delta / 1000
@@ -688,7 +688,7 @@ export class BootScene extends Phaser.Scene {
 
       if (Math.abs(dx) > 10) {
         // In dialogue, hold chasers at a dramatic distance so dialogue can be read
-        if (isDuringDialogue && Math.abs(chaser.x - playerPos.x) < 75) {
+        if (isDuringDialogue && Math.abs(chaser.x - playerPos.x) < 95) {
           continue
         }
         const step = item.speed * deltaSeconds
@@ -700,13 +700,13 @@ export class BootScene extends Phaser.Scene {
       // Clamp to world bounds
       chaser.x = Phaser.Math.Clamp(chaser.x, 20, this.levelConfig.stageWidth - 20)
 
-      // Catch check against Dennis's actual position
+      // Catch check against Dennis's actual position (recalibrated for enlarged silhouettes)
       if (!isDuringDialogue && this.encounterState === 'active') {
         const dist = Phaser.Math.Distance.Between(chaser.x, chaser.y, playerPos.x, playerPos.y)
-        if (dist < 75 && dist >= 34) {
+        if (dist < 95 && dist >= 46) {
           audioManager.playSfx('tension')
         }
-        if (dist < 34) {
+        if (dist < 46) {
           this.triggerDennisCaught(chaser)
           break
         }
@@ -852,54 +852,54 @@ export class BootScene extends Phaser.Scene {
 
     if (speakerId === 'dennis') {
       if (this.dennis) {
-        return { x: this.dennis.x, y: this.dennis.y, height: 80 }
+        return { x: this.dennis.x, y: this.dennis.y, height: 116 }
       }
-      return this.playerController?.getPosition()
+      return this.playerController?.getPosition() ? { ...this.playerController.getPosition(), height: 116 } : undefined
     }
 
     if (speakerId === 'manish') {
       if (this.manish && this.manish.visible) {
-        return { x: this.manish.x, y: this.manish.y, height: 80 }
+        return { x: this.manish.x, y: this.manish.y, height: 110 }
       }
     }
 
     if (speakerId === 'sathish') {
       if (this.sathish && this.sathish.visible) {
-        return { x: this.sathish.x, y: this.sathish.y, height: 80 }
+        return { x: this.sathish.x, y: this.sathish.y, height: 110 }
       }
     }
 
     if (speakerId === 'rahul') {
       if (this.rahul && this.rahul.visible) {
-        return { x: this.rahul.x, y: this.rahul.y, height: 80 }
+        return { x: this.rahul.x, y: this.rahul.y, height: 110 }
       }
     }
 
     if (speakerId === 'drama_raghu' || speakerId === 'drama-raghu') {
       const raghu = this.blockingEnemies.find((e) => e.enemyId === 'drama-raghu')
       if (raghu) {
-        return { x: raghu.x, y: raghu.y, height: 80 }
+        return { x: raghu.x, y: raghu.y, height: 102 }
       }
-      return { x: 980, y: groundY, height: 80 }
+      return { x: 980, y: groundY, height: 102 }
     }
 
     if (speakerId === 'blocker_chethan') {
       const chethan = this.blockingEnemies.find((e) => e.enemyId === 'blocker-4-1')
       if (chethan) {
-        return { x: chethan.x, y: chethan.y, height: 80 }
+        return { x: chethan.x, y: chethan.y, height: 102 }
       }
-      return { x: 960, y: groundY, height: 80 }
+      return { x: 960, y: groundY, height: 102 }
     }
 
     const enemy = this.blockingEnemies.find(
       (e) => e.enemyId === speakerId || e.config.name.toLowerCase() === speakerId.toLowerCase()
     )
     if (enemy) {
-      return { x: enemy.x, y: enemy.y, height: 80 }
+      return { x: enemy.x, y: enemy.y, height: 102 }
     }
 
     if (this.levelConfig.interaction) {
-      return { x: this.levelConfig.interaction.triggerX, y: groundY, height: 80 }
+      return { x: this.levelConfig.interaction.triggerX, y: groundY, height: 102 }
     }
 
     return undefined

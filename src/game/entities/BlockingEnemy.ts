@@ -20,8 +20,8 @@ export class BlockingEnemy extends Phaser.GameObjects.Container {
   private hpText?: Phaser.GameObjects.Text
   private idleTween?: Phaser.Tweens.Tween
 
-  public readonly characterWidth = 38
-  public readonly characterHeight = 80
+  public readonly characterWidth = 48
+  public readonly characterHeight = 102
 
   constructor(scene: Phaser.Scene, config: BlockingEnemyConfig, groundY: number) {
     super(scene, config.initialX, groundY)
@@ -33,14 +33,14 @@ export class BlockingEnemy extends Phaser.GameObjects.Container {
     // 1. Add to scene display list
     scene.add.existing(this)
 
-    // 2. Create invisible dynamic physics proxy body for collision
+    // 2. Create invisible dynamic physics proxy body for collision (scaled to 44x98)
     this.physicsBody = scene.physics.add.sprite(config.initialX, groundY, '__DEFAULT')
     this.physicsBody.setVisible(false)
     this.physicsBody.setAlpha(0)
-    this.physicsBody.setSize(34, 78)
+    this.physicsBody.setSize(44, 98)
     this.physicsBody.setOffset(
-      (this.physicsBody.width - 34) / 2,
-      this.physicsBody.height - 78
+      (this.physicsBody.width - 44) / 2,
+      this.physicsBody.height - 98
     )
     this.physicsBody.setImmovable(true)
     this.physicsBody.body.setAllowGravity(false)
@@ -60,10 +60,10 @@ export class BlockingEnemy extends Phaser.GameObjects.Container {
   }
 
   private createVisuals(): void {
-    // 1. Shadow
+    // 1. Shadow (enlarged for 48px width)
     this.shadowGraphics = this.scene.add.graphics()
     this.shadowGraphics.fillStyle(0x000000, 0.35)
-    this.shadowGraphics.fillEllipse(0, 2, 42, 12)
+    this.shadowGraphics.fillEllipse(0, 3, 54, 15)
     this.add(this.shadowGraphics)
 
     // 2. Body Graphics
@@ -72,80 +72,80 @@ export class BlockingEnemy extends Phaser.GameObjects.Container {
     const shirt = this.config.shirtColorHex
     const pants = this.config.pantsColorHex
 
-    // Shoes (y: -6 to 0)
+    // Shoes (y: -8 to 0)
     g.fillStyle(0x0f172a, 1)
-    g.fillRoundedRect(-15, -6, 13, 6, 2)
-    g.fillRoundedRect(2, -6, 13, 6, 2)
+    g.fillRoundedRect(-19, -8, 16, 8, 3)
+    g.fillRoundedRect(3, -8, 16, 8, 3)
 
-    // Pants (y: -34 to -6)
+    // Pants (y: -44 to -8)
     g.fillStyle(pants, 1)
-    g.fillRoundedRect(-13, -34, 11, 29, 2)
-    g.fillRoundedRect(2, -34, 11, 29, 2)
+    g.fillRoundedRect(-16, -44, 14, 37, 3)
+    g.fillRoundedRect(2, -44, 14, 37, 3)
     // Belt
     g.fillStyle(0x0f172a, 1)
-    g.fillRect(-14, -36, 28, 3)
+    g.fillRect(-17, -47, 34, 4)
 
-    // Shirt / Torso (y: -58 to -36)
+    // Shirt / Torso (y: -75 to -47)
     g.fillStyle(shirt, 1)
-    g.fillRoundedRect(-14, -58, 28, 23, 3)
+    g.fillRoundedRect(-17, -75, 34, 29, 4)
 
-    // Arms in confrontational / hands-on-hips stance (y: -56 to -40)
+    // Arms in confrontational / hands-on-hips stance (y: -73 to -51)
     g.fillStyle(shirt, 1)
-    g.fillRoundedRect(-18, -56, 5, 17, 2)
-    g.fillRoundedRect(13, -56, 5, 17, 2)
+    g.fillRoundedRect(-22, -73, 6, 21, 3)
+    g.fillRoundedRect(16, -73, 6, 21, 3)
     // Hands
     g.fillStyle(0xfed7aa, 1)
-    g.fillCircle(-15.5, -39, 2.5)
-    g.fillCircle(15.5, -39, 2.5)
+    g.fillCircle(-19, -51, 3)
+    g.fillCircle(19, -51, 3)
 
-    // Neck & Head (y: -74 to -58)
+    // Neck & Head (y: -95 to -75)
     g.fillStyle(0xfed7aa, 1)
-    g.fillRect(-4, -60, 8, 4) // Neck
-    g.fillRoundedRect(-11, -74, 22, 16, 4) // Face
+    g.fillRect(-5, -78, 10, 5) // Neck
+    g.fillRoundedRect(-14, -95, 28, 20, 5) // Face
 
     // Eyes
     g.fillStyle(0x1e293b, 1)
-    g.fillRect(-6, -68, 3, 2.5)
-    g.fillRect(3, -68, 3, 2.5)
+    g.fillRect(-8, -87, 4, 3)
+    g.fillRect(4, -87, 4, 3)
 
-    // Hairstyle
+    // Hairstyle (scaled up to y: -106)
     g.fillStyle(0x18181b, 1) // Black hair
     if (this.config.hairstyle === 'spiky') {
-      g.fillTriangle(-12, -74, -4, -74, -8, -82)
-      g.fillTriangle(-6, -74, 2, -74, -2, -84)
-      g.fillTriangle(0, -74, 8, -74, 4, -83)
-      g.fillTriangle(6, -74, 12, -74, 9, -80)
+      g.fillTriangle(-15, -95, -5, -95, -10, -105)
+      g.fillTriangle(-8, -95, 2, -95, -3, -107)
+      g.fillTriangle(0, -95, 10, -95, 5, -106)
+      g.fillTriangle(7, -95, 15, -95, 11, -102)
     } else if (this.config.hairstyle === 'crew') {
-      g.fillRoundedRect(-12, -78, 24, 7, 2)
+      g.fillRoundedRect(-15, -101, 30, 9, 3)
     } else {
       // Parted
-      g.fillCircle(-6, -76, 6)
-      g.fillCircle(4, -77, 7)
-      g.fillCircle(9, -75, 5)
+      g.fillCircle(-8, -97, 7.5)
+      g.fillCircle(5, -98, 8.5)
+      g.fillCircle(11, -96, 6.5)
     }
 
     this.add(this.placeholderGraphics)
 
     // 3. Identification & Health Badge
-    const badgeW = 76
-    const badgeH = 15
+    const badgeW = 90
+    const badgeH = 19
     const badgeBg = this.scene.add.graphics()
     badgeBg.fillStyle(0x0f172a, 0.9)
-    badgeBg.lineStyle(1, 0xef4444, 0.7) // Red border for blockers
-    badgeBg.fillRoundedRect(-badgeW / 2, 8, badgeW, badgeH, 3)
-    badgeBg.strokeRoundedRect(-badgeW / 2, 8, badgeW, badgeH, 3)
+    badgeBg.lineStyle(1.5, 0xef4444, 0.75) // Red border for blockers
+    badgeBg.fillRoundedRect(-badgeW / 2, 10, badgeW, badgeH, 4)
+    badgeBg.strokeRoundedRect(-badgeW / 2, 10, badgeW, badgeH, 4)
 
-    this.badgeText = this.scene.add.text(0, 15.5, this.config.badgeLabel, {
+    this.badgeText = this.scene.add.text(0, 19.5, this.config.badgeLabel, {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '9px',
+      fontSize: '10.5px',
       fontStyle: 'bold',
       color: '#f87171',
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
-    this.hpText = this.scene.add.text(0, -82, this.getHpIndicator(), {
+    this.hpText = this.scene.add.text(0, -106, this.getHpIndicator(), {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '11px',
+      fontSize: '13px',
       fontStyle: 'bold',
       color: '#ef4444',
       align: 'center',
@@ -194,9 +194,9 @@ export class BlockingEnemy extends Phaser.GameObjects.Container {
     const targetX = this.x + recoilDir * 14
 
     // Floating arcade hit text (e.g. "*POW!*")
-    const sparkText = this.scene.add.text(this.x, this.y - 45, this.currentHp <= 0 ? '★ DOWN!' : '★ POW!', {
+    const sparkText = this.scene.add.text(this.x, this.y - 60, this.currentHp <= 0 ? '★ DOWN!' : '★ POW!', {
       fontFamily: GAME_FONTS.display,
-      fontSize: '15px',
+      fontSize: '16px',
       fontStyle: 'bold',
       color: this.currentHp <= 0 ? '#fbbf24' : '#ef4444',
     }).setOrigin(0.5, 0.5)

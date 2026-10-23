@@ -155,7 +155,37 @@ DD Game Scratch includes a one-click desktop launcher for Windows:
 
 ---
 
-## 8. Development & Verification
+## 9. Character Scale Upgrade & Visual Polish (Milestone 19)
+
+To ensure characters are immediately recognizable, visually prominent, and expressive on both laptop screens and mobile landscape displays, DD Game Scratch underwent a full character scale hierarchy upgrade:
+
+### 9.1 Character Scale Matrix
+
+| Entity | Old Visible Dimensions | New Visible Dimensions | Scale Multiplier | Silhouette & Visual Identity |
+| :--- | :--- | :--- | :--- | :--- |
+| **Dennis (Protagonist)** | 44px × 84px | **60px × 116px** | **~1.38×** | Curly dark hair curls, blue denim shirt with chest pockets & collar, blue jeans, dark shoes, 60×16px ground shadow. |
+| **Manish (Chaser)** | 44px × 84px | **58px × 110px** | **~1.32×** | Crisp black shirt, dark slate trousers, neat parted hair, **prominent sky-blue frame rectangular glasses** with cyan tint. |
+| **Sathish (Chaser)** | 44px × 84px | **58px × 110px** | **~1.32×** | Black crew-neck T-shirt with **iconic red Lenovo chest badge & readable 10px lettering**, bare forearms, charcoal pants, textured hair. |
+| **Rahul (Chaser)** | 44px × 84px | **58px × 110px** | **~1.32×** | Dark teal shirt with **4 prominent bright teal horizontal stripes & sleeve stripes**, dark slate pants, tousled dark fringe hair. |
+| **Blockers / Encounter NPCs** | 38px × 80px | **48px × 102px** | **~1.26×** | Bold confrontational stance, hands-on-hips, colored shirts, red HP heart pips at y: -106, 90×19px blocker badge. |
+| **Main Menu Characters** | Displayed ~84px | **~110px–116px** | **~1.35×** | Live Thatha Tea scene: Dennis sipping cutting chai from scaled glass, Manish by tea counter, Sathish on stools, Rahul by bench. |
+| **Character Roster Avatars** | 56px–64px boxes | **72px–96px boxes** | **~1.40×** | Sized up avatar tiles with character role tags (HERO / CHASER) and 80px–96px header initials in the profile panel. |
+
+### 9.2 Physics & Collision Recalibration
+- **Dennis Physics Body**: Sized to `48px × 110px` (previously 38×80) with centered bottom offset `((w - 48)/2, h - 110)`. Dennis's feet stay locked to local `y: 0`, ensuring solid ground contact on sidewalks and asphalt without floating or floor sinking.
+- **Blocker Physics Body**: Sized to `44px × 98px` (previously 34×78) with offset `((w - 44)/2, h - 98)`. Solid collision matches the wider 48px body silhouette.
+- **CombatSystem Reach**: `ATTACK_RANGE_X` increased from `75px` to `96px` and `ATTACK_TOLERANCE_Y` from `60px` to `80px`. Vertical overlap checks recalibrated from 80px to Dennis's 116px and Blocker's 102px. Forward contact allowance expanded to `-24px` to eliminate deadzones.
+- **Chaser Pursuit & Spacing**:
+  - Chaser spacing offsets increased from `(0, 45, 90)` to `(0, 55, 110)` to keep pursuers naturally separated.
+  - Catch distance threshold increased from `34px` to `46px` (touching bounds without clipping).
+  - Dramatic dialogue hold distance increased from `75px` to `95px`.
+  - Tension heartbeat SFX radius calibrated to `dist < 95 && dist >= 46`.
+- **Camera Follow Framing**: Camera follow vertical offset tuned from `30` to `22` to maintain optimal vertical headroom above Dennis's taller 116px head during sprints and jumps.
+- **Dialogue Anchor Clearance**: `resolveSpeakerPosition` updated with `height: 116` (Dennis), `height: 110` (Chasers), and `height: 102` (Blockers), ensuring comic speech bubbles float with a crisp 16px clearance above hair tufts and hairstyles.
+
+---
+
+## 10. Development & Verification
 
 ### Scripts
 - `npm run dev`: Start local development server with Vite HMR (`http://localhost:5173/`).
@@ -167,14 +197,13 @@ DD Game Scratch includes a one-click desktop launcher for Windows:
 ### Verification Status
 - **Type Safety**: Passed with 0 errors (`tsc -b --noEmit`).
 - **Linter**: Passed with 0 errors and 0 warnings on 42 project files (`oxlint`).
-- **Production Build**: Passed in 1.60s (`dist/index.html`, `dist/assets/*.css`, `dist/assets/*.js`).
-- **Large-Scale UI Audit (Milestone 18)**:
-  - Main Menu: Verified large branding header, oversized Play Game button, clear secondary buttons, and enlarged dialogue bubbles.
-  - Stage Selection: Verified large 01–05 stage cards, typography, and prominent Start Stage launch button.
-  - Character Selection: Verified enlarged character cards, avatar portraits, and play button with zero overflow.
-  - Settings Modal: Verified thick 14–16px slider tracks, 32px gold thumbs, and large mute toggles.
-  - Credits Modal: Verified large developer attribution (`Developed by its2much Mv`), setting inspiration, and tech stack.
-  - In-Game HUD: Verified large Pause button, stage indicator, and prominent touch D-pad & action controls.
-  - Pause Menu: Verified massive `GAME PAUSED` heading, oversized Resume Game button, and secondary options.
-  - Audio: Independent music and SFX sliders verified; original soundtrack `public/assets/audio/music/DD Game BGM.mp3` preserved 100%.
-  - Note: Physical iOS/Android device testing recommended for hardware-specific orientation lock behavior.
+- **Production Build**: Passed in 1.28s (`dist/index.html`, `dist/assets/*.css`, `dist/assets/*.js`).
+- **Milestone 19 Character Scale & Visibility Audit**:
+  - Main Menu: Verified enlarged Dennis (116px) with cutting chai glass, Manish (110px with glasses), Sathish (110px with Lenovo shirt), and Rahul (110px with teal stripes). Dialogue bubbles clear heads cleanly.
+  - Character Selection Roster: Verified 72px–80px avatar boxes, Dennis hero badge, and 80px–96px profile headers.
+  - Level 1 (College Gate): Verified Dennis running/jumping with solid ground contact, chasers pursuing at 55px/110px separation, attack swoosh connecting with Campus Gate Guard, blocker taking damage and defeat.
+  - Level 3 (MG Road): Verified drama rehearsal sequence (`CHASE_ACTIVE → ENCOUNTER_TRIGGERED → DIALOGUE_ACTIVE → REVEAL_COMPLETE → ATTACK_INTERACTION → CHASE_RESUMED`). Raghu encounter and chase resumption verified.
+  - Level 5 (Cubbon Park Finale): Verified Cubbon Park Bandstand finish, blocker encounters, dialogue, and Grand Victory Modal trigger.
+  - Audio: Looping gameplay BGM `public/assets/audio/music/DD Game BGM.mp3` preserved 100% untouched.
+  - Note: Physical touchscreen device testing recommended for testing native touch-digitizer latency.
+

@@ -7,8 +7,8 @@ export interface AttackResult {
 }
 
 export class CombatSystem {
-  public static readonly ATTACK_RANGE_X = 75
-  public static readonly ATTACK_TOLERANCE_Y = 60
+  public static readonly ATTACK_RANGE_X = 96
+  public static readonly ATTACK_TOLERANCE_Y = 80
 
   /**
    * Attempts an attack against the nearest valid blocking enemy in facing direction.
@@ -29,24 +29,24 @@ export class CombatSystem {
       const enemyY = enemy.y
 
       // Vertical proximity check:
-      // Characters are ~80px tall with feet at y.
+      // Characters are ~102-116px tall with feet at y.
       // Direct difference handles both grounded or slight airborne jumps.
       const directDy = Math.abs(enemyY - playerY)
       // Vertical span overlap check (bottom to head)
-      const pTop = playerY - 80
+      const pTop = playerY - 116
       const pBottom = playerY
-      const eTop = enemyY - 80
+      const eTop = enemyY - 102
       const eBottom = enemyY
       const overlapY = Math.min(pBottom, eBottom) - Math.max(pTop, eTop)
 
-      if (directDy > this.ATTACK_TOLERANCE_Y && overlapY < 20) {
+      if (directDy > this.ATTACK_TOLERANCE_Y && overlapY < 24) {
         continue
       }
 
       // Directional check: enemy must be in facing direction
       const dx = (enemyX - playerX) * facing
-      // Allow up to 16px contact overlap to prevent deadzones when characters touch
-      if (dx >= -16 && dx <= this.ATTACK_RANGE_X) {
+      // Allow up to 24px contact overlap to prevent deadzones when characters touch
+      if (dx >= -24 && dx <= this.ATTACK_RANGE_X) {
         const dist = Math.abs(dx)
         if (dist < minDistance) {
           minDistance = dist

@@ -334,7 +334,7 @@ export class DialogueSystem {
 
     if (speakerPos) {
       speakerScreenX = speakerPos.x - cam.scrollX
-      const characterHeight = speakerPos.height ?? 80
+      const characterHeight = speakerPos.height ?? 110
       speakerHeadScreenY = (speakerPos.y - characterHeight) - cam.scrollY
     }
 

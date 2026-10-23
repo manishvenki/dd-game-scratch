@@ -112,30 +112,30 @@ export class MainMenuScene extends Phaser.Scene {
   private spawnCharacters(groundY: number): void {
     // Manish: Leaning near the tea counter (x: 690)
     this.manish = new Manish(this, {
-      x: 695,
+      x: 690,
       y: groundY - 2,
       idlePhaseOffsetMs: 150,
     })
     this.manish.setDepth(15)
 
-    // Dennis: Standing relaxed near tea bench with chai glass (x: 820)
+    // Dennis: Standing relaxed near tea bench with chai glass (x: 825)
     this.dennis = new Dennis(this, {
-      x: 820,
+      x: 825,
       y: groundY - 2,
     })
     this.dennis.setDepth(20)
 
-    // Sathish: Relaxing by the tea stools (x: 935)
+    // Sathish: Relaxing by the tea stools (x: 955)
     this.sathish = new Sathish(this, {
-      x: 935,
+      x: 955,
       y: groundY - 2,
       idlePhaseOffsetMs: 400,
     })
     this.sathish.setDepth(15)
 
-    // Rahul: Lounging near the wooden tea bench (x: 1040)
+    // Rahul: Lounging near the wooden tea bench (x: 1075)
     this.rahul = new Rahul(this, {
-      x: 1040,
+      x: 1075,
       y: groundY - 2,
       idlePhaseOffsetMs: 650,
     })
@@ -158,32 +158,32 @@ export class MainMenuScene extends Phaser.Scene {
   private setupDennisTeaGesture(groundY: number): void {
     if (!this.dennis) return
 
-    // Create small cutting chai glass
+    // Create cutting chai glass scaled to match Dennis's 1.38x scale
     this.dennisTeaGlass = this.add.graphics()
     this.dennisTeaGlass.setDepth(25)
 
     const drawChaiGlass = (g: Phaser.GameObjects.Graphics) => {
       g.clear()
       // Glass outline
-      g.fillStyle(0x38bdf8, 0.4)
-      g.fillRoundedRect(-5, -14, 10, 14, 2)
-      g.lineStyle(1, 0xe2e8f0, 0.8)
-      g.strokeRoundedRect(-5, -14, 10, 14, 2)
+      g.fillStyle(0x38bdf8, 0.45)
+      g.fillRoundedRect(-6, -17, 12, 17, 2.5)
+      g.lineStyle(1.2, 0xe2e8f0, 0.85)
+      g.strokeRoundedRect(-6, -17, 12, 17, 2.5)
       // Hot Cutting Chai (amber/brown)
       g.fillStyle(0xd97706, 0.95)
-      g.fillRect(-4, -10, 8, 9)
+      g.fillRect(-5, -12, 10, 11)
       // Tea foam line
-      g.fillStyle(0xfef08a, 0.85)
-      g.fillRect(-4, -11, 8, 2)
+      g.fillStyle(0xfef08a, 0.9)
+      g.fillRect(-5, -13, 10, 2.5)
     }
 
     drawChaiGlass(this.dennisTeaGlass)
-    this.dennisTeaGlass.setPosition(832, groundY - 42)
+    this.dennisTeaGlass.setPosition(848, groundY - 56)
 
     // Dennis raising tea glass to sip every 4.5 seconds
     this.teaSipTween = this.tweens.add({
       targets: this.dennisTeaGlass,
-      y: groundY - 60,
+      y: groundY - 82,
       duration: 800,
       hold: 1200,
       yoyo: true,
@@ -280,30 +280,30 @@ export class MainMenuScene extends Phaser.Scene {
     const dialogue = MAIN_MENU_DIALOGUES[this.currentDialogueIndex]
     this.currentDialogueIndex = (this.currentDialogueIndex + 1) % MAIN_MENU_DIALOGUES.length
 
-    // Determine target character position
-    let targetX = 820
-    let targetY = this.groundY - 135
+    // Determine target character position (recalibrated above taller character heads)
+    let targetX = 825
+    let targetY = this.groundY - 165
     let speakerColor = '#f59e0b'
 
     switch (dialogue.charKey) {
       case 'dennis':
-        targetX = this.dennis ? this.dennis.x : 820
-        targetY = this.groundY - 130
+        targetX = this.dennis ? this.dennis.x : 825
+        targetY = this.groundY - 165
         speakerColor = '#38bdf8'
         break
       case 'manish':
-        targetX = this.manish ? this.manish.x : 695
-        targetY = this.groundY - 130
+        targetX = this.manish ? this.manish.x : 690
+        targetY = this.groundY - 160
         speakerColor = '#ef4444'
         break
       case 'sathish':
-        targetX = this.sathish ? this.sathish.x : 935
-        targetY = this.groundY - 130
+        targetX = this.sathish ? this.sathish.x : 955
+        targetY = this.groundY - 160
         speakerColor = '#22c55e'
         break
       case 'rahul':
-        targetX = this.rahul ? this.rahul.x : 1040
-        targetY = this.groundY - 130
+        targetX = this.rahul ? this.rahul.x : 1075
+        targetY = this.groundY - 160
         speakerColor = '#f97316'
         break
     }
