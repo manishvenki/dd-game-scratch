@@ -466,11 +466,11 @@ export class BootScene extends Phaser.Scene {
     this.titleText = this.add
       .text(0, 0, this.levelConfig.title.toUpperCase(), {
         fontFamily: GAME_FONTS.display,
-        fontSize: '28px',
+        fontSize: '38px',
         fontStyle: 'bold',
         color: '#ffffff',
         stroke: '#090d16',
-        strokeThickness: 4,
+        strokeThickness: 5,
         align: 'center',
       })
       .setOrigin(0.5, 0.5)
@@ -481,7 +481,7 @@ export class BootScene extends Phaser.Scene {
     this.subtitleText = this.add
       .text(0, 0, `${this.levelConfig.stageNumber} • ${this.levelConfig.subtitle}`.toUpperCase(), {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '13px',
+        fontSize: '18px',
         fontStyle: 'bold',
         color: '#fbbf24', // amber-400
         align: 'center',
@@ -495,7 +495,7 @@ export class BootScene extends Phaser.Scene {
     this.statusText = this.add
       .text(0, 0, 'PHASER 3.90 • PURSUIT & COMIC DIALOGUE ACTIVE', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '11px',
+        fontSize: '15px',
         fontStyle: 'bold',
         color: '#34d399', // emerald-400
         align: 'center',
@@ -512,7 +512,7 @@ export class BootScene extends Phaser.Scene {
     this.objectiveText = this.add
       .text(0, 0, '', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '11.5px',
+        fontSize: '16px',
         fontStyle: 'bold',
         color: '#fef08a',
         align: 'center',
@@ -525,7 +525,7 @@ export class BootScene extends Phaser.Scene {
     this.controlGuideText = this.add
       .text(0, 0, '[A/D or ←/→] MOVE  •  [SPACE or ↑] JUMP  •  [J or X] ATTACK', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '11px',
+        fontSize: '15px',
         fontStyle: 'bold',
         color: '#cbd5e1',
         align: 'center',
@@ -1038,54 +1038,56 @@ export class BootScene extends Phaser.Scene {
     const height = this.scale.height
 
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(200)
-    const cardW = Math.min(width - 32, 430)
-    const cardH = 180
+    const cardW = Math.min(width - 32, 620)
+    const cardH = 230
 
     const bg = this.add.graphics()
-    bg.fillStyle(0x090d16, 0.96)
-    bg.lineStyle(2, 0xf59e0b, 0.9) // amber-500
-    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
-    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
+    bg.fillStyle(0x090d16, 0.98)
+    bg.lineStyle(2.5, 0xf59e0b, 0.95) // amber-500
+    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
+    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
 
     const stageNum = this.add
-      .text(0, -cardH / 2 + 20, cfg.stageNumber.toUpperCase(), {
+      .text(0, -cardH / 2 + 25, cfg.stageNumber.toUpperCase(), {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '13px',
+        fontSize: '18px',
         fontStyle: 'bold',
         color: '#f59e0b',
       })
       .setOrigin(0.5, 0.5)
 
     const title = this.add
-      .text(0, -cardH / 2 + 45, cfg.title.toUpperCase(), {
+      .text(0, -cardH / 2 + 58, cfg.title.toUpperCase(), {
         fontFamily: GAME_FONTS.display,
-        fontSize: '26px',
+        fontSize: '38px',
         fontStyle: 'bold',
         color: '#ffffff',
         stroke: '#090d16',
-        strokeThickness: 3,
+        strokeThickness: 5,
       })
       .setOrigin(0.5, 0.5)
 
     const introText = cfg.tanglishIntro ?? cfg.objectiveText
     const obj = this.add
-      .text(0, -cardH / 2 + 84, introText, {
+      .text(0, -cardH / 2 + 108, introText, {
         fontFamily: GAME_FONTS.body,
-        fontSize: '12px',
-        color: '#cbd5e1',
+        fontSize: '16px',
+        fontStyle: 'bold',
+        color: '#e2e8f0',
         align: 'center',
-        wordWrap: { width: cardW - 36 },
+        lineSpacing: 4,
+        wordWrap: { width: cardW - 48 },
       })
       .setOrigin(0.5, 0.5)
 
     const startBtnBg = this.add.graphics()
     startBtnBg.fillStyle(0xd97706, 1)
-    startBtnBg.fillRoundedRect(-cardW / 2 + 20, 40, cardW - 40, 32, 6)
+    startBtnBg.fillRoundedRect(-cardW / 2 + 24, cardH / 2 - 58, cardW - 48, 44, 8)
 
     const startBtnTxt = this.add
-      .text(0, 56, 'START ENCOUNTER [TAP OR ANY KEY TO SPRINT]', {
+      .text(0, cardH / 2 - 36, 'START ENCOUNTER [TAP OR ANY KEY TO SPRINT]', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '14px',
+        fontSize: '18px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
@@ -1147,39 +1149,41 @@ export class BootScene extends Phaser.Scene {
     const height = this.scale.height
 
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(200)
-    const cardW = Math.min(width - 24, 430)
-    const cardH = 185
+    const cardW = Math.min(width - 24, 640)
+    const cardH = 260
 
     // Full-screen semi-transparent backdrop
     const backdrop = this.add.graphics()
-    backdrop.fillStyle(0x000000, 0.72)
+    backdrop.fillStyle(0x000000, 0.75)
     backdrop.fillRect(-width / 2, -height / 2, width, height)
 
     // Modal Card Box
     const bg = this.add.graphics()
     bg.fillStyle(0x090d16, 0.98)
-    bg.lineStyle(2, config.accentColor, 1)
-    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
-    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
+    bg.lineStyle(2.5, config.accentColor, 1)
+    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
+    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
 
     const title = this.add
-      .text(0, -cardH / 2 + 28, config.title.toUpperCase(), {
+      .text(0, -cardH / 2 + 36, config.title.toUpperCase(), {
         fontFamily: GAME_FONTS.display,
-        fontSize: '26px',
+        fontSize: '38px',
         fontStyle: 'bold',
         color: '#ffffff',
         stroke: '#090d16',
-        strokeThickness: 3,
+        strokeThickness: 5,
       })
       .setOrigin(0.5, 0.5)
 
     const sub = this.add
-      .text(0, -cardH / 2 + 65, config.subtitle, {
+      .text(0, -cardH / 2 + 88, config.subtitle, {
         fontFamily: GAME_FONTS.body,
-        fontSize: '12px',
+        fontSize: '16px',
+        fontStyle: 'bold',
         color: '#cbd5e1',
         align: 'center',
-        wordWrap: { width: cardW - 32 },
+        lineSpacing: 4,
+        wordWrap: { width: cardW - 48 },
       })
       .setOrigin(0.5, 0.5)
 
@@ -1187,12 +1191,12 @@ export class BootScene extends Phaser.Scene {
 
     // Render Buttons
     const btnCount = config.buttons.length
-    const btnW = Math.min(125, (cardW - 32 - (btnCount - 1) * 8) / btnCount)
-    const btnH = 32
-    const gap = 8
+    const gap = 12
+    const btnW = Math.min(185, (cardW - 48 - (btnCount - 1) * gap) / btnCount)
+    const btnH = 46
     const totalW = btnCount * btnW + (btnCount - 1) * gap
     const startX = -totalW / 2 + btnW / 2
-    const btnY = cardH / 2 - 28
+    const btnY = cardH / 2 - 36
 
     const buttonBounds: Array<{
       minX: number
@@ -1208,12 +1212,12 @@ export class BootScene extends Phaser.Scene {
 
       const bBg = this.add.graphics()
       bBg.fillStyle(bColor, 1)
-      bBg.fillRoundedRect(bx - btnW / 2, btnY - btnH / 2, btnW, btnH, 6)
+      bBg.fillRoundedRect(bx - btnW / 2, btnY - btnH / 2, btnW, btnH, 8)
 
       const bTxt = this.add
         .text(bx, btnY, btnCfg.label.toUpperCase(), {
           fontFamily: GAME_FONTS.heading,
-          fontSize: btnCount > 2 ? '11px' : '13px',
+          fontSize: btnCount > 2 ? '15px' : '18px',
           fontStyle: 'bold',
           color: '#ffffff',
           align: 'center',
@@ -1273,75 +1277,76 @@ export class BootScene extends Phaser.Scene {
     const height = this.scale.height
 
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(250)
-    const cardW = Math.min(width - 24, 460)
-    const cardH = Math.min(height - 24, 250)
+    const cardW = Math.min(width - 24, 740)
+    const cardH = Math.min(height - 24, 380)
 
     const bg = this.add.graphics()
     bg.fillStyle(0x090d16, 0.98)
-    bg.lineStyle(2.5, 0xf59e0b, 1) // Amber-500
-    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 10)
-    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 10)
+    bg.lineStyle(3, 0xf59e0b, 1) // Amber-500
+    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 14)
+    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 14)
 
     // Inner subtle glow border
-    bg.lineStyle(1, 0x10b981, 0.5)
-    bg.strokeRoundedRect(-cardW / 2 + 4, -cardH / 2 + 4, cardW - 8, cardH - 8, 8)
+    bg.lineStyle(1.5, 0x10b981, 0.6)
+    bg.strokeRoundedRect(-cardW / 2 + 5, -cardH / 2 + 5, cardW - 10, cardH - 10, 10)
 
     // Celebration Ribbon Banner
-    const ribbonY = -cardH / 2 + 22
+    const ribbonY = -cardH / 2 + 30
     const trophyText = this.add.text(0, ribbonY, '★ GRAND VICTORY — ADVENTURE COMPLETED! ★', {
       fontFamily: GAME_FONTS.display,
-      fontSize: '18px',
+      fontSize: '30px',
       fontStyle: 'bold',
       color: '#f59e0b',
     }).setOrigin(0.5, 0.5)
 
-    const subtitleText = this.add.text(0, ribbonY + 22, 'Dennis survived all 5 Bengaluru chases from College Gate to Cubbon Park!', {
+    const subtitleText = this.add.text(0, ribbonY + 28, 'Dennis survived all 5 Bengaluru chases from College Gate to Cubbon Park!', {
       fontFamily: GAME_FONTS.body,
-      fontSize: '10.5px',
+      fontSize: '16px',
+      fontStyle: 'bold',
       color: '#cbd5e1',
       align: 'center',
-      wordWrap: { width: cardW - 32 },
+      wordWrap: { width: cardW - 40 },
     }).setOrigin(0.5, 0.5)
 
     // 5-Level Completion Card Grid / Summary
-    const stageSummaryY = ribbonY + 54
+    const stageSummaryY = ribbonY + 76
     const summaryBg = this.add.graphics()
     summaryBg.fillStyle(0x0f172a, 0.9)
-    summaryBg.lineStyle(1, 0x334155, 0.8)
-    const sumW = cardW - 32
-    const sumH = 56
-    summaryBg.fillRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 6)
-    summaryBg.strokeRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 6)
+    summaryBg.lineStyle(1.5, 0x334155, 0.8)
+    const sumW = cardW - 40
+    const sumH = 76
+    summaryBg.fillRoundedRect(-sumW / 2, stageSummaryY - 10, sumW, sumH, 8)
+    summaryBg.strokeRoundedRect(-sumW / 2, stageSummaryY - 10, sumW, sumH, 8)
 
-    const stage123 = this.add.text(0, stageSummaryY + 6, '✓ STAGE 01: College Gate   ✓ STAGE 02: Thatha Tea   ✓ STAGE 03: MG Road', {
+    const stage123 = this.add.text(0, stageSummaryY + 8, '✓ STAGE 01: College Gate   ✓ STAGE 02: Thatha Tea   ✓ STAGE 03: MG Road', {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '9.5px',
+      fontSize: '15px',
       fontStyle: 'bold',
       color: '#34d399', // Emerald
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
-    const stage45 = this.add.text(0, stageSummaryY + 28, '✓ STAGE 04: Dr. Rajkumar Park   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
+    const stage45 = this.add.text(0, stageSummaryY + 38, '✓ STAGE 04: Dr. Rajkumar Park   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '9.5px',
+      fontSize: '15px',
       fontStyle: 'bold',
       color: '#fef08a', // Yellow
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
     // Developer Credit - Prominent & Tasteful
-    const creditY = stageSummaryY + 64
+    const creditY = stageSummaryY + 92
     const devCreditText = this.add.text(0, creditY, 'Developed by its2much Mv', {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '14px',
+      fontSize: '22px',
       fontStyle: 'bold',
       color: '#fbbf24', // Amber-400
     }).setOrigin(0.5, 0.5)
 
     // Optional subtle teaser
-    const teaserText = this.add.text(0, creditY + 16, 'More of Dennis\'s story coming soon...', {
+    const teaserText = this.add.text(0, creditY + 24, 'More of Dennis\'s story coming soon...', {
       fontFamily: GAME_FONTS.body,
-      fontSize: '9.5px',
+      fontSize: '14px',
       fontStyle: 'italic',
       color: '#94a3b8',
     }).setOrigin(0.5, 0.5)
@@ -1370,21 +1375,22 @@ export class BootScene extends Phaser.Scene {
     ]
 
     const btnCount = btnConfigs.length
-    const btnW = Math.min(125, (cardW - 48) / btnCount)
-    const gap = 8
+    const gap = 12
+    const btnW = Math.min(195, (cardW - 60 - (btnCount - 1) * gap) / btnCount)
+    const btnH = 46
     const totalButtonsW = btnCount * btnW + (btnCount - 1) * gap
     const startX = -totalButtonsW / 2 + btnW / 2
-    const btnY = cardH / 2 - 24
+    const btnY = cardH / 2 - 32
 
     btnConfigs.forEach((cfg, idx) => {
       const bx = startX + idx * (btnW + gap)
       const btnBg = this.add.graphics()
       btnBg.fillStyle(cfg.color, 1)
-      btnBg.fillRoundedRect(bx - btnW / 2, btnY - 14, btnW, 28, 6)
+      btnBg.fillRoundedRect(bx - btnW / 2, btnY - btnH / 2, btnW, btnH, 8)
 
       const btnTxt = this.add.text(bx, btnY, cfg.label, {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '11px',
+        fontSize: '16px',
         fontStyle: 'bold',
         color: '#ffffff',
       }).setOrigin(0.5, 0.5)
@@ -1423,27 +1429,27 @@ export class BootScene extends Phaser.Scene {
     if (!this.objectiveText || !this.objectiveBg) return
 
     const textBounds = this.objectiveText.getBounds()
-    const padX = 10
-    const padY = 3.5
+    const padX = 16
+    const padY = 6
     const bgW = textBounds.width + padX * 2
     const bgH = textBounds.height + padY * 2
 
     this.objectiveBg.clear()
-    this.objectiveBg.fillStyle(0x0f172a, 0.85)
-    this.objectiveBg.lineStyle(1, 0xf59e0b, 0.7)
+    this.objectiveBg.fillStyle(0x0f172a, 0.9)
+    this.objectiveBg.lineStyle(1.5, 0xf59e0b, 0.8)
     this.objectiveBg.fillRoundedRect(
       this.objectiveText.x - bgW / 2,
       this.objectiveText.y - bgH / 2,
       bgW,
       bgH,
-      4
+      6
     )
     this.objectiveBg.strokeRoundedRect(
       this.objectiveText.x - bgW / 2,
       this.objectiveText.y - bgH / 2,
       bgW,
       bgH,
-      4
+      6
     )
   }
 
@@ -1454,8 +1460,8 @@ export class BootScene extends Phaser.Scene {
     this.playerStatusText.setText(label)
 
     const bounds = this.playerStatusText.getBounds()
-    const padX = 8
-    const padY = 4
+    const padX = 14
+    const padY = 6
     const bgW = bounds.width + padX * 2
     const bgH = bounds.height + padY * 2
 
@@ -1524,10 +1530,10 @@ export class BootScene extends Phaser.Scene {
     }
 
     // Responsive Header Positioning
-    const titleSize = isNarrow ? Math.max(15, Math.floor(width * 0.044)) : 22
-    const subtitleSize = isNarrow ? Math.max(10, Math.floor(width * 0.023)) : 12
+    const titleSize = isNarrow ? Math.max(22, Math.floor(width * 0.05)) : 34
+    const subtitleSize = isNarrow ? Math.max(14, Math.floor(width * 0.028)) : 18
 
-    const headerBaseY = isShort ? 14 : Math.max(20, height * 0.075)
+    const headerBaseY = isShort ? 18 : Math.max(24, height * 0.08)
 
     if (this.titleText) {
       this.titleText.setFontSize(`${titleSize}px`)
@@ -1538,36 +1544,36 @@ export class BootScene extends Phaser.Scene {
     if (this.subtitleText) {
       this.subtitleText.setFontSize(`${subtitleSize}px`)
       this.subtitleText.setText(`${this.levelConfig.stageNumber} • ${this.levelConfig.subtitle}`)
-      this.subtitleText.setPosition(centerX, headerBaseY + (isShort ? 16 : 20))
+      this.subtitleText.setPosition(centerX, headerBaseY + (isShort ? 22 : 28))
     }
 
     if (this.statusBadge && this.statusText && this.statusBg) {
-      const badgeY = headerBaseY + (isShort ? 34 : 41)
+      const badgeY = headerBaseY + (isShort ? 46 : 56)
       this.statusBadge.setPosition(centerX, badgeY)
 
       const textBounds = this.statusText.getBounds()
-      const padX = 10
-      const padY = 3.5
+      const padX = 14
+      const padY = 6
       const bgW = textBounds.width + padX * 2
       const bgH = textBounds.height + padY * 2
 
       this.statusBg.clear()
-      this.statusBg.fillStyle(0x064e3b, 0.6)
-      this.statusBg.lineStyle(1, 0x10b981, 0.5)
-      this.statusBg.fillRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 4)
-      this.statusBg.strokeRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 4)
+      this.statusBg.fillStyle(0x064e3b, 0.7)
+      this.statusBg.lineStyle(1.5, 0x10b981, 0.6)
+      this.statusBg.fillRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 6)
+      this.statusBg.strokeRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 6)
     }
 
     if (this.objectiveText) {
-      const objY = headerBaseY + (isShort ? 52 : 62)
+      const objY = headerBaseY + (isShort ? 72 : 88)
       this.objectiveText.setPosition(centerX, objY)
       this.updateObjectiveBadge()
     }
 
     // Controls Guide
     if (this.controlGuideText) {
-      const guideY = isShort ? groundY - 14 : groundY - 18
-      this.controlGuideText.setFontSize(isNarrow ? '7.5px' : '8.5px')
+      const guideY = isShort ? groundY - 18 : groundY - 24
+      this.controlGuideText.setFontSize(isNarrow ? '12px' : '15px')
       this.controlGuideText.setPosition(centerX, guideY)
     }
 

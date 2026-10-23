@@ -40,7 +40,37 @@ DD Game Scratch runs exclusively inside a fixed, full-viewport landscape game ca
 
 ---
 
-## 2. Complete Audio Architecture
+## 2. Large-Scale UI System & Visual Polish
+
+To address small interface scaling and ensure high readability and tactile responsiveness on both desktop displays and mobile landscape viewports, DD Game Scratch features a centralized design-token system:
+
+### 2.1 Centralized Typography Tokens
+- **Hero Title (`--font-size-title-hero`)**: `clamp(3rem, 6vw, 5.5rem)` (48px–88px) — Used for main game branding and victory headings.
+- **Modal Header (`--font-size-modal-header`)**: `clamp(2rem, 4vw, 3.25rem)` (32px–52px) — Used for modal titles, pause screens, and level clear banners.
+- **Primary Button Labels (`--font-size-btn-primary`)**: `clamp(1.35rem, 2.5vw, 2rem)` (22px–32px) — Used for `PLAY GAME`, `START STAGE`, and `RESUME GAME`.
+- **Secondary Button Labels (`--font-size-btn-secondary`)**: `clamp(1.1rem, 1.8vw, 1.5rem)` (18px–24px) — Used for menu options, restart, settings, and modal controls.
+- **Dialogue & Story Body (`--font-size-dialogue-body`)**: `clamp(1.05rem, 1.6vw, 1.35rem)` (17px–22px) — Used for Tanglish dialogue bubbles, mission briefings, and story cards.
+- **Labels & Status Badges (`--font-size-label`)**: `clamp(0.95rem, 1.4vw, 1.15rem)` (15px–18px) — Used for stage numbers, encounter tags, character roles, and status feedback.
+
+### 2.2 Touch Controls & Mobile Landscape Ergonomics
+- **D-pad Left / Right**: Sized to 72px–88px (`w-18 h-18 sm:w-22 sm:h-22`) with 36px–44px bold directional arrows anchored in the bottom-left corner.
+- **Action Buttons (Attack / Jump)**: Sized to 80px–96px (`w-20 h-20 sm:w-24 sm:h-24`) with high-contrast rose/amber backgrounds and clear icons anchored in the bottom-right corner.
+- **HUD Pause & Controls**: Sized to a minimum 48px height with generous padding, preventing accidental mis-clicks during intense chases.
+- **Unobstructed Viewport**: Controls are strictly pushed to outer screen margins, keeping Dennis, blockers, and hazards fully visible.
+
+### 2.3 Audio Mixer Sliders & Controls
+- **Track Geometry**: Custom 14px–16px thick dark slate tracks with subtle rounded corners.
+- **Thumb Geometry**: 32px diameter gold/amber orbs with drop shadows and 1.15x hover scale, making volume adjustment intuitive on touch screens.
+- **Independent Mute Badges**: Large 44px height buttons with clear visual status (`🔇 MUTED` in rose vs `🔊 ACTIVE` in emerald).
+
+### 2.4 In-Game Phaser UI & World Preservation
+- **Speech Bubbles**: Sized to 540x120px with 16px speaker font, 18px body font, and 12px comic pointer tails.
+- **Intro & Level Clear Overlays**: Sized to 620x230px and 640x260px with bold 38px stage headings and large action buttons.
+- **Zero Coordinate Distortion**: Scaling applied purely to text styles and UI geometry, preserving camera tracking, physics bodies, jump velocities, and blocker collision bounds 1:1.
+
+---
+
+## 3. Complete Audio Architecture
 
 Audio is centralized in [`src/game/systems/AudioManager.ts`](src/game/systems/AudioManager.ts) and [`src/game/systems/SoundSynthesizer.ts`](src/game/systems/SoundSynthesizer.ts), featuring dual independent channels with Web Audio synthesis and original asset playback:
 
@@ -72,7 +102,7 @@ Audio is centralized in [`src/game/systems/AudioManager.ts`](src/game/systems/Au
 
 ---
 
-## 3. Landscape & Orientation System
+## 4. Landscape & Orientation System
 
 - **Primary Landscape Layout**: The UI dynamically adapts to ultra-wide displays, laptops, tablets, and mobile landscape screens.
 - **Orientation Lock**: Programmatic lock (`screen.orientation.lock('landscape')`) is requested where supported by browser APIs.
@@ -85,7 +115,7 @@ Audio is centralized in [`src/game/systems/AudioManager.ts`](src/game/systems/Au
 
 ---
 
-## 4. Playable Stages & Bengaluru Route
+## 5. Playable Stages & Bengaluru Route
 
 1. **Stage 01: Bengaluru College Street**: Campus perimeter and avenue. Dennis knocks through 3 college blockers (Ajay, Vijay, Sanjay) and outruns the trio to the BMTC Bus Stop.
 2. **Stage 02: Thatha Tea, Kalyan Nagar**: Tea shop frontage opposite Dr. Rajkumar Park. Dennis knocks past blockers Vikram & Kiran and dashes to the Kammanahalli crossroad.
@@ -97,7 +127,7 @@ Audio is centralized in [`src/game/systems/AudioManager.ts`](src/game/systems/Au
 
 ---
 
-## 5. Controls
+## 6. Controls
 
 - **Desktop Keyboard**:
   - `A` / `D` or `←` / `→`: Run Left / Right
@@ -105,13 +135,13 @@ Audio is centralized in [`src/game/systems/AudioManager.ts`](src/game/systems/Au
   - `J` or `X`: Attack blockers
   - `ESC` or `P`: Toggle Pause Menu
 - **Mobile / Touch Screen**:
-  - On-screen D-pad buttons: Left (`◀`), Right (`▶`)
-  - Virtual action buttons: `ATTACK` (rose), `JUMP` (amber)
-  - HUD buttons: `⏸ PAUSE`, `🔊 BGM`, `⚙ SETTINGS`, `⛶ FULLSCREEN`
+  - On-screen D-pad buttons: Left (`◀`), Right (`▶`) — 72px–88px high-visibility touch targets
+  - Virtual action buttons: `ATTACK` (rose), `JUMP` (amber) — 80px–96px ergonomic circular/rounded pads
+  - HUD buttons: `⏸ PAUSE`, `🔊 BGM`, `⚙ SETTINGS`, `⛶ FULLSCREEN` — 44px–48px minimum touch targets
 
 ---
 
-## 6. Windows Desktop Launcher
+## 7. Windows Desktop Launcher
 
 DD Game Scratch includes a one-click desktop launcher for Windows:
 
@@ -125,7 +155,7 @@ DD Game Scratch includes a one-click desktop launcher for Windows:
 
 ---
 
-## 7. Development & Verification
+## 8. Development & Verification
 
 ### Scripts
 - `npm run dev`: Start local development server with Vite HMR (`http://localhost:5173/`).
@@ -137,11 +167,14 @@ DD Game Scratch includes a one-click desktop launcher for Windows:
 ### Verification Status
 - **Type Safety**: Passed with 0 errors (`tsc -b --noEmit`).
 - **Linter**: Passed with 0 errors and 0 warnings on 42 project files (`oxlint`).
-- **Production Build**: Passed in 4.83s (`dist/index.html`, `dist/assets/*.css`, `dist/assets/*.js`).
-- **Browser Playtesting**:
-  - Unified landscape interface verified; zero website elements present.
-  - Main menu, Stages modal, Cast modal, Settings modal, Credits modal verified.
-  - Level 1 gameplay launch, in-game HUD, pause menu (`ESC`, `P`, button), and resume verified.
-  - Dual-channel volume and mute persistence verified.
-  - Original gameplay BGM `public/assets/audio/music/DD Game BGM.mp3` preserved.
+- **Production Build**: Passed in 1.60s (`dist/index.html`, `dist/assets/*.css`, `dist/assets/*.js`).
+- **Large-Scale UI Audit (Milestone 18)**:
+  - Main Menu: Verified large branding header, oversized Play Game button, clear secondary buttons, and enlarged dialogue bubbles.
+  - Stage Selection: Verified large 01–05 stage cards, typography, and prominent Start Stage launch button.
+  - Character Selection: Verified enlarged character cards, avatar portraits, and play button with zero overflow.
+  - Settings Modal: Verified thick 14–16px slider tracks, 32px gold thumbs, and large mute toggles.
+  - Credits Modal: Verified large developer attribution (`Developed by its2much Mv`), setting inspiration, and tech stack.
+  - In-Game HUD: Verified large Pause button, stage indicator, and prominent touch D-pad & action controls.
+  - Pause Menu: Verified massive `GAME PAUSED` heading, oversized Resume Game button, and secondary options.
+  - Audio: Independent music and SFX sliders verified; original soundtrack `public/assets/audio/music/DD Game BGM.mp3` preserved 100%.
   - Note: Physical iOS/Android device testing recommended for hardware-specific orientation lock behavior.

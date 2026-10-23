@@ -5,6 +5,18 @@
   --font-gta-display: 'Teko', 'Impact', 'Arial Black', sans-serif;
   --font-gta-heading: 'Barlow Condensed', 'Arial Narrow', 'Franklin Gothic Medium', sans-serif;
   --font-gta-body: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Centralized Large-Scale UI Design Tokens */
+  --font-size-title-hero: clamp(48px, 6vw, 84px);
+  --font-size-modal-header: clamp(32px, 4vw, 52px);
+  --font-size-btn-primary: clamp(22px, 2.5vw, 32px);
+  --font-size-btn-secondary: clamp(18px, 2vw, 24px);
+  --font-size-dialogue-body: clamp(16px, 1.8vw, 22px);
+  --font-size-label: clamp(14px, 1.4vw, 18px);
+
+  /* Touch Targets & Minimum Hit Areas */
+  --touch-target-primary: 56px;
+  --touch-target-gamepad: 72px;
 }
 
 html, body, #root {
@@ -34,22 +46,22 @@ html, body, #root {
   font-family: var(--font-gta-body);
 }
 
-/* GTA Urban Headline */
+/* GTA Urban Headline - Substantially Enlarged */
 .gta-title {
   font-family: var(--font-gta-display);
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  line-height: 0.92;
-  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.8), 0 0 16px rgba(0, 0, 0, 0.6);
+  line-height: 0.95;
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.85), 0 0 20px rgba(0, 0, 0, 0.7);
 }
 
 /* GTA Subheading & Stage Labels */
 .gta-subtitle {
   font-family: var(--font-gta-heading);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.1em;
   font-weight: 700;
-  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.7);
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.75);
 }
 
 /* GTA Action Button */
@@ -58,6 +70,15 @@ html, body, #root {
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 800;
+  transition: all 0.15s ease-out;
+}
+
+.gta-btn:hover {
+  transform: translateY(-1px);
+}
+
+.gta-btn:active {
+  transform: translateY(1px) scale(0.98);
 }
 
 /* GTA Mission Badge / HUD Tag */
@@ -72,5 +93,60 @@ html, body, #root {
 .gta-dialogue {
   font-family: var(--font-gta-body);
   font-weight: 600;
-  line-height: 1.35;
+  line-height: 1.4;
+}
+
+/* Large-Scale Custom Volume Sliders */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-runnable-track {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 9999px;
+  height: 16px;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 9999px;
+  height: 16px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  margin-top: -8px;
+  background: #f59e0b;
+  border: 3px solid #fef08a;
+  border-radius: 50%;
+  height: 32px;
+  width: 32px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: #f59e0b;
+  border: 3px solid #fef08a;
+  border-radius: 50%;
+  height: 32px;
+  width: 32px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.1s ease, background-color 0.15s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  transform: scale(1.15);
+  background: #fbbf24;
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+  transform: scale(1.15);
+  background: #fbbf24;
 }

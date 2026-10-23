@@ -241,7 +241,7 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.dialogueSpeakerText = this.add.text(0, 0, '', {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '13px',
+      fontSize: '18px',
       fontStyle: 'bold',
       color: '#f59e0b',
     })
@@ -250,11 +250,11 @@ export class MainMenuScene extends Phaser.Scene {
 
     this.dialogueContentText = this.add.text(0, 0, '', {
       fontFamily: GAME_FONTS.body,
-      fontSize: '13px',
+      fontSize: '17px',
       color: '#0f172a',
       fontStyle: 'bold',
       align: 'center',
-      wordWrap: { width: 220 },
+      wordWrap: { width: 320 },
     })
     this.dialogueContentText.setOrigin(0.5, 0.5)
     this.dialogueBubble.add(this.dialogueContentText)
@@ -282,28 +282,28 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Determine target character position
     let targetX = 820
-    let targetY = this.groundY - 110
+    let targetY = this.groundY - 135
     let speakerColor = '#f59e0b'
 
     switch (dialogue.charKey) {
       case 'dennis':
         targetX = this.dennis ? this.dennis.x : 820
-        targetY = this.groundY - 105
+        targetY = this.groundY - 130
         speakerColor = '#38bdf8'
         break
       case 'manish':
         targetX = this.manish ? this.manish.x : 695
-        targetY = this.groundY - 105
+        targetY = this.groundY - 130
         speakerColor = '#ef4444'
         break
       case 'sathish':
         targetX = this.sathish ? this.sathish.x : 935
-        targetY = this.groundY - 105
+        targetY = this.groundY - 130
         speakerColor = '#22c55e'
         break
       case 'rahul':
         targetX = this.rahul ? this.rahul.x : 1040
-        targetY = this.groundY - 105
+        targetY = this.groundY - 130
         speakerColor = '#f97316'
         break
     }
@@ -314,29 +314,29 @@ export class MainMenuScene extends Phaser.Scene {
 
     // Measure bubble size
     const contentBounds = this.dialogueContentText.getBounds()
-    const bubbleWidth = Math.max(160, Math.min(240, contentBounds.width + 24))
-    const bubbleHeight = contentBounds.height + 34
+    const bubbleWidth = Math.max(220, Math.min(360, contentBounds.width + 36))
+    const bubbleHeight = contentBounds.height + 44
 
     // Position text inside container
-    this.dialogueSpeakerText.setPosition(0, -bubbleHeight / 2 + 12)
-    this.dialogueContentText.setPosition(0, 4)
+    this.dialogueSpeakerText.setPosition(0, -bubbleHeight / 2 + 16)
+    this.dialogueContentText.setPosition(0, 8)
 
     // Draw speech bubble with pointer tail
     this.dialogueBubbleBg.clear()
     // Drop shadow
-    this.dialogueBubbleBg.fillStyle(0x000000, 0.25)
-    this.dialogueBubbleBg.fillRoundedRect(-bubbleWidth / 2 + 2, -bubbleHeight / 2 + 3, bubbleWidth, bubbleHeight, 8)
+    this.dialogueBubbleBg.fillStyle(0x000000, 0.3)
+    this.dialogueBubbleBg.fillRoundedRect(-bubbleWidth / 2 + 3, -bubbleHeight / 2 + 4, bubbleWidth, bubbleHeight, 12)
     // Bubble body
     this.dialogueBubbleBg.fillStyle(0xffffff, 0.98)
-    this.dialogueBubbleBg.fillRoundedRect(-bubbleWidth / 2, -bubbleHeight / 2, bubbleWidth, bubbleHeight, 8)
+    this.dialogueBubbleBg.fillRoundedRect(-bubbleWidth / 2, -bubbleHeight / 2, bubbleWidth, bubbleHeight, 12)
     // Border
-    this.dialogueBubbleBg.lineStyle(2, 0x0f172a, 0.85)
-    this.dialogueBubbleBg.strokeRoundedRect(-bubbleWidth / 2, -bubbleHeight / 2, bubbleWidth, bubbleHeight, 8)
+    this.dialogueBubbleBg.lineStyle(2.5, 0x0f172a, 0.9)
+    this.dialogueBubbleBg.strokeRoundedRect(-bubbleWidth / 2, -bubbleHeight / 2, bubbleWidth, bubbleHeight, 12)
     // Speech pointer tail pointing to character head
     this.dialogueBubbleBg.fillStyle(0xffffff, 0.98)
-    this.dialogueBubbleBg.fillTriangle(-8, bubbleHeight / 2, 8, bubbleHeight / 2, 0, bubbleHeight / 2 + 8)
-    this.dialogueBubbleBg.lineBetween(-8, bubbleHeight / 2, 0, bubbleHeight / 2 + 8)
-    this.dialogueBubbleBg.lineBetween(0, bubbleHeight / 2 + 8, 8, bubbleHeight / 2)
+    this.dialogueBubbleBg.fillTriangle(-10, bubbleHeight / 2, 10, bubbleHeight / 2, 0, bubbleHeight / 2 + 12)
+    this.dialogueBubbleBg.lineBetween(-10, bubbleHeight / 2, 0, bubbleHeight / 2 + 12)
+    this.dialogueBubbleBg.lineBetween(0, bubbleHeight / 2 + 12, 10, bubbleHeight / 2)
 
     this.dialogueBubble.setPosition(targetX, targetY - bubbleHeight / 2)
 

@@ -122,36 +122,36 @@ export default function StageSelectModal({
       aria-labelledby="stages-title"
       className="fixed inset-0 z-30 flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 select-none"
     >
-      <div className="relative w-full max-w-5xl bg-slate-900/95 border-2 border-amber-500/40 rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col justify-between max-h-[92vh] overflow-y-auto">
+      <div className="relative w-full max-w-6xl bg-slate-900/95 border-2 border-amber-500/40 rounded-3xl p-5 sm:p-7 shadow-2xl flex flex-col justify-between max-h-[94vh] overflow-y-auto">
         {/* Top Header Bar */}
-        <header className="flex items-center justify-between border-b border-slate-800 pb-3 gap-3">
-          <div className="flex items-center gap-3">
+        <header className="flex items-center justify-between border-b border-slate-800 pb-4 gap-4">
+          <div className="flex items-center gap-4">
             <button
               type="button"
               onClick={handleClose}
-              className="gta-btn px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer"
+              className="gta-btn px-4.5 py-2.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white border border-slate-700 text-sm sm:text-base font-black flex items-center gap-2 transition-colors cursor-pointer min-h-[44px]"
             >
-              <span>&larr;</span>
+              <span className="text-lg">&larr;</span>
               <span>MENU</span>
             </button>
             <div>
-              <h2 id="stages-title" className="gta-title text-2xl sm:text-3xl font-black uppercase tracking-wider text-white">
+              <h2 id="stages-title" className="gta-title text-3xl sm:text-5xl font-black uppercase tracking-wider text-white">
                 Stage Selection
               </h2>
-              <p className="gta-subtitle text-xs text-amber-400 font-bold">
+              <p className="gta-subtitle text-sm sm:text-base text-amber-400 font-bold mt-0.5">
                 5 PLAYABLE ENCOUNTERS &bull; BENGALURU ADVENTURE
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => {
                 audioManager.playSfx('click')
                 onOpenSettings?.()
               }}
-              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors"
+              className="w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors flex items-center justify-center text-xl shadow-md min-h-[44px]"
               title="Settings"
               aria-label="Settings"
             >
@@ -160,7 +160,7 @@ export default function StageSelectModal({
             <button
               type="button"
               onClick={handleClose}
-              className="w-8 h-8 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors"
+              className="w-12 h-12 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center cursor-pointer transition-colors text-xl font-bold shadow-md min-h-[44px]"
               aria-label="Close stage selection"
             >
               ✕
@@ -169,30 +169,30 @@ export default function StageSelectModal({
         </header>
 
         {/* Content: Carousel / List on Left, Briefing Card on Right */}
-        <div className="py-4 flex flex-col lg:flex-row gap-5 items-stretch w-full flex-1 min-h-0">
+        <div className="py-5 flex flex-col lg:flex-row gap-6 items-stretch w-full flex-1 min-h-0">
           {/* Left: Stage Cards List */}
-          <div className="flex-1 flex flex-col gap-2 overflow-y-auto pr-1">
-            <div className="text-xs font-gta-heading uppercase tracking-widest text-slate-400 flex items-center justify-between">
+          <div className="flex-1 flex flex-col gap-3 overflow-y-auto pr-1">
+            <div className="text-sm sm:text-base font-gta-heading uppercase tracking-widest text-slate-300 flex items-center justify-between font-bold">
               <span>SELECT MISSION</span>
-              <span className="text-amber-400 font-bold">STAGE {selectedStage} OF 5</span>
+              <span className="text-amber-400">STAGE {selectedStage} OF 5</span>
             </div>
 
-            <div className="space-y-2">
+            <div className="space-y-3">
               {STAGES.map((stage) => {
                 const isSelected = selectedStage === stage.levelNumber
                 return (
                   <div
                     key={stage.id}
                     onClick={() => handleSelect(stage.levelNumber)}
-                    className={`p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-3 ${
+                    className={`p-3.5 sm:p-4 rounded-2xl border-2 transition-all cursor-pointer flex items-center justify-between gap-4 ${
                       isSelected
-                        ? 'bg-slate-900 border-amber-400 shadow-lg shadow-amber-500/10 scale-[1.01]'
-                        : 'bg-slate-900/60 border-slate-800 hover:bg-slate-900 hover:border-slate-700'
+                        ? 'bg-slate-900 border-amber-400 shadow-xl shadow-amber-500/15 scale-[1.01]'
+                        : 'bg-slate-900/70 border-slate-800 hover:bg-slate-900 hover:border-slate-700'
                     }`}
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-4">
                       <div
-                        className={`w-9 h-9 rounded-lg flex items-center justify-center font-gta-heading font-black text-base border ${
+                        className={`w-14 h-14 sm:w-16 sm:h-16 rounded-xl flex items-center justify-center font-gta-heading font-black text-2xl sm:text-3xl border-2 shrink-0 ${
                           isSelected
                             ? 'bg-amber-500 text-slate-950 border-amber-300'
                             : 'bg-slate-800 text-slate-400 border-slate-700'
@@ -201,22 +201,22 @@ export default function StageSelectModal({
                         0{stage.levelNumber}
                       </div>
                       <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-base font-gta-heading font-bold text-white tracking-wide">
+                        <div className="flex items-center gap-2.5 flex-wrap">
+                          <span className="text-lg sm:text-2xl font-gta-heading font-black text-white tracking-wide">
                             {stage.title}
                           </span>
-                          <span className={`text-xs font-gta-heading px-2 py-0.5 rounded border ${stage.badgeColor}`}>
+                          <span className={`text-xs sm:text-sm font-gta-heading font-bold px-2.5 py-0.5 rounded-lg border ${stage.badgeColor}`}>
                             {stage.stageTag}
                           </span>
                         </div>
-                        <p className="text-xs text-slate-400 font-gta-body mt-0.5">
+                        <p className="text-sm sm:text-base text-slate-300 font-gta-body mt-1 font-medium">
                           {stage.location}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      <span className="hidden sm:inline-block text-xs font-gta-heading font-semibold text-emerald-400">
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="hidden sm:inline-block text-sm font-gta-heading font-black text-emerald-400">
                         ✓ READY
                       </span>
                       <button
@@ -225,7 +225,7 @@ export default function StageSelectModal({
                           e.stopPropagation()
                           handleLaunch(stage.levelNumber)
                         }}
-                        className="gta-btn px-3 py-1.5 rounded-lg text-xs font-gta-heading font-bold bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow"
+                        className="gta-btn px-4 py-2 sm:px-5 sm:py-2.5 rounded-xl text-sm sm:text-base font-gta-heading font-black bg-amber-500 hover:bg-amber-400 text-slate-950 transition-colors shadow-lg min-h-[44px]"
                       >
                         PLAY &rarr;
                       </button>
@@ -237,56 +237,56 @@ export default function StageSelectModal({
           </div>
 
           {/* Right: Selected Stage Mission Briefing Card */}
-          <div className="w-full lg:w-96 bg-slate-900 border border-slate-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between shadow-2xl">
-            <div className="space-y-3.5">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                <span className={`px-2.5 py-0.5 rounded text-xs font-gta-heading font-bold border ${currentStage.badgeColor}`}>
+          <div className="w-full lg:w-[440px] xl:w-[480px] bg-slate-900 border-2 border-slate-700/80 rounded-3xl p-5 sm:p-6 flex flex-col justify-between shadow-2xl">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+                <span className={`px-3 py-1 rounded-lg text-sm font-gta-heading font-black border ${currentStage.badgeColor}`}>
                   {currentStage.stageTag}
                 </span>
-                <span className="text-xs font-gta-heading text-emerald-400 font-semibold">
+                <span className="text-sm font-gta-heading text-emerald-400 font-bold">
                   ● STATUS: PLAYABLE
                 </span>
               </div>
 
               <div>
-                <h3 className="text-2xl font-black font-gta-display text-white uppercase tracking-wide">
+                <h3 className="text-3xl sm:text-4xl font-black font-gta-display text-white uppercase tracking-wide leading-tight">
                   {currentStage.title}
                 </h3>
-                <div className="text-xs text-amber-400 font-gta-body font-medium mt-0.5">
+                <div className="text-sm sm:text-base text-amber-400 font-gta-body font-semibold mt-1">
                   📍 {currentStage.location}
                 </div>
               </div>
 
-              <div className="space-y-1 bg-slate-950/60 border border-slate-800/80 rounded-xl p-3">
-                <div className="text-xs font-gta-heading uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5 bg-slate-950/70 border border-slate-800/90 rounded-2xl p-4">
+                <div className="text-xs sm:text-sm font-gta-heading font-bold uppercase tracking-wider text-slate-300">
                   MISSION OBJECTIVE
                 </div>
-                <p className="text-xs text-slate-200 font-gta-body leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-200 font-gta-body leading-relaxed">
                   {currentStage.objective}
                 </p>
               </div>
 
-              <div className="space-y-1 bg-slate-950/40 border border-slate-800/60 rounded-xl p-2.5">
-                <div className="text-xs font-gta-heading uppercase tracking-wider text-slate-400">
+              <div className="space-y-1.5 bg-slate-950/50 border border-slate-800/80 rounded-2xl p-3.5">
+                <div className="text-xs sm:text-sm font-gta-heading font-bold uppercase tracking-wider text-slate-400">
                   ENCOUNTER SPECIFICS
                 </div>
-                <p className="text-xs text-slate-400 font-gta-body">
+                <p className="text-sm text-slate-300 font-gta-body">
                   {currentStage.encounter}
                 </p>
               </div>
             </div>
 
-            <div className="pt-3 border-t border-slate-800 space-y-1.5 mt-3">
+            <div className="pt-4 border-t border-slate-800 space-y-2 mt-4">
               <button
                 type="button"
                 id="btn-stage-launch"
                 onClick={() => handleLaunch(currentStage.levelNumber)}
-                className="gta-btn w-full py-3 px-4 rounded-xl font-bold text-lg uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-lg shadow-amber-500/20 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-2"
+                className="gta-btn w-full py-4 sm:py-5 px-6 rounded-2xl font-black text-xl sm:text-2xl uppercase tracking-wider bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 shadow-xl shadow-amber-500/25 border-2 border-amber-300 cursor-pointer transition-all flex items-center justify-center gap-3 min-h-[64px]"
               >
                 <span>START {currentStage.stageTag}</span>
-                <span>&rarr;</span>
+                <span className="text-2xl">&rarr;</span>
               </button>
-              <div className="text-xs text-center font-gta-heading text-slate-500">
+              <div className="text-xs sm:text-sm text-center font-gta-heading text-slate-400 font-semibold">
                 Developed by its2much Mv
               </div>
             </div>
@@ -294,9 +294,9 @@ export default function StageSelectModal({
         </div>
 
         {/* Footer */}
-        <footer className="flex items-center justify-between border-t border-slate-800 pt-2 text-xs font-gta-heading text-slate-400">
-          <div>Developed by its2much Mv</div>
-          <div className="text-[11px] text-slate-500">
+        <footer className="flex items-center justify-between border-t border-slate-800 pt-3 text-xs sm:text-sm font-gta-heading text-slate-400">
+          <div className="font-bold text-slate-300">Developed by its2much Mv</div>
+          <div className="text-xs text-slate-400">
             Epilogue: Kristu Jayanti University (KJU) reserved for post-Level 5
           </div>
         </footer>

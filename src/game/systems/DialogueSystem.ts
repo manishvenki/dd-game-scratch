@@ -122,8 +122,8 @@ export class DialogueSystem {
     const width = this.scene.scale.width
     const isNarrow = width < 560
 
-    this.cardWidth = Math.min(width - 24, isNarrow ? 300 : 350)
-    this.cardHeight = isNarrow ? 96 : 88
+    this.cardWidth = Math.min(width - 32, isNarrow ? 380 : 540)
+    this.cardHeight = isNarrow ? 130 : 120
 
     // Screen-space container for sharp font rendering with camera tracking
     this.container = this.scene.add.container(width / 2, 120)
@@ -137,9 +137,9 @@ export class DialogueSystem {
     // Speaker Badge Background & Text
     this.speakerBadgeBg = this.scene.add.graphics()
     this.speakerNameText = this.scene.add
-      .text(-this.cardWidth / 2 + 14, -this.cardHeight / 2 + 13, '', {
+      .text(-this.cardWidth / 2 + 18, -this.cardHeight / 2 + 18, '', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '11px',
+        fontSize: '16px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
@@ -149,9 +149,9 @@ export class DialogueSystem {
 
     // Progress counter (e.g. 1 / 4)
     this.progressText = this.scene.add
-      .text(this.cardWidth / 2 - 14, -this.cardHeight / 2 + 13, '', {
+      .text(this.cardWidth / 2 - 18, -this.cardHeight / 2 + 18, '', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '10px',
+        fontSize: '14px',
         fontStyle: 'bold',
         color: '#94a3b8',
       })
@@ -160,22 +160,22 @@ export class DialogueSystem {
 
     // Dialogue Body Text (Multi-line Tanglish with comfortable line height)
     this.lineText = this.scene.add
-      .text(-this.cardWidth / 2 + 14, -this.cardHeight / 2 + 28, '', {
+      .text(-this.cardWidth / 2 + 18, -this.cardHeight / 2 + 38, '', {
         fontFamily: GAME_FONTS.body,
-        fontSize: isNarrow ? '12px' : '13px',
-        fontStyle: 'normal',
-        color: '#f8fafc',
-        lineSpacing: 3,
-        wordWrap: { width: this.cardWidth - 28 },
+        fontSize: isNarrow ? '16px' : '18px',
+        fontStyle: 'bold',
+        color: '#ffffff',
+        lineSpacing: 5,
+        wordWrap: { width: this.cardWidth - 36 },
       })
       .setOrigin(0, 0)
     this.container.add(this.lineText)
 
     // Continue action hint
     this.hintText = this.scene.add
-      .text(this.cardWidth / 2 - 14, this.cardHeight / 2 - 10, 'TAP / SPACE →', {
+      .text(this.cardWidth / 2 - 18, this.cardHeight / 2 - 14, 'TAP / SPACE →', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '10px',
+        fontSize: '14px',
         fontStyle: 'bold',
         color: '#fbbf24', // amber-400
       })
@@ -202,21 +202,21 @@ export class DialogueSystem {
     this.lastIsAbove = isAboveSpeaker
 
     // Outer drop shadow
-    this.bubbleBg.fillStyle(0x000000, 0.55)
-    this.bubbleBg.fillRoundedRect(-cardW / 2 + 2, -cardH / 2 + 3, cardW, cardH, 8)
+    this.bubbleBg.fillStyle(0x000000, 0.65)
+    this.bubbleBg.fillRoundedRect(-cardW / 2 + 3, -cardH / 2 + 4, cardW, cardH, 12)
 
     // Main Bubble Body
-    this.bubbleBg.fillStyle(0x0b1120, 0.96)
-    this.bubbleBg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
+    this.bubbleBg.fillStyle(0x0b1120, 0.98)
+    this.bubbleBg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
 
     // Vibrant comic border
-    this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.85) // sky-400
-    this.bubbleBg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 8)
+    this.bubbleBg.lineStyle(2, 0x38bdf8, 0.9) // sky-400
+    this.bubbleBg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
 
     // Tail pointer directed toward speaker
-    const clampedTailX = Phaser.Math.Clamp(tailX, -cardW / 2 + 18, cardW / 2 - 18)
-    const tailW = 10
-    const tailH = 11
+    const clampedTailX = Phaser.Math.Clamp(tailX, -cardW / 2 + 24, cardW / 2 - 24)
+    const tailW = 14
+    const tailH = 15
 
     this.bubbleBg.fillStyle(0x0b1120, 1)
 
@@ -232,7 +232,7 @@ export class DialogueSystem {
         clampedTailX,
         tipY
       )
-      this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.85)
+      this.bubbleBg.lineStyle(2, 0x38bdf8, 0.9)
       this.bubbleBg.lineBetween(clampedTailX - tailW, baseY, clampedTailX, tipY)
       this.bubbleBg.lineBetween(clampedTailX, tipY, clampedTailX + tailW, baseY)
     } else {
@@ -247,7 +247,7 @@ export class DialogueSystem {
         clampedTailX,
         tipY
       )
-      this.bubbleBg.lineStyle(1.5, 0x38bdf8, 0.85)
+      this.bubbleBg.lineStyle(2, 0x38bdf8, 0.9)
       this.bubbleBg.lineBetween(clampedTailX - tailW, baseY, clampedTailX, tipY)
       this.bubbleBg.lineBetween(clampedTailX, tipY, clampedTailX + tailW, baseY)
     }
@@ -267,11 +267,11 @@ export class DialogueSystem {
         this.speakerBadgeBg.clear()
         this.speakerBadgeBg.fillStyle(line.badgeColorHex, 0.95)
         this.speakerBadgeBg.fillRoundedRect(
-          this.speakerNameText.x - 5,
-          this.speakerNameText.y - 6,
-          bounds.width + 10,
-          14,
-          3
+          this.speakerNameText.x - 7,
+          this.speakerNameText.y - bounds.height / 2 - 3,
+          bounds.width + 14,
+          bounds.height + 6,
+          4
         )
       }
     }
