@@ -302,13 +302,14 @@ export class BootScene extends Phaser.Scene {
       })
 
       // Camera Follows Dennis smoothly (calibrated vertical framing for enlarged character)
+      const isShort = this.scale.height < 480
       this.cameras.main.startFollow(
         this.playerController.getPhysicsBody(),
         true,
         0.08,
         0.08,
         0,
-        22
+        isShort ? -12 : 22
       )
 
       // Player Ground Collision
@@ -1039,9 +1040,11 @@ export class BootScene extends Phaser.Scene {
     const width = this.scale.width
     const height = this.scale.height
 
+    const isShort = height < 450
+
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(200)
-    const cardW = Math.min(width - 32, 620)
-    const cardH = 230
+    const cardW = Math.min(width - 24, isShort ? 540 : 620)
+    const cardH = Math.min(height - 24, isShort ? 180 : 230)
 
     const bg = this.add.graphics()
     bg.fillStyle(0x090d16, 0.98)
@@ -1050,46 +1053,47 @@ export class BootScene extends Phaser.Scene {
     bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
 
     const stageNum = this.add
-      .text(0, -cardH / 2 + 25, cfg.stageNumber.toUpperCase(), {
+      .text(0, -cardH / 2 + (isShort ? 18 : 25), cfg.stageNumber.toUpperCase(), {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '18px',
+        fontSize: isShort ? '15px' : '18px',
         fontStyle: 'bold',
         color: '#f59e0b',
       })
       .setOrigin(0.5, 0.5)
 
     const title = this.add
-      .text(0, -cardH / 2 + 58, cfg.title.toUpperCase(), {
+      .text(0, -cardH / 2 + (isShort ? 44 : 58), cfg.title.toUpperCase(), {
         fontFamily: GAME_FONTS.display,
-        fontSize: '38px',
+        fontSize: isShort ? '28px' : '38px',
         fontStyle: 'bold',
         color: '#ffffff',
         stroke: '#090d16',
-        strokeThickness: 5,
+        strokeThickness: isShort ? 4 : 5,
       })
       .setOrigin(0.5, 0.5)
 
     const introText = cfg.tanglishIntro ?? cfg.objectiveText
     const obj = this.add
-      .text(0, -cardH / 2 + 108, introText, {
+      .text(0, -cardH / 2 + (isShort ? 84 : 108), introText, {
         fontFamily: GAME_FONTS.body,
-        fontSize: '16px',
+        fontSize: isShort ? '13px' : '16px',
         fontStyle: 'bold',
         color: '#e2e8f0',
         align: 'center',
-        lineSpacing: 4,
-        wordWrap: { width: cardW - 48 },
+        lineSpacing: isShort ? 2 : 4,
+        wordWrap: { width: cardW - 40 },
       })
       .setOrigin(0.5, 0.5)
 
+    const startBtnH = isShort ? 36 : 44
     const startBtnBg = this.add.graphics()
     startBtnBg.fillStyle(0xd97706, 1)
-    startBtnBg.fillRoundedRect(-cardW / 2 + 24, cardH / 2 - 58, cardW - 48, 44, 8)
+    startBtnBg.fillRoundedRect(-cardW / 2 + 20, cardH / 2 - (isShort ? 46 : 58), cardW - 40, startBtnH, 8)
 
     const startBtnTxt = this.add
-      .text(0, cardH / 2 - 36, 'START ENCOUNTER [TAP OR ANY KEY TO SPRINT]', {
+      .text(0, cardH / 2 - (isShort ? 28 : 36), 'START ENCOUNTER [TAP OR ANY KEY TO SPRINT]', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '18px',
+        fontSize: isShort ? '14px' : '18px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
@@ -1150,9 +1154,11 @@ export class BootScene extends Phaser.Scene {
     const width = this.scale.width
     const height = this.scale.height
 
+    const isShort = height < 450
+
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(200)
-    const cardW = Math.min(width - 24, 640)
-    const cardH = 260
+    const cardW = Math.min(width - 20, isShort ? 540 : 640)
+    const cardH = Math.min(height - 20, isShort ? 200 : 260)
 
     // Full-screen semi-transparent backdrop
     const backdrop = this.add.graphics()
@@ -1167,25 +1173,25 @@ export class BootScene extends Phaser.Scene {
     bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
 
     const title = this.add
-      .text(0, -cardH / 2 + 36, config.title.toUpperCase(), {
+      .text(0, -cardH / 2 + (isShort ? 26 : 36), config.title.toUpperCase(), {
         fontFamily: GAME_FONTS.display,
-        fontSize: '38px',
+        fontSize: isShort ? '26px' : '38px',
         fontStyle: 'bold',
         color: '#ffffff',
         stroke: '#090d16',
-        strokeThickness: 5,
+        strokeThickness: isShort ? 4 : 5,
       })
       .setOrigin(0.5, 0.5)
 
     const sub = this.add
-      .text(0, -cardH / 2 + 88, config.subtitle, {
+      .text(0, -cardH / 2 + (isShort ? 66 : 88), config.subtitle, {
         fontFamily: GAME_FONTS.body,
-        fontSize: '16px',
+        fontSize: isShort ? '13px' : '16px',
         fontStyle: 'bold',
         color: '#cbd5e1',
         align: 'center',
-        lineSpacing: 4,
-        wordWrap: { width: cardW - 48 },
+        lineSpacing: isShort ? 2 : 4,
+        wordWrap: { width: cardW - 36 },
       })
       .setOrigin(0.5, 0.5)
 
@@ -1193,12 +1199,12 @@ export class BootScene extends Phaser.Scene {
 
     // Render Buttons
     const btnCount = config.buttons.length
-    const gap = 12
-    const btnW = Math.min(185, (cardW - 48 - (btnCount - 1) * gap) / btnCount)
-    const btnH = 46
+    const gap = isShort ? 8 : 12
+    const btnH = isShort ? 38 : 46
+    const btnW = Math.min(isShort ? 150 : 185, (cardW - 32 - (btnCount - 1) * gap) / btnCount)
     const totalW = btnCount * btnW + (btnCount - 1) * gap
     const startX = -totalW / 2 + btnW / 2
-    const btnY = cardH / 2 - 36
+    const btnY = cardH / 2 - (isShort ? 28 : 36)
 
     const buttonBounds: Array<{
       minX: number
@@ -1219,7 +1225,7 @@ export class BootScene extends Phaser.Scene {
       const bTxt = this.add
         .text(bx, btnY, btnCfg.label.toUpperCase(), {
           fontFamily: GAME_FONTS.heading,
-          fontSize: btnCount > 2 ? '15px' : '18px',
+          fontSize: isShort ? '13px' : (btnCount > 2 ? '15px' : '18px'),
           fontStyle: 'bold',
           color: '#ffffff',
           align: 'center',
@@ -1278,77 +1284,78 @@ export class BootScene extends Phaser.Scene {
     const width = this.scale.width
     const height = this.scale.height
 
+    const isShort = height < 460
     const overlay = this.add.container(width / 2, height / 2).setScrollFactor(0).setDepth(250)
-    const cardW = Math.min(width - 24, 740)
-    const cardH = Math.min(height - 24, 380)
+    const cardW = Math.min(width - 20, isShort ? 680 : 740)
+    const cardH = Math.min(height - 16, isShort ? 310 : 380)
 
     const bg = this.add.graphics()
     bg.fillStyle(0x090d16, 0.98)
-    bg.lineStyle(3, 0xf59e0b, 1) // Amber-500
-    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 14)
-    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 14)
+    bg.lineStyle(isShort ? 2 : 3, 0xf59e0b, 1) // Amber-500
+    bg.fillRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
+    bg.strokeRoundedRect(-cardW / 2, -cardH / 2, cardW, cardH, 12)
 
     // Inner subtle glow border
     bg.lineStyle(1.5, 0x10b981, 0.6)
-    bg.strokeRoundedRect(-cardW / 2 + 5, -cardH / 2 + 5, cardW - 10, cardH - 10, 10)
+    bg.strokeRoundedRect(-cardW / 2 + 4, -cardH / 2 + 4, cardW - 8, cardH - 8, 10)
 
     // Celebration Ribbon Banner
-    const ribbonY = -cardH / 2 + 30
+    const ribbonY = -cardH / 2 + (isShort ? 20 : 30)
     const trophyText = this.add.text(0, ribbonY, '★ GRAND VICTORY — ADVENTURE COMPLETED! ★', {
       fontFamily: GAME_FONTS.display,
-      fontSize: '30px',
+      fontSize: isShort ? '22px' : '30px',
       fontStyle: 'bold',
       color: '#f59e0b',
     }).setOrigin(0.5, 0.5)
 
-    const subtitleText = this.add.text(0, ribbonY + 28, 'Dennis survived all 5 Bengaluru chases from College Gate to Cubbon Park!', {
+    const subtitleText = this.add.text(0, ribbonY + (isShort ? 22 : 28), 'Dennis survived all 5 Bengaluru chases from College Gate to Cubbon Park!', {
       fontFamily: GAME_FONTS.body,
-      fontSize: '16px',
+      fontSize: isShort ? '13px' : '16px',
       fontStyle: 'bold',
       color: '#cbd5e1',
       align: 'center',
-      wordWrap: { width: cardW - 40 },
+      wordWrap: { width: cardW - 32 },
     }).setOrigin(0.5, 0.5)
 
     // 5-Level Completion Card Grid / Summary
-    const stageSummaryY = ribbonY + 76
+    const stageSummaryY = ribbonY + (isShort ? 60 : 76)
     const summaryBg = this.add.graphics()
     summaryBg.fillStyle(0x0f172a, 0.9)
     summaryBg.lineStyle(1.5, 0x334155, 0.8)
-    const sumW = cardW - 40
-    const sumH = 76
-    summaryBg.fillRoundedRect(-sumW / 2, stageSummaryY - 10, sumW, sumH, 8)
-    summaryBg.strokeRoundedRect(-sumW / 2, stageSummaryY - 10, sumW, sumH, 8)
+    const sumW = cardW - 32
+    const sumH = isShort ? 54 : 76
+    summaryBg.fillRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 8)
+    summaryBg.strokeRoundedRect(-sumW / 2, stageSummaryY - 8, sumW, sumH, 8)
 
-    const stage123 = this.add.text(0, stageSummaryY + 8, '✓ STAGE 01: College Gate   ✓ STAGE 02: Thatha Tea   ✓ STAGE 03: MG Road', {
+    const stage123 = this.add.text(0, stageSummaryY + (isShort ? 4 : 8), '✓ STAGE 01: College Gate   ✓ STAGE 02: Thatha Tea   ✓ STAGE 03: MG Road', {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '15px',
+      fontSize: isShort ? '12px' : '15px',
       fontStyle: 'bold',
       color: '#34d399', // Emerald
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
-    const stage45 = this.add.text(0, stageSummaryY + 38, '✓ STAGE 04: Dr. Rajkumar Park   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
+    const stage45 = this.add.text(0, stageSummaryY + (isShort ? 26 : 38), '✓ STAGE 04: Dr. Rajkumar Park   ★ STAGE 05: Cubbon Park Bandstand [CLEARED]', {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '15px',
+      fontSize: isShort ? '12px' : '15px',
       fontStyle: 'bold',
       color: '#fef08a', // Yellow
       align: 'center',
     }).setOrigin(0.5, 0.5)
 
     // Developer Credit - Prominent & Tasteful
-    const creditY = stageSummaryY + 92
+    const creditY = stageSummaryY + (isShort ? 68 : 92)
     const devCreditText = this.add.text(0, creditY, 'Developed by its2much Mv', {
       fontFamily: GAME_FONTS.heading,
-      fontSize: '22px',
+      fontSize: isShort ? '17px' : '22px',
       fontStyle: 'bold',
       color: '#fbbf24', // Amber-400
     }).setOrigin(0.5, 0.5)
 
     // Optional subtle teaser
-    const teaserText = this.add.text(0, creditY + 24, 'More of Dennis\'s story coming soon...', {
+    const teaserText = this.add.text(0, creditY + (isShort ? 18 : 24), 'More of Dennis\'s story coming soon...', {
       fontFamily: GAME_FONTS.body,
-      fontSize: '14px',
+      fontSize: isShort ? '11px' : '14px',
       fontStyle: 'italic',
       color: '#94a3b8',
     }).setOrigin(0.5, 0.5)
@@ -1377,12 +1384,12 @@ export class BootScene extends Phaser.Scene {
     ]
 
     const btnCount = btnConfigs.length
-    const gap = 12
-    const btnW = Math.min(195, (cardW - 60 - (btnCount - 1) * gap) / btnCount)
-    const btnH = 46
+    const gap = isShort ? 8 : 12
+    const btnH = isShort ? 36 : 46
+    const btnW = Math.min(isShort ? 150 : 195, (cardW - 40 - (btnCount - 1) * gap) / btnCount)
     const totalButtonsW = btnCount * btnW + (btnCount - 1) * gap
     const startX = -totalButtonsW / 2 + btnW / 2
-    const btnY = cardH / 2 - 32
+    const btnY = cardH / 2 - (isShort ? 24 : 32)
 
     btnConfigs.forEach((cfg, idx) => {
       const bx = startX + idx * (btnW + gap)
@@ -1392,7 +1399,7 @@ export class BootScene extends Phaser.Scene {
 
       const btnTxt = this.add.text(bx, btnY, cfg.label, {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '16px',
+        fontSize: isShort ? '13px' : '16px',
         fontStyle: 'bold',
         color: '#ffffff',
       }).setOrigin(0.5, 0.5)
@@ -1411,7 +1418,7 @@ export class BootScene extends Phaser.Scene {
       const relY = pointer.y - height / 2
 
       // Check if clicked in button row
-      if (relY >= btnY - 20 && relY <= btnY + 20) {
+      if (relY >= btnY - btnH / 2 - 4 && relY <= btnY + btnH / 2 + 4) {
         btnConfigs.forEach((cfg, idx) => {
           const bx = startX + idx * (btnW + gap)
           if (Math.abs(relX - bx) <= btnW / 2 + 4) {
@@ -1517,7 +1524,7 @@ export class BootScene extends Phaser.Scene {
     const stageWidth = this.levelConfig.stageWidth
     const groundY = this.getGroundY(height)
     const isNarrow = width < 560
-    const isShort = height < 440
+    const isShort = height < 480
 
     // Update Bounds
     this.physics.world.setBounds(0, 0, stageWidth, height)
@@ -1534,54 +1541,69 @@ export class BootScene extends Phaser.Scene {
     // Responsive Header Positioning
     const titleSize = isNarrow ? Math.max(22, Math.floor(width * 0.05)) : 34
     const subtitleSize = isNarrow ? Math.max(14, Math.floor(width * 0.028)) : 18
+    const headerBaseY = Math.max(24, height * 0.08)
 
-    const headerBaseY = isShort ? 18 : Math.max(24, height * 0.08)
-
+    // On short mobile landscape viewports, hide duplicate title/subtitle because React HUD shows the stage badge
     if (this.titleText) {
-      this.titleText.setFontSize(`${titleSize}px`)
-      this.titleText.setText(this.levelConfig.title.toUpperCase())
-      this.titleText.setPosition(centerX, headerBaseY)
+      this.titleText.setVisible(!isShort)
+      if (!isShort) {
+        this.titleText.setFontSize(`${titleSize}px`)
+        this.titleText.setText(this.levelConfig.title.toUpperCase())
+        this.titleText.setPosition(centerX, headerBaseY)
+      }
     }
 
     if (this.subtitleText) {
-      this.subtitleText.setFontSize(`${subtitleSize}px`)
-      this.subtitleText.setText(`${this.levelConfig.stageNumber} • ${this.levelConfig.subtitle}`)
-      this.subtitleText.setPosition(centerX, headerBaseY + (isShort ? 22 : 28))
+      this.subtitleText.setVisible(!isShort)
+      if (!isShort) {
+        this.subtitleText.setFontSize(`${subtitleSize}px`)
+        this.subtitleText.setText(`${this.levelConfig.stageNumber} • ${this.levelConfig.subtitle}`)
+        this.subtitleText.setPosition(centerX, headerBaseY + 28)
+      }
     }
 
-    if (this.statusBadge && this.statusText && this.statusBg) {
-      const badgeY = headerBaseY + (isShort ? 46 : 56)
-      this.statusBadge.setPosition(centerX, badgeY)
+    if (this.statusBadge) {
+      this.statusBadge.setVisible(!isShort)
+      if (!isShort && this.statusText && this.statusBg) {
+        const badgeY = headerBaseY + 56
+        this.statusBadge.setPosition(centerX, badgeY)
 
-      const textBounds = this.statusText.getBounds()
-      const padX = 14
-      const padY = 6
-      const bgW = textBounds.width + padX * 2
-      const bgH = textBounds.height + padY * 2
+        const textBounds = this.statusText.getBounds()
+        const padX = 14
+        const padY = 6
+        const bgW = textBounds.width + padX * 2
+        const bgH = textBounds.height + padY * 2
 
-      this.statusBg.clear()
-      this.statusBg.fillStyle(0x064e3b, 0.7)
-      this.statusBg.lineStyle(1.5, 0x10b981, 0.6)
-      this.statusBg.fillRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 6)
-      this.statusBg.strokeRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 6)
+        this.statusBg.clear()
+        this.statusBg.fillStyle(0x064e3b, 0.7)
+        this.statusBg.lineStyle(1.5, 0x10b981, 0.6)
+        this.statusBg.fillRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 6)
+        this.statusBg.strokeRoundedRect(-bgW / 2, -bgH / 2, bgW, bgH, 6)
+      }
     }
 
     if (this.objectiveText) {
-      const objY = headerBaseY + (isShort ? 72 : 88)
+      const objY = isShort ? 42 : headerBaseY + 88
       this.objectiveText.setPosition(centerX, objY)
       this.updateObjectiveBadge()
     }
 
     // Controls Guide
     if (this.controlGuideText) {
-      const guideY = isShort ? groundY - 18 : groundY - 24
-      this.controlGuideText.setFontSize(isNarrow ? '12px' : '15px')
-      this.controlGuideText.setPosition(centerX, guideY)
+      this.controlGuideText.setVisible(!isShort && !isNarrow)
+      if (!isShort && !isNarrow) {
+        const guideY = groundY - 24
+        this.controlGuideText.setFontSize('15px')
+        this.controlGuideText.setPosition(centerX, guideY)
+      }
     }
 
     if (this.playerStatusText) {
       this.playerStatusText.setPosition(centerX, height - 20)
     }
+
+    // Calibrate camera framing for short viewports
+    this.cameras.main.setFollowOffset(0, isShort ? -12 : 22)
 
     // Keep Dennis on ground within boundaries
     if (this.playerController) {

@@ -85,10 +85,10 @@ export default function PlayPage() {
     return () => window.removeEventListener('dd_game_pause_change', onPauseChange)
   }, [])
 
-  // 4. Screen Orientation and Fullscreen Listeners
+  // 4. Screen Orientation, Fullscreen, and Pointer Safety Listeners
   useEffect(() => {
     const checkOrientation = () => {
-      const portrait = window.innerHeight > window.innerWidth && window.innerWidth < 850
+      const portrait = window.innerHeight > window.innerWidth
       setIsPortrait(portrait)
       if (!portrait) {
         setDismissPortraitWarning(false)
@@ -99,14 +99,28 @@ export default function PlayPage() {
       setIsFullscreen(Boolean(document.fullscreenElement))
     }
 
+    // Safety: release touch directional inputs on any global pointer release or tab blur
+    const releaseVirtualInputs = () => {
+      virtualInputBridge.setLeft(false)
+      virtualInputBridge.setRight(false)
+    }
+
     window.addEventListener('resize', checkOrientation)
     window.addEventListener('orientationchange', checkOrientation)
+    window.visualViewport?.addEventListener('resize', checkOrientation)
     document.addEventListener('fullscreenchange', checkFullscreen)
+    window.addEventListener('pointerup', releaseVirtualInputs)
+    window.addEventListener('pointercancel', releaseVirtualInputs)
+    window.addEventListener('blur', releaseVirtualInputs)
 
     return () => {
       window.removeEventListener('resize', checkOrientation)
       window.removeEventListener('orientationchange', checkOrientation)
+      window.visualViewport?.removeEventListener('resize', checkOrientation)
       document.removeEventListener('fullscreenchange', checkFullscreen)
+      window.removeEventListener('pointerup', releaseVirtualInputs)
+      window.removeEventListener('pointercancel', releaseVirtualInputs)
+      window.removeEventListener('blur', releaseVirtualInputs)
     }
   }, [])
 
@@ -174,7 +188,7 @@ export default function PlayPage() {
     <section
       ref={gameSectionRef}
       aria-label="Darling Dennis Game - Pure Landscape Game Experience"
-      className="fixed inset-0 w-screen h-screen overflow-hidden bg-slate-950 select-none flex flex-col"
+      className="fixed inset-0 w-full h-full min-h-[100dvh] max-h-[100dvh] overflow-hidden bg-slate-950 select-none flex flex-col"
     >
       {/* Fullscreen Live Phaser Canvas */}
       <div className="absolute inset-0 z-0 w-full h-full">
@@ -182,47 +196,47 @@ export default function PlayPage() {
       </div>
 
       {/* Game-Native Landscape HUD Overlay (ScrollFactor 0, absolute overlay) */}
-      <header className="relative z-20 w-full px-4 py-3 sm:px-6 sm:py-4 flex items-center justify-between pointer-events-none">
+      <header className="relative z-20 w-full px-2.5 py-1.5 sm:px-6 sm:py-3 pt-[max(6px,env(safe-area-inset-top))] pl-[max(10px,env(safe-area-inset-left))] pr-[max(10px,env(safe-area-inset-right))] flex items-center justify-between pointer-events-none">
         {/* Left: Pause Button & Stage Badge */}
-        <div className="pointer-events-auto flex items-center gap-3">
+        <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
           {/* PAUSE BUTTON */}
           <button
             type="button"
             id="btn-hud-pause"
             onClick={handlePauseToggle}
-            className="px-5 py-2.5 sm:px-6 sm:py-3 rounded-2xl bg-slate-900/95 hover:bg-amber-500 hover:text-slate-950 text-amber-400 border-2 border-amber-500/50 text-sm sm:text-base font-gta-heading tracking-wider font-black transition-all shadow-xl flex items-center gap-2 cursor-pointer active:scale-95 min-h-[48px]"
+            className="px-3.5 py-1.5 sm:px-5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-slate-900/95 hover:bg-amber-500 hover:text-slate-950 text-amber-400 border border-amber-500/50 text-xs sm:text-base font-gta-heading tracking-wider font-black transition-all shadow-xl flex items-center gap-1.5 sm:gap-2 cursor-pointer active:scale-95 min-h-[38px] sm:min-h-[46px]"
             title="Pause Game (ESC or P)"
           >
-            <span className="text-base sm:text-lg">⏸</span>
+            <span className="text-sm sm:text-base">⏸</span>
             <span>PAUSE</span>
           </button>
 
           {/* STAGE BADGE */}
-          <div className="hidden xs:flex items-center gap-2.5 px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl bg-slate-950/90 backdrop-blur-md border border-slate-800 text-sm sm:text-base font-gta-heading tracking-wide text-white shadow-xl min-h-[48px]">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+          <div className="flex items-center gap-2 px-3 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-950/90 backdrop-blur-md border border-slate-800 text-xs sm:text-base font-gta-heading tracking-wide text-white shadow-xl min-h-[38px] sm:min-h-[46px]">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-bold text-amber-300">{stageLabel}</span>
           </div>
 
-          <div className="hidden md:inline-block px-4 py-2 rounded-2xl bg-slate-950/80 border border-slate-800/80 text-xs sm:text-sm font-gta-heading font-semibold text-slate-300">
+          <div className="hidden lg:inline-block px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800/80 text-xs font-gta-heading font-semibold text-slate-300">
             Developed by its2much Mv
           </div>
         </div>
 
         {/* Right: Audio, Settings, Fullscreen */}
-        <div className="pointer-events-auto flex items-center gap-2.5 bg-slate-950/90 backdrop-blur-md border border-slate-800/80 rounded-2xl p-2 sm:p-2.5 shadow-xl">
+        <div className="pointer-events-auto flex items-center gap-1.5 sm:gap-2.5 bg-slate-950/90 backdrop-blur-md border border-slate-800/80 rounded-xl sm:rounded-2xl p-1 sm:p-2 shadow-xl">
           {/* Audio Mute/Unmute */}
           <button
             type="button"
             id="btn-play-audio"
             onClick={toggleMute}
-            className={`px-4 py-2 sm:px-5 sm:py-2.5 rounded-2xl text-sm sm:text-base font-gta-heading tracking-wider font-bold flex items-center gap-2 transition-all cursor-pointer border min-h-[44px] ${
+            className={`px-2.5 py-1 sm:px-4 sm:py-2 rounded-xl sm:rounded-2xl text-xs sm:text-base font-gta-heading tracking-wider font-bold flex items-center gap-1.5 transition-all cursor-pointer border min-h-[36px] sm:min-h-[44px] ${
               isMuted
                 ? 'bg-rose-500/20 text-rose-300 border-rose-500/40 hover:bg-rose-500/30'
                 : 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 hover:bg-emerald-500/30'
             }`}
             title={isMuted ? 'Unmute Audio' : 'Mute Audio'}
           >
-            <span className="text-base">{isMuted ? '🔇' : '🔊'}</span>
+            <span className="text-sm sm:text-base">{isMuted ? '🔇' : '🔊'}</span>
             <span className="hidden sm:inline">{isMuted ? 'MUTED' : 'BGM ON'}</span>
           </button>
 
@@ -231,11 +245,11 @@ export default function PlayPage() {
             type="button"
             id="btn-toggle-fullscreen"
             onClick={toggleFullscreen}
-            className="px-3.5 py-2 sm:px-4.5 sm:py-2.5 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer transition-colors text-xs sm:text-sm font-gta-heading tracking-wide flex items-center gap-1.5 min-h-[44px]"
+            className="px-2.5 py-1 sm:px-3.5 sm:py-2 rounded-xl sm:rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-200 border border-slate-700 cursor-pointer transition-colors text-xs sm:text-sm font-gta-heading tracking-wide flex items-center gap-1 min-h-[36px] sm:min-h-[44px]"
             title={isFullscreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
           >
-            <span className="text-base">⛶</span>
-            <span className="hidden sm:inline">{isFullscreen ? 'EXIT FULL' : 'FULLSCREEN'}</span>
+            <span className="text-sm sm:text-base">⛶</span>
+            <span className="hidden md:inline">{isFullscreen ? 'EXIT FULL' : 'FULLSCREEN'}</span>
           </button>
 
           {/* Settings Trigger */}
@@ -246,7 +260,7 @@ export default function PlayPage() {
               audioManager.playSfx('click')
               setShowSettings(true)
             }}
-            className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors flex items-center justify-center text-lg sm:text-xl min-h-[44px]"
+            className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-slate-800/90 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 cursor-pointer transition-colors flex items-center justify-center text-base sm:text-lg min-h-[36px] sm:min-h-[44px]"
             title="Game Settings"
           >
             ⚙
@@ -255,10 +269,10 @@ export default function PlayPage() {
       </header>
 
       {/* On-screen Touch Controls (D-pad & Action Buttons for Mobile/Tablet) */}
-      <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-4 sm:p-6 z-20">
+      <div className="absolute inset-0 pointer-events-none flex flex-col justify-end p-2.5 sm:p-5 pb-[max(8px,env(safe-area-inset-bottom))] pl-[max(12px,env(safe-area-inset-left))] pr-[max(12px,env(safe-area-inset-right))] z-20">
         <div className="flex items-end justify-between w-full">
           {/* Movement Buttons (Left / Right) */}
-          <div className="pointer-events-auto flex items-center gap-3">
+          <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
             <button
               type="button"
               id="btn-touch-left"
@@ -274,9 +288,9 @@ export default function PlayPage() {
               onPointerLeave={() => virtualInputBridge.setLeft(false)}
               onPointerCancel={() => virtualInputBridge.setLeft(false)}
               onContextMenu={(e) => e.preventDefault()}
-              className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-slate-900/90 backdrop-blur-md border-2 border-slate-700/90 active:bg-amber-500/30 active:border-amber-400 active:scale-95 text-slate-100 active:text-amber-300 flex items-center justify-center font-bold shadow-2xl touch-none select-none cursor-pointer transition-transform"
+              className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl bg-slate-900/85 backdrop-blur-sm border-2 border-slate-700/80 active:bg-amber-500/30 active:border-amber-400 active:scale-95 text-slate-100 active:text-amber-300 flex items-center justify-center font-bold shadow-xl touch-none select-none cursor-pointer transition-transform"
             >
-              <svg className="w-9 h-9 sm:w-11 sm:h-11" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-7 h-7 sm:w-9 sm:h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M15 19l-7-7 7-7" />
               </svg>
             </button>
@@ -296,16 +310,16 @@ export default function PlayPage() {
               onPointerLeave={() => virtualInputBridge.setRight(false)}
               onPointerCancel={() => virtualInputBridge.setRight(false)}
               onContextMenu={(e) => e.preventDefault()}
-              className="w-18 h-18 sm:w-22 sm:h-22 rounded-2xl bg-slate-900/90 backdrop-blur-md border-2 border-slate-700/90 active:bg-amber-500/30 active:border-amber-400 active:scale-95 text-slate-100 active:text-amber-300 flex items-center justify-center font-bold shadow-2xl touch-none select-none cursor-pointer transition-transform"
+              className="w-14 h-14 sm:w-18 sm:h-18 rounded-2xl bg-slate-900/85 backdrop-blur-sm border-2 border-slate-700/80 active:bg-amber-500/30 active:border-amber-400 active:scale-95 text-slate-100 active:text-amber-300 flex items-center justify-center font-bold shadow-xl touch-none select-none cursor-pointer transition-transform"
             >
-              <svg className="w-9 h-9 sm:w-11 sm:h-11" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-7 h-7 sm:w-9 sm:h-9" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M9 5l7 7-7 7" />
               </svg>
             </button>
           </div>
 
           {/* Action Buttons: Attack & Jump */}
-          <div className="pointer-events-auto flex items-center gap-3">
+          <div className="pointer-events-auto flex items-center gap-2 sm:gap-3">
             <button
               type="button"
               id="btn-touch-attack"
@@ -315,12 +329,12 @@ export default function PlayPage() {
                 virtualInputBridge.triggerAttack()
               }}
               onContextMenu={(e) => e.preventDefault()}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-rose-500/25 backdrop-blur-md border-2 border-rose-500/80 active:bg-rose-500/50 active:border-rose-300 active:scale-95 text-rose-200 flex flex-col items-center justify-center shadow-2xl touch-none select-none cursor-pointer transition-transform gap-0.5"
+              className="w-15 h-15 sm:w-20 sm:h-20 rounded-2xl bg-rose-500/20 backdrop-blur-sm border-2 border-rose-500/70 active:bg-rose-500/40 active:border-rose-300 active:scale-95 text-rose-200 flex flex-col items-center justify-center shadow-xl touch-none select-none cursor-pointer transition-transform gap-0.5"
             >
-              <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="currentColor" viewBox="0 0 24 24">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
               </svg>
-              <span className="text-xs sm:text-sm font-gta-heading font-black uppercase tracking-wider">ATTACK</span>
+              <span className="text-[10px] sm:text-xs font-gta-heading font-black uppercase tracking-wider">ATTACK</span>
             </button>
 
             <button
@@ -332,12 +346,12 @@ export default function PlayPage() {
                 virtualInputBridge.triggerJump()
               }}
               onContextMenu={(e) => e.preventDefault()}
-              className="w-20 h-20 sm:w-24 sm:h-24 rounded-2xl bg-amber-500/25 backdrop-blur-md border-2 border-amber-500/80 active:bg-amber-500/50 active:border-amber-300 active:scale-95 text-amber-200 flex flex-col items-center justify-center shadow-2xl touch-none select-none cursor-pointer transition-transform gap-0.5"
+              className="w-15 h-15 sm:w-20 sm:h-20 rounded-2xl bg-amber-500/20 backdrop-blur-sm border-2 border-amber-500/70 active:bg-amber-500/40 active:border-amber-300 active:scale-95 text-amber-200 flex flex-col items-center justify-center shadow-xl touch-none select-none cursor-pointer transition-transform gap-0.5"
             >
-              <svg className="w-7 h-7 sm:w-8 sm:h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-6 h-6 sm:w-7 sm:h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
-              <span className="text-xs sm:text-sm font-gta-heading font-black uppercase tracking-wider">JUMP</span>
+              <span className="text-[10px] sm:text-xs font-gta-heading font-black uppercase tracking-wider">JUMP</span>
             </button>
           </div>
         </div>

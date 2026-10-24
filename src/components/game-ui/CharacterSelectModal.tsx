@@ -49,7 +49,7 @@ export default function CharacterSelectModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/90 backdrop-blur-md p-3 sm:p-6 select-none animate-fadeIn">
-      <div className="relative w-full max-w-6xl max-h-[94vh] bg-slate-900 border-2 border-amber-500/40 rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+      <div className="relative w-full max-w-6xl max-h-[min(94dvh,94%)] bg-slate-900 border-2 border-amber-500/40 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
         {/* Modal Header */}
         <div className="flex items-center justify-between px-6 py-4 bg-slate-950 border-b border-amber-500/20">
           <div className="flex items-center gap-3.5">

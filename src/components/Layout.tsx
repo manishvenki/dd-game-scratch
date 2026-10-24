@@ -14,7 +14,7 @@ interface LayoutProps {
  */
 export default function Layout({ children }: LayoutProps) {
   return (
-    <div className="w-screen h-screen overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950 antialiased">
+    <div className="w-full h-full min-h-[100dvh] max-h-[100dvh] overflow-hidden bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-amber-500 selection:text-slate-950 antialiased">
       {/* Skip to Content Accessibility Link */}
       <a
         href="#game-root"

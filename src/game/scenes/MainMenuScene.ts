@@ -68,7 +68,7 @@ export class MainMenuScene extends Phaser.Scene {
     void ensureGameFontsLoaded()
     const width = this.scale.width
     const height = this.scale.height
-    this.groundY = Math.max(380, Math.floor(height * 0.78))
+    this.groundY = Math.min(height - 50, Math.floor(height * 0.82))
     const stageWidth = 2200
 
     // 1. Configure World & Camera Bounds
@@ -355,7 +355,15 @@ export class MainMenuScene extends Phaser.Scene {
   private handleResize(gameSize: Phaser.Structs.Size): void {
     const width = gameSize.width
     const height = gameSize.height
-    this.groundY = Math.max(380, Math.floor(height * 0.78))
+    this.groundY = Math.min(height - 50, Math.floor(height * 0.82))
+
+    this.bengaluruStreet?.resize(width, height, 2200, this.groundY, 'thatha-tea')
+
+    if (this.dennis) this.dennis.y = this.groundY - 2
+    if (this.manish) this.manish.y = this.groundY - 2
+    if (this.sathish) this.sathish.y = this.groundY - 2
+    if (this.rahul) this.rahul.y = this.groundY - 2
+    if (this.dennisTeaGlass) this.dennisTeaGlass.y = this.groundY - 56
 
     const targetCenterX = 840
     const cameraScrollX = Math.max(0, targetCenterX - width / 2)

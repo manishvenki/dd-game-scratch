@@ -122,7 +122,7 @@ export default function StageSelectModal({
       aria-labelledby="stages-title"
       className="fixed inset-0 z-30 flex items-center justify-center p-3 sm:p-5 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-200 select-none"
     >
-      <div className="relative w-full max-w-6xl bg-slate-900/95 border-2 border-amber-500/40 rounded-3xl p-5 sm:p-7 shadow-2xl flex flex-col justify-between max-h-[94vh] overflow-y-auto">
+      <div className="relative w-full max-w-6xl bg-slate-900/95 border-2 border-amber-500/40 rounded-2xl sm:rounded-3xl p-3.5 sm:p-7 shadow-2xl flex flex-col justify-between max-h-[min(94dvh,94%)] overflow-y-auto">
         {/* Top Header Bar */}
         <header className="flex items-center justify-between border-b border-slate-800 pb-4 gap-4">
           <div className="flex items-center gap-4">

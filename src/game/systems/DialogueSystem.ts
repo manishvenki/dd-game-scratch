@@ -120,13 +120,15 @@ export class DialogueSystem {
 
   private buildDialogueContainer(): void {
     const width = this.scene.scale.width
+    const height = this.scene.scale.height
     const isNarrow = width < 560
+    const isShort = height < 450
 
-    this.cardWidth = Math.min(width - 32, isNarrow ? 380 : 540)
-    this.cardHeight = isNarrow ? 130 : 120
+    this.cardWidth = Math.min(width - 24, isNarrow ? 360 : isShort ? 460 : 540)
+    this.cardHeight = isShort ? 88 : isNarrow ? 120 : 120
 
     // Screen-space container for sharp font rendering with camera tracking
-    this.container = this.scene.add.container(width / 2, 120)
+    this.container = this.scene.add.container(width / 2, isShort ? 80 : 120)
     this.container.setScrollFactor(0)
     this.container.setDepth(300)
 
@@ -137,9 +139,9 @@ export class DialogueSystem {
     // Speaker Badge Background & Text
     this.speakerBadgeBg = this.scene.add.graphics()
     this.speakerNameText = this.scene.add
-      .text(-this.cardWidth / 2 + 18, -this.cardHeight / 2 + 18, '', {
+      .text(-this.cardWidth / 2 + 16, -this.cardHeight / 2 + (isShort ? 14 : 18), '', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '16px',
+        fontSize: isShort ? '14px' : '16px',
         fontStyle: 'bold',
         color: '#ffffff',
       })
@@ -149,9 +151,9 @@ export class DialogueSystem {
 
     // Progress counter (e.g. 1 / 4)
     this.progressText = this.scene.add
-      .text(this.cardWidth / 2 - 18, -this.cardHeight / 2 + 18, '', {
+      .text(this.cardWidth / 2 - 16, -this.cardHeight / 2 + (isShort ? 14 : 18), '', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '14px',
+        fontSize: isShort ? '12px' : '14px',
         fontStyle: 'bold',
         color: '#94a3b8',
       })
@@ -160,22 +162,22 @@ export class DialogueSystem {
 
     // Dialogue Body Text (Multi-line Tanglish with comfortable line height)
     this.lineText = this.scene.add
-      .text(-this.cardWidth / 2 + 18, -this.cardHeight / 2 + 38, '', {
+      .text(-this.cardWidth / 2 + 16, -this.cardHeight / 2 + (isShort ? 30 : 38), '', {
         fontFamily: GAME_FONTS.body,
-        fontSize: isNarrow ? '16px' : '18px',
+        fontSize: isShort ? '14px' : isNarrow ? '16px' : '18px',
         fontStyle: 'bold',
         color: '#ffffff',
-        lineSpacing: 5,
-        wordWrap: { width: this.cardWidth - 36 },
+        lineSpacing: isShort ? 3 : 5,
+        wordWrap: { width: this.cardWidth - 32 },
       })
       .setOrigin(0, 0)
     this.container.add(this.lineText)
 
     // Continue action hint
     this.hintText = this.scene.add
-      .text(this.cardWidth / 2 - 18, this.cardHeight / 2 - 14, 'TAP / SPACE →', {
+      .text(this.cardWidth / 2 - 16, this.cardHeight / 2 - (isShort ? 10 : 14), 'TAP / SPACE →', {
         fontFamily: GAME_FONTS.heading,
-        fontSize: '14px',
+        fontSize: isShort ? '12px' : '14px',
         fontStyle: 'bold',
         color: '#fbbf24', // amber-400
       })
@@ -338,27 +340,29 @@ export class DialogueSystem {
       speakerHeadScreenY = (speakerPos.y - characterHeight) - cam.scrollY
     }
 
+    const isShort = viewportH < 450
     // Determine vertical placement: preferred above speaker's head
-    const verticalGap = 16
+    const verticalGap = isShort ? 10 : 16
     let targetY = speakerHeadScreenY - cardH / 2 - verticalGap
     let isAbove = true
 
-    // Flip below speaker if character is near the top edge of screen
-    const topSafeMargin = cardH / 2 + 10
-    if (targetY < topSafeMargin) {
+    // Top safe margin to prevent collision with top React HUD
+    const topSafeMargin = isShort ? 44 : 52
+    if (targetY - cardH / 2 < topSafeMargin) {
       if (speakerPos) {
         targetY = (speakerPos.y - cam.scrollY) + cardH / 2 + verticalGap
         isAbove = false
       }
     }
 
-    // Viewport boundary clamping so bubble never leaves screen
+    // Viewport boundary clamping so bubble never leaves screen or obscures bottom touch controls
     const minX = cardW / 2 + 8
     const maxX = viewportW - cardW / 2 - 8
     const clampedX = Phaser.Math.Clamp(speakerScreenX, minX, maxX)
 
-    const minY = cardH / 2 + 8
-    const maxY = viewportH - cardH / 2 - 8
+    const bottomSafeMargin = isShort ? 74 : 80
+    const minY = cardH / 2 + topSafeMargin
+    const maxY = viewportH - cardH / 2 - bottomSafeMargin
     const clampedY = Phaser.Math.Clamp(targetY, minY, maxY)
 
     // Tail pointer points toward the speaker's true horizontal screen position
