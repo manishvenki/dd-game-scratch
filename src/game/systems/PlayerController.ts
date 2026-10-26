@@ -195,7 +195,17 @@ export class PlayerController {
       audioManager.playSfx('jump')
     }
 
-    // 6. Synchronize visual Dennis entity
+    // 6. Synchronize visual Dennis entity with coordinate sanity checks
+    if (!Number.isFinite(this.physicsBody.x) || !Number.isFinite(this.physicsBody.y)) {
+      this.physicsBody.setPosition(this.dennis.x, this.dennis.y)
+    }
+    if (!Number.isFinite(body.velocity.x)) {
+      body.setVelocityX(0)
+    }
+    if (!Number.isFinite(body.velocity.y)) {
+      body.setVelocityY(0)
+    }
+
     this.dennis.setPosition(this.physicsBody.x, this.physicsBody.y)
     this.dennis.setFacingDirection(this.facing)
 

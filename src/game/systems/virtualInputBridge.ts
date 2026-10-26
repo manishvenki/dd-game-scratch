@@ -36,6 +36,7 @@ export class VirtualInputBridge {
    * Registers a press event for a specific action, associating it with a pointerId if available.
    */
   public pressAction(action: InputAction, pointerId?: number): void {
+    const wasActive = this.isActionActive(action)
     if (pointerId !== undefined && pointerId !== null) {
       this.activePointers[action].add(pointerId)
     } else {
@@ -48,7 +49,9 @@ export class VirtualInputBridge {
       this.attackRequested = true
     }
 
-    this.notify(action, true)
+    if (!wasActive || action === 'jump' || action === 'attack') {
+      this.notify(action, true)
+    }
   }
 
   /**
@@ -56,6 +59,7 @@ export class VirtualInputBridge {
    * If no more pointers hold the action, it becomes inactive.
    */
   public releaseAction(action: InputAction, pointerId?: number): void {
+    const wasActive = this.isActionActive(action)
     if (pointerId !== undefined && pointerId !== null) {
       this.activePointers[action].delete(pointerId)
     } else {
@@ -64,7 +68,9 @@ export class VirtualInputBridge {
     }
 
     const stillActive = this.isActionActive(action)
-    this.notify(action, stillActive)
+    if (wasActive !== stillActive) {
+      this.notify(action, stillActive)
+    }
   }
 
   /**
@@ -184,6 +190,11 @@ export class VirtualInputBridge {
    * Called on blur, hidden, pause, restart, caught, scene destroy.
    */
   public reset(): void {
+    const wasLeft = this.isActionActive('left')
+    const wasRight = this.isActionActive('right')
+    const wasJump = this.isActionActive('jump')
+    const wasAttack = this.isActionActive('attack')
+
     this.directHeld = { left: false, right: false, jump: false, attack: false }
     this.activePointers.left.clear()
     this.activePointers.right.clear()
@@ -191,10 +202,11 @@ export class VirtualInputBridge {
     this.activePointers.attack.clear()
     this.jumpRequested = false
     this.attackRequested = false
-    this.notify('left', false)
-    this.notify('right', false)
-    this.notify('jump', false)
-    this.notify('attack', false)
+
+    if (wasLeft) this.notify('left', false)
+    if (wasRight) this.notify('right', false)
+    if (wasJump) this.notify('jump', false)
+    if (wasAttack) this.notify('attack', false)
   }
 }
 

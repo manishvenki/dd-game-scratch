@@ -15,17 +15,29 @@ export interface GameCanvasProps {
  * Prevents memory leaks and duplicate canvas instances by strictly managing
  * instantiation, destruction, and cleanup within a React ref.
  */
+const DEFAULT_SCENES: Phaser.Types.Scenes.SceneType[] = [BootScene]
+
 export default function GameCanvas({
   className = '',
-  scenes = [BootScene],
+  scenes = DEFAULT_SCENES,
   onReady,
 }: GameCanvasProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const gameRef = useRef<Phaser.Game | null>(null)
+  const onReadyRef = useRef(onReady)
+  const scenesRef = useRef(scenes)
+
+  useEffect(() => {
+    onReadyRef.current = onReady
+    scenesRef.current = scenes
+  }, [onReady, scenes])
 
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
+
+    // Prevent duplicate Phaser game instantiation if instance already exists
+    if (gameRef.current) return
 
     // Clean up any stale canvas or element from previous mounts/StrictMode passes
     while (container.firstChild) {
@@ -35,19 +47,17 @@ export default function GameCanvas({
     let isDisposed = false
 
     // Initialize decoupled Phaser 3 configuration
-    const config = createGameConfig(container, scenes)
+    const config = createGameConfig(container, scenesRef.current)
     const game = new Phaser.Game(config)
     gameRef.current = game
 
-    if (onReady) {
-      game.events.once(Phaser.Core.Events.READY, () => {
-        if (!isDisposed) {
-          onReady(game)
-        }
-      })
-    }
+    game.events.once(Phaser.Core.Events.READY, () => {
+      if (!isDisposed) {
+        onReadyRef.current?.(game)
+      }
+    })
 
-    // Teardown logic
+    // Teardown logic - only invoked when GameCanvas component is unmounted
     return () => {
       isDisposed = true
 
@@ -62,7 +72,7 @@ export default function GameCanvas({
         container.removeChild(container.firstChild)
       }
     }
-  }, [scenes, onReady])
+  }, [])
 
   return (
     <div

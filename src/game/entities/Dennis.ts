@@ -176,7 +176,6 @@ export class Dennis extends Phaser.GameObjects.Container {
       this.idleTween = this.scene.tweens.add({
         targets: this.placeholderGraphics,
         scaleY: 1.025,
-        scaleX: 0.985,
         duration: 1200,
         yoyo: true,
         repeat: -1,
@@ -194,7 +193,7 @@ export class Dennis extends Phaser.GameObjects.Container {
     this.facingDirection = direction
 
     if (this.placeholderGraphics) {
-      this.placeholderGraphics.setScale(direction, 1)
+      this.placeholderGraphics.setScale(direction, this.placeholderGraphics.scaleY)
     }
 
     if (this.productionSprite) {
@@ -215,15 +214,18 @@ export class Dennis extends Phaser.GameObjects.Container {
 
     // Pause idle breathing tween when running or in mid-air
     if (state === 'idle') {
+      if (this.placeholderGraphics) {
+        this.placeholderGraphics.setScale(this.facingDirection, this.placeholderGraphics.scaleY)
+      }
       if (this.idleTween && this.idleTween.isPaused()) {
         this.idleTween.resume()
       }
     } else {
       if (this.idleTween && this.idleTween.isPlaying()) {
         this.idleTween.pause()
-        if (this.placeholderGraphics) {
-          this.placeholderGraphics.setScale(this.facingDirection, 1)
-        }
+      }
+      if (this.placeholderGraphics) {
+        this.placeholderGraphics.setScale(this.facingDirection, 1)
       }
     }
 

@@ -217,4 +217,190 @@ describe('VirtualInputBridge - Multi-Touch Input Logic', () => {
     // Should not call after unsubscribe
     expect(subscriber).toHaveBeenCalledTimes(2)
   })
+
+  describe('All 11 Required Gameplay Input Combinations', () => {
+    it('Combination 1: LEFT alone', () => {
+      bridge.pressAction('left', 1)
+      expect(bridge.isLeft()).toBe(true)
+      expect(bridge.isRight()).toBe(false)
+      expect(bridge.isJumpHeld()).toBe(false)
+      expect(bridge.isAttackHeld()).toBe(false)
+      bridge.releaseAction('left', 1)
+      expect(bridge.isLeft()).toBe(false)
+    })
+
+    it('Combination 2: RIGHT alone', () => {
+      bridge.pressAction('right', 1)
+      expect(bridge.isRight()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+      expect(bridge.isJumpHeld()).toBe(false)
+      expect(bridge.isAttackHeld()).toBe(false)
+      bridge.releaseAction('right', 1)
+      expect(bridge.isRight()).toBe(false)
+    })
+
+    it('Combination 3: JUMP alone', () => {
+      bridge.pressAction('jump', 1)
+      expect(bridge.isJumpHeld()).toBe(true)
+      expect(bridge.consumeJump()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+      expect(bridge.isRight()).toBe(false)
+      expect(bridge.isAttackHeld()).toBe(false)
+      bridge.releaseAction('jump', 1)
+      expect(bridge.isJumpHeld()).toBe(false)
+    })
+
+    it('Combination 4: ATTACK alone', () => {
+      bridge.pressAction('attack', 1)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.consumeAttack()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+      expect(bridge.isRight()).toBe(false)
+      expect(bridge.isJumpHeld()).toBe(false)
+      bridge.releaseAction('attack', 1)
+      expect(bridge.isAttackHeld()).toBe(false)
+    })
+
+    it('Combination 5: LEFT + JUMP simultaneously', () => {
+      bridge.pressAction('left', 1)
+      bridge.pressAction('jump', 2)
+      expect(bridge.isLeft()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(true)
+      expect(bridge.consumeJump()).toBe(true)
+      expect(bridge.isRight()).toBe(false)
+      expect(bridge.isAttackHeld()).toBe(false)
+
+      bridge.releaseAction('jump', 2)
+      expect(bridge.isLeft()).toBe(true) // LEFT still held
+      expect(bridge.isJumpHeld()).toBe(false)
+
+      bridge.releaseAction('left', 1)
+      expect(bridge.isLeft()).toBe(false)
+    })
+
+    it('Combination 6: RIGHT + JUMP simultaneously', () => {
+      bridge.pressAction('right', 1)
+      bridge.pressAction('jump', 2)
+      expect(bridge.isRight()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(true)
+      expect(bridge.consumeJump()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+      expect(bridge.isAttackHeld()).toBe(false)
+
+      bridge.releaseAction('right', 1)
+      expect(bridge.isJumpHeld()).toBe(true) // JUMP still held
+      expect(bridge.isRight()).toBe(false)
+
+      bridge.releaseAction('jump', 2)
+      expect(bridge.isJumpHeld()).toBe(false)
+    })
+
+    it('Combination 7: LEFT + ATTACK simultaneously', () => {
+      bridge.pressAction('left', 1)
+      bridge.pressAction('attack', 2)
+      expect(bridge.isLeft()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.consumeAttack()).toBe(true)
+      expect(bridge.isRight()).toBe(false)
+      expect(bridge.isJumpHeld()).toBe(false)
+
+      bridge.releaseAction('attack', 2)
+      expect(bridge.isLeft()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(false)
+
+      bridge.releaseAction('left', 1)
+      expect(bridge.isLeft()).toBe(false)
+    })
+
+    it('Combination 8: RIGHT + ATTACK simultaneously', () => {
+      bridge.pressAction('right', 1)
+      bridge.pressAction('attack', 2)
+      expect(bridge.isRight()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.consumeAttack()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+      expect(bridge.isJumpHeld()).toBe(false)
+
+      bridge.releaseAction('attack', 2)
+      expect(bridge.isRight()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(false)
+
+      bridge.releaseAction('right', 1)
+      expect(bridge.isRight()).toBe(false)
+    })
+
+    it('Combination 9: JUMP + ATTACK simultaneously', () => {
+      bridge.pressAction('jump', 1)
+      bridge.pressAction('attack', 2)
+      expect(bridge.isJumpHeld()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.consumeJump()).toBe(true)
+      expect(bridge.consumeAttack()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+      expect(bridge.isRight()).toBe(false)
+
+      bridge.releaseAction('jump', 1)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(false)
+
+      bridge.releaseAction('attack', 2)
+      expect(bridge.isAttackHeld()).toBe(false)
+    })
+
+    it('Combination 10: LEFT + JUMP + ATTACK simultaneously', () => {
+      bridge.pressAction('left', 1)
+      bridge.pressAction('jump', 2)
+      bridge.pressAction('attack', 3)
+
+      expect(bridge.isLeft()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.consumeJump()).toBe(true)
+      expect(bridge.consumeAttack()).toBe(true)
+      expect(bridge.isRight()).toBe(false)
+
+      // Release jump, left and attack must stay active
+      bridge.releaseAction('jump', 2)
+      expect(bridge.isLeft()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(false)
+
+      // Release left, attack stays active
+      bridge.releaseAction('left', 1)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+
+      // Release attack
+      bridge.releaseAction('attack', 3)
+      expect(bridge.isAttackHeld()).toBe(false)
+    })
+
+    it('Combination 11: RIGHT + JUMP + ATTACK simultaneously', () => {
+      bridge.pressAction('right', 1)
+      bridge.pressAction('jump', 2)
+      bridge.pressAction('attack', 3)
+
+      expect(bridge.isRight()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(true)
+      expect(bridge.consumeJump()).toBe(true)
+      expect(bridge.consumeAttack()).toBe(true)
+      expect(bridge.isLeft()).toBe(false)
+
+      // Release attack, right and jump must stay active
+      bridge.releaseAction('attack', 3)
+      expect(bridge.isRight()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(true)
+      expect(bridge.isAttackHeld()).toBe(false)
+
+      // Release jump, right stays active
+      bridge.releaseAction('jump', 2)
+      expect(bridge.isRight()).toBe(true)
+      expect(bridge.isJumpHeld()).toBe(false)
+
+      // Release right
+      bridge.releaseAction('right', 1)
+      expect(bridge.isRight()).toBe(false)
+    })
+  })
 })

@@ -37,7 +37,11 @@ html, body, #root {
   inset: 0;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: manipulation;
+  -webkit-touch-callout: none;
+  touch-action: none !important;
+  overscroll-behavior: none !important;
+  overscroll-behavior-x: none !important;
+  overscroll-behavior-y: none !important;
   background-color: #020617;
 }
 
