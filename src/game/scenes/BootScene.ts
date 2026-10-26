@@ -20,6 +20,7 @@ import {
 } from '../dialogue/dialogueData'
 import { GAME_FONTS, ensureGameFontsLoaded } from '../config/typography'
 import { audioManager } from '../systems/AudioManager'
+import { virtualInputBridge } from '../systems/virtualInputBridge'
 
 export class BootScene extends Phaser.Scene {
   // Level State
@@ -723,6 +724,7 @@ export class BootScene extends Phaser.Scene {
     if (this.encounterState === 'caught') return
     this.encounterState = 'caught'
     this.playerController?.setFrozen(true)
+    virtualInputBridge.reset()
     audioManager.playSfx('game-over')
 
     let chaserName = 'Rahul'
@@ -782,6 +784,7 @@ export class BootScene extends Phaser.Scene {
     if (paused) {
       this.physics.pause()
       this.playerController?.setFrozen(true)
+      virtualInputBridge.reset()
       audioManager.playSfx('pause')
       window.dispatchEvent(new CustomEvent('dd_game_pause_change', { detail: { paused: true } }))
     } else {
@@ -815,6 +818,7 @@ export class BootScene extends Phaser.Scene {
     this.interactionTriggered = true
     this.encounterState = 'dialogue'
     this.playerController?.setFrozen(true)
+    virtualInputBridge.reset()
 
     // Cleanly pause chasers so their exact positions and states are preserved
     this.chasersPaused = true
@@ -1147,6 +1151,7 @@ export class BootScene extends Phaser.Scene {
     accentColor: number
     buttons: Array<{ label: string; color?: number; onClick: () => void }>
   }): void {
+    virtualInputBridge.reset()
     if (this.overlayContainer) {
       this.overlayContainer.destroy()
     }
@@ -1277,6 +1282,7 @@ export class BootScene extends Phaser.Scene {
   private showGrandVictoryModal(): void {
     audioManager.setMusicTrack('victory')
     audioManager.playSfx('stage-complete')
+    virtualInputBridge.reset()
     if (this.overlayContainer) {
       this.overlayContainer.destroy()
     }
